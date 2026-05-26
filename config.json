@@ -1,1 +1,15 @@
-{}
+{
+  "_note": "Local fallback only. run_local_ui.py prefers %LOCALAPPDATA%\\CoteabMacro\\config.json when present.",
+  "macro_theme": "midnight",
+  "session_time": "00:00:00",
+  "biome_pings": {},
+  "webhook_url": [],
+  "selected_theme": "ocean",
+  "strange_controller": true,
+  "biome_randomizer": true,
+  "auto_reconnect": false,
+  "auto_claim_daily_quests": true,
+  "enable_potion_switching": true,
+  "enable_potion_crafting": false,
+  "disabled_biomes_br_sc": []
+}

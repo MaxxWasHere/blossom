@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Potion Recorder</title>
+  <style>
+    :root {
+      --accent: #7c5bf5;
+      --accent-2: #8b5cf6;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --bg: #13111f;
+      --panel: #191625;
+      --panel-2: #211d33;
+      --field: #242038;
+      --border: rgba(124, 91, 245, 0.28);
+      --text: #f4f4f5;
+      --muted: #a1a1aa;
+      --ease-spring: cubic-bezier(0.2, 1.2, 0.35, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      user-select: none;
+    }
+
+    .window {
+      display: grid;
+      grid-template-rows: 34px 1fr;
+      width: 100%;
+      height: 100%;
+      border: 1px solid var(--border);
+      background:
+        radial-gradient(circle at top left, rgba(124, 91, 245, 0.16), transparent 36%),
+        var(--panel);
+    }
+
+    .titlebar {
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      height: 34px;
+      padding: 0 8px 0 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      background: rgba(19, 17, 31, 0.92);
+    }
+
+    .title-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      padding-right: 8px;
+      cursor: grab;
+    }
+
+    .titlebar-drag {
+      flex: 1;
+      min-width: 40px;
+      cursor: grab;
+    }
+
+    .titlebar-drag:active,
+    .title-left:active {
+      cursor: grabbing;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--success);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.45);
+      flex: 0 0 auto;
+    }
+
+    .dot.live {
+      background: var(--danger);
+      box-shadow: 0 0 12px rgba(239, 68, 68, 0.72);
+      animation: dot-pulse 0.9s ease-in-out infinite;
+    }
+
+    @keyframes dot-pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.42;
+        transform: scale(0.78);
+      }
+    }
+
+    .title {
+      overflow: hidden;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .window-actions {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 0 0 auto;
+      padding-left: 8px;
+    }
+
+    .window-btn {
+      width: 26px;
+      height: 24px;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+    }
+
+    .window-btn:hover {
+      border-color: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.07);
+      color: #fff;
+    }
+
+    .window-btn.close:hover {
+      border-color: rgba(239, 68, 68, 0.38);
+      background: rgba(239, 68, 68, 0.18);
+    }
+
+    .content {
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      min-height: 0;
+      padding: 12px 14px 16px;
+      animation: enter 0.24s var(--ease-spring) both;
+    }
+
+    @keyframes enter {
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .name-input {
+      width: 100%;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 10px;
+      outline: none;
+      background: var(--field);
+      color: var(--text);
+      font-size: 12px;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .name-input::placeholder {
+      color: rgba(212, 212, 216, 0.52);
+    }
+
+    .name-input:focus {
+      border-color: rgba(124, 91, 245, 0.58);
+      background: #28233d;
+      box-shadow: 0 0 0 3px rgba(124, 91, 245, 0.16);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .stat {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-width: 0;
+      height: 52px;
+      padding: 0 12px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      background: var(--panel-2);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 850;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      transition: transform 0.16s var(--ease-spring), color 0.16s ease;
+    }
+
+    .stat-value.bump {
+      color: #fff;
+      transform: scale(1.08);
+    }
+
+    .status {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      flex: 0 0 auto;
+      margin-top: auto;
+    }
+
+    .action-btn {
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 10px;
+      color: var(--text);
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      transition: transform 0.16s var(--ease-spring), background 0.16s ease, border-color 0.16s ease;
+    }
+
+    .action-btn:hover {
+      transform: translateY(-1px);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .action-btn:active {
+      transform: translateY(0) scale(0.98);
+    }
+
+    .record-btn {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border-color: rgba(124, 91, 245, 0.58);
+      box-shadow: 0 6px 14px rgba(124, 91, 245, 0.2);
+    }
+
+    .record-btn.is-active {
+      background: rgba(239, 68, 68, 0.18);
+      border-color: rgba(239, 68, 68, 0.48);
+      box-shadow: none;
+    }
+
+    .save-btn {
+      background: var(--field);
+    }
+
+    .save-btn.is-ready {
+      border-color: rgba(34, 197, 94, 0.4);
+      background: rgba(34, 197, 94, 0.1);
+    }
+
+    .replay-btn {
+      background: rgba(33, 150, 243, 0.16);
+      border-color: rgba(33, 150, 243, 0.34);
+    }
+  </style>
+</head>
+
+<body>
+  <main class="window">
+    <header class="titlebar">
+      <div class="title-left pywebview-drag-region">
+        <div class="dot" id="dot"></div>
+        <div class="title">Potion Recorder</div>
+      </div>
+      <div class="titlebar-drag pywebview-drag-region" aria-hidden="true"></div>
+      <div class="window-actions">
+        <button class="window-btn" id="minBtn" title="Minimize">-</button>
+        <button class="window-btn close" id="closeBtn" title="Close">x</button>
+      </div>
+    </header>
+
+    <section class="content">
+      <input class="name-input" id="nameInput" placeholder="Potion name" autocomplete="off" spellcheck="false" />
+
+      <div class="stats">
+        <div class="stat">
+          <span class="stat-label">Clicks</span>
+          <span class="stat-value" id="clickCount">0</span>
+        </div>
+        <div class="stat">
+          <span class="stat-label">Time</span>
+          <span class="stat-value" id="timer">00:00</span>
+        </div>
+      </div>
+
+      <div class="status" id="status">Ready - enter a potion name, then F1 or Record.</div>
+
+      <div class="actions">
+        <button class="action-btn record-btn" id="recordBtn">Record (F1)</button>
+        <button class="action-btn save-btn" id="saveBtn">Stop & Save (F2)</button>
+        <button class="action-btn replay-btn" id="replayBtn">Replay Save</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const api = () => window.pywebview && window.pywebview.api;
+    const dot = document.getElementById("dot");
+    const statusEl = document.getElementById("status");
+    const clickEl = document.getElementById("clickCount");
+    const timerEl = document.getElementById("timer");
+    const nameInput = document.getElementById("nameInput");
+    const recordBtn = document.getElementById("recordBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const replayBtn = document.getElementById("replayBtn");
+    let lastClicks = 0;
+    let syncTimer = null;
+    let isClosing = false;
+
+    const fmtTime = (sec) => {
+      const m = String(Math.floor(sec / 60)).padStart(2, "0");
+      const s = String(sec % 60).padStart(2, "0");
+      return `${m}:${s}`;
+    };
+
+    const bump = (el) => {
+      el.classList.add("bump");
+      setTimeout(() => el.classList.remove("bump"), 150);
+    };
+
+    const setName = async () => {
+      const bridge = api();
+      if (!bridge || typeof bridge.set_potion_recorder_name !== "function") return;
+      await bridge.set_potion_recorder_name(nameInput.value.trim());
+    };
+
+    const applyState = (state) => {
+      if (!state) return;
+      if (typeof state.name === "string" && document.activeElement !== nameInput) {
+        nameInput.value = state.name;
+      }
+
+      const clicks = state.click_count || 0;
+      clickEl.textContent = String(clicks);
+      timerEl.textContent = fmtTime(state.elapsed || 0);
+      statusEl.textContent = state.status || "Ready";
+
+      if (clicks !== lastClicks) {
+        bump(clickEl);
+        lastClicks = clicks;
+      }
+
+      const recording = !!state.recording;
+      dot.className = "dot" + (recording ? " live" : "");
+      recordBtn.classList.toggle("is-active", recording);
+      recordBtn.disabled = recording;
+      saveBtn.classList.toggle("is-ready", !recording && clicks > 0);
+      saveBtn.disabled = false;
+      replayBtn.disabled = recording;
+    };
+
+    const handleResult = (result, fallback) => {
+      if (result && typeof result === "object" && result.ok === false) {
+        statusEl.textContent = result.error || fallback;
+        return false;
+      }
+      if (result && typeof result === "object" && result.ok === true && result.filename) {
+        statusEl.textContent = `Saved ${result.filename}`;
+      }
+      return true;
+    };
+
+    const errorText = (error) => {
+      if (error && typeof error === "object" && "message" in error) return error.message;
+      return String(error || "Unknown error");
+    };
+
+    const sync = async () => {
+      if (isClosing) return;
+      const bridge = api();
+      if (!bridge || typeof bridge.get_potion_recorder_state !== "function") return;
+      try {
+        applyState(await bridge.get_potion_recorder_state());
+      } catch (error) {
+        console.warn(error);
+      }
+    };
+
+    nameInput.addEventListener("input", setName);
+    nameInput.addEventListener("change", setName);
+
+    const startRecording = async () => {
+      const bridge = api();
+      if (!bridge || typeof bridge.start_macro_recording !== "function") return;
+      if (!nameInput.value.trim()) {
+        statusEl.textContent = "Enter a potion name first";
+        nameInput.focus();
+        return;
+      }
+      recordBtn.disabled = true;
+      try {
+        await setName();
+        const result = await bridge.start_macro_recording();
+        if (!handleResult(result, "Record failed")) {
+          recordBtn.disabled = false;
+        }
+        await sync();
+      } catch (error) {
+        statusEl.textContent = `Record failed: ${error}`;
+        recordBtn.disabled = false;
+      }
+    };
+
+    const stopAndSave = async () => {
+      const bridge = api();
+      if (!bridge || typeof bridge.stop_macro_recording_potion !== "function") return;
+      if (!nameInput.value.trim()) {
+        statusEl.textContent = "Enter a potion name first";
+        nameInput.focus();
+        return;
+      }
+      saveBtn.disabled = true;
+      try {
+        await setName();
+        const result = await bridge.stop_macro_recording_potion(nameInput.value.trim());
+        handleResult(result, "Save failed");
+        await sync();
+      } catch (error) {
+        statusEl.textContent = `Save failed: ${errorText(error)}`;
+      } finally {
+        saveBtn.disabled = false;
+      }
+    };
+
+    recordBtn.addEventListener("click", startRecording);
+    saveBtn.addEventListener("click", stopAndSave);
+
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "F1") {
+        event.preventDefault();
+        startRecording();
+      } else if (event.key === "F2") {
+        event.preventDefault();
+        stopAndSave();
+      }
+    });
+
+    replayBtn.addEventListener("click", async () => {
+      const bridge = api();
+      if (!bridge || typeof bridge.replay_potion_recording !== "function") return;
+      const name = nameInput.value.trim();
+      if (!name) {
+        statusEl.textContent = "Enter a potion name first";
+        return;
+      }
+
+      replayBtn.disabled = true;
+      statusEl.textContent = "Replaying saved clicks...";
+      try {
+        await setName();
+        const result = await bridge.replay_potion_recording(name);
+        if (typeof result === "string" && result.startsWith("Error:")) {
+          statusEl.textContent = result;
+        } else {
+          statusEl.textContent = result || "Replay Finished";
+        }
+      } catch (error) {
+        statusEl.textContent = `Replay failed: ${errorText(error)}`;
+      } finally {
+        replayBtn.disabled = false;
+        await sync();
+      }
+    });
+
+    document.getElementById("minBtn").addEventListener("click", async () => {
+      const bridge = api();
+      if (bridge && typeof bridge.minimize_potion_recorder_window === "function") {
+        await bridge.minimize_potion_recorder_window();
+      }
+    });
+
+    document.getElementById("closeBtn").addEventListener("click", async () => {
+      isClosing = true;
+      if (syncTimer) {
+        clearInterval(syncTimer);
+        syncTimer = null;
+      }
+      const bridge = api();
+      if (bridge && typeof bridge.close_potion_recorder_overlay === "function") {
+        try {
+          await bridge.close_potion_recorder_overlay();
+        } catch (error) {
+          console.warn(error);
+        }
+      }
+    });
+
+    const boot = () => {
+      if (syncTimer) return;
+      sync();
+      syncTimer = setInterval(sync, 500);
+    };
+
+    window.addEventListener("beforeunload", () => {
+      isClosing = true;
+      if (syncTimer) {
+        clearInterval(syncTimer);
+        syncTimer = null;
+      }
+    });
+
+    window.addEventListener("pywebviewready", boot);
+    if (window.pywebview && window.pywebview.api) boot();
+  </script>
+</body>
+
+</html>

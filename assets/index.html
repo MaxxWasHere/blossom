@@ -43,12 +43,944 @@ This ping will be silently ignored for ${D}. Use a User ID or Role ID instead.`)
 Please select a potion recipe file before enabling Auto Craft.`);return}j(X),K("enable_potion_crafting",X)}})}),n.jsxs("div",{style:{display:"flex",gap:"8px",alignItems:"center",marginBottom:"12px"},children:[n.jsx("button",{className:"btn btn-accent",onClick:G,style:{fontSize:"12px",padding:"6px 12px"},children:"⏺ Open Potion Recorder"}),n.jsx("button",{className:"btn",onClick:F,style:{fontSize:"12px",padding:"6px 12px",backgroundColor:"#374151",color:"white",border:"1px solid var(--border-color)"},children:"🔄 Refresh Files"})]}),n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Selected Recipe"}),n.jsx(V,{value:p,onChange:X=>{r(X),K("selected_potion_file",X)},placeholder:"— Select a recipe file —"})]})]}),n.jsxs("div",{style:{position:"relative",border:"1px solid var(--border-color)",padding:"20px",background:"var(--card-bg)"},children:[n.jsx("div",{className:"corner-bracket tl"}),n.jsx("div",{className:"corner-bracket tr"}),n.jsx("div",{className:"corner-bracket bl"}),n.jsx("div",{className:"corner-bracket br"}),n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🔄"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Potion Switching"}),n.jsx("p",{children:"Automatically switch between different potion recipes"})]})]}),n.jsx(ie,{label:"Enable potion switching",description:"Switch to next potion after interval",checked:v,onChange:X=>{b(X),K("enable_potion_switching",X)}}),n.jsxs("div",{className:"form-group",style:{marginTop:"15px"},children:[n.jsx("label",{className:"form-label",children:"Switch interval (seconds)"}),n.jsx("input",{type:"number",className:"form-input",value:A,onChange:X=>T(X.target.value)})]}),n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Select potion #1"}),n.jsx(V,{value:q,onChange:X=>{g(X),K("potion_file_1",X)},placeholder:"— None —"})]}),n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Select potion #2"}),n.jsx(V,{value:Y,onChange:X=>{J(X),K("potion_file_2",X)},placeholder:"— None —"})]}),n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Select potion #3"}),n.jsx(V,{value:R,onChange:X=>{Z(X),K("potion_file_3",X)},placeholder:"— None —"})]})]})]})}function ng(){const{isMacroRunning:o}=ot(),[j,p]=z.useState(null);return z.useEffect(()=>{let r=!0;const d=async()=>{if(window.pywebview?.api?.get_active_modules)try{const v=await window.pywebview.api.get_active_modules();r&&p(v)}catch(v){console.error("Failed to fetch active modules:",v)}};d();const y=setInterval(d,2e3);return()=>{r=!1,clearInterval(y)}},[]),j?n.jsxs(n.Fragment,{children:[n.jsx("div",{className:"page-header",children:n.jsx("h2",{children:"Macro Status"})}),j.incompatibilities.length>0&&n.jsxs("div",{className:"card",style:{borderLeft:"4px solid #ef4444",background:"rgba(239, 68, 68, 0.05)"},children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",style:{color:"#ef4444"},children:"⚠️"}),n.jsxs("div",{children:[n.jsx("h3",{style:{color:"#ef4444"},children:"Potential Issues Found!"}),n.jsx("p",{children:"The following conflicts or settings might prevent some actions from running:"})]})]}),n.jsx("ul",{style:{margin:"10px 0 0 20px",color:"#f87171",lineHeight:"1.6"},children:j.incompatibilities.map((r,d)=>n.jsx("li",{children:r},d))})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"⚙️"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Active Modules"}),n.jsx("p",{children:"u can check currently running or enabled macro actions here btw"})]})]}),n.jsx("div",{className:"status-grid",style:{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(280px, 1fr))",gap:"12px",marginTop:"10px"},children:Object.entries(j.modules).map(([r,d])=>n.jsxs("div",{style:{padding:"12px 16px",background:"rgba(255,255,255,0.03)",border:"1px solid var(--border)",borderRadius:"6px",display:"flex",alignItems:"center",justifyContent:"space-between",opacity:d.enabled?1:.5},children:[n.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"10px"},children:[n.jsx("div",{style:{width:"10px",height:"10px",borderRadius:"50%",background:d.active?"#22c55e":d.enabled?"#f59e0b":"#6b7280",boxShadow:d.active?"0 0 8px #22c55e":"none"}}),n.jsx("span",{style:{fontWeight:600,color:d.active?"var(--text-bright)":"var(--text-muted)"},children:r})]}),n.jsx("div",{style:{fontSize:"0.8rem",textTransform:"uppercase",fontWeight:700,letterSpacing:"0.5px"},children:d.active?n.jsx("span",{style:{color:"#22c55e"},children:"Active"}):d.enabled?n.jsx("span",{style:{color:"#f59e0b"},children:"Paused/Idle"}):n.jsx("span",{style:{color:"#6b7280"},children:"Disabled"})})]},r))}),n.jsx("div",{style:{marginTop:"20px",padding:"12px",background:"rgba(0,0,0,0.2)",borderRadius:"6px",fontSize:"0.85rem",color:"var(--text-muted)"},children:n.jsxs("div",{style:{display:"flex",gap:"15px",flexWrap:"wrap"},children:[n.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"6px"},children:[n.jsx("div",{style:{width:"8px",height:"8px",borderRadius:"50%",background:"#22c55e"}}),n.jsx("span",{children:"Currently Performing Action"})]}),n.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"6px"},children:[n.jsx("div",{style:{width:"8px",height:"8px",borderRadius:"50%",background:"#f59e0b"}}),n.jsx("span",{children:"Enabled but currently Idle"})]}),n.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"6px"},children:[n.jsx("div",{style:{width:"8px",height:"8px",borderRadius:"50%",background:"#6b7280"}}),n.jsx("span",{children:"Disabled in Settings"})]})]})})]}),!o&&n.jsx("div",{className:"info-banner",style:{marginTop:"16px"},children:"Macro is currently STOPPED. Most modules will appear as Idle or Disabled until you start the macro (F1)."})]}):n.jsx("div",{style:{padding:"20px"},children:"Loading status information..."})}const Hd="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()[]{}<>?/\\|~`",ig={WINDY:"#9ae5ff",RAINY:"#027cbd",SNOWY:"#Dceff9","SAND STORM":"#8F7057",HELL:"#ff4719",STARFALL:"#011ab7",CORRUPTION:"#6d32a8",NULL:"#838383",GLITCHED:"#bfff00",DREAMSPACE:"#ea9dda",CYBERSPACE:"#0A1A3D",AURORA:"#56d6a0",HEAVEN:"#dfaf63",EGGLAND:"#d4fc8d",SINGULARITY:"#cf4023"},Ld=["WINDY","RAINY","SNOWY","SAND STORM","HELL","STARFALL","CORRUPTION","NULL","GLITCHED","DREAMSPACE","CYBERSPACE","AURORA","HEAVEN"];function cg(){const[o,j]=z.useState("GLITCHED"),p=z.useRef(0),r=z.useRef(0),d=z.useCallback(()=>{const y=6+Math.floor(Math.random()*12),v=[];for(let b=0;b<y;b++)b>0&&b%4===0&&Math.random()>.5?v.push("-"):v.push(Hd[Math.floor(Math.random()*Hd.length)]);return`[${v.join("")}]`},[]);return z.useEffect(()=>{const y=v=>{v-r.current>35&&(j(d()),r.current=v),p.current=requestAnimationFrame(y)};return p.current=requestAnimationFrame(y),()=>cancelAnimationFrame(p.current)},[d]),n.jsx("span",{className:"glitch-text",children:o})}function sg(){const{config:o,error:j,sessionDuration:p,lastStartTime:r,isMacroRunning:d,biomeColors:y}=ot(),[v,b]=z.useState("00:00:00");z.useEffect(()=>{const H=()=>{let L=p;d&&r&&(L+=Date.now()-r);const K=Math.floor(L/(1e3*60*60)),T=Math.floor(L%(1e3*60*60)/(1e3*60)),G=Math.floor(L%(1e3*60)/1e3),V=X=>X.toString().padStart(2,"0");b(`${V(K)}:${V(T)}:${V(G)}`)};H();const F=setInterval(H,1e3);return()=>clearInterval(F)},[p,r,d]);function A(H){return y[H]||ig[H]||"#9ca3af"}if(j)return n.jsxs("div",{style:{padding:"20px",color:"#ef4444"},children:[n.jsx("h3",{children:"Error Loading Stats"}),n.jsx("p",{children:j})]});if(!o)return n.jsx("div",{style:{padding:"20px"},children:"Loading stats..."});const _=o.biome_counts||{},q=Object.entries(_).filter(([H])=>H!=="NORMAL").reduce((H,[,F])=>H+Number(F),0),g=o.merchant_counts||{},Y=Object.values(g).reduce((H,F)=>H+Number(F),0),J=Object.keys(_).filter(H=>H!=="NORMAL"),R=Ld.filter(H=>J.includes(H)),Z=J.filter(H=>!Ld.includes(H)).sort(),$=[...R,...Z];return n.jsxs(n.Fragment,{children:[n.jsxs("div",{className:"page-header",children:[n.jsx("h2",{children:"Stats"}),n.jsx("p",{children:"Session statistics and biome encounter history"})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"⏱️"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Session Overview"}),n.jsx("p",{children:"Current macro session statistics"})]})]}),n.jsxs("div",{className:"stats-grid",children:[n.jsxs("div",{className:"stat-card accent",children:[n.jsx("div",{className:"stat-value",children:v}),n.jsx("div",{className:"stat-label",children:"Session Time"})]}),n.jsxs("div",{className:"stat-card",children:[n.jsx("div",{className:"stat-value",children:q.toLocaleString()}),n.jsx("div",{className:"stat-label",children:"Total Biomes Founds"})]}),n.jsxs("div",{className:"stat-card",children:[n.jsx("div",{className:"stat-value",children:Y.toLocaleString()}),n.jsx("div",{className:"stat-label",children:"Merchants Found"})]})]})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🌍"}),n.jsx("div",{children:n.jsx("h3",{children:"Biome Count Section"})})]}),n.jsx("div",{className:"stats-grid",children:$.map(H=>n.jsxs("div",{className:"stat-card",children:[n.jsx("div",{className:"stat-value",children:_[H]||0}),n.jsx("div",{className:"stat-label",style:{color:A(H)},children:H==="GLITCHED"?n.jsx(cg,{}):H})]},H))})]})]})}function og(){const{config:o,saveConfig:j,error:p}=ot();if(p)return n.jsxs("div",{style:{padding:"20px",color:"red"},children:["Error: ",p]});if(!o)return n.jsx("div",{style:{padding:"20px"},children:"Loading..."});const r=(d,y)=>{j({...o,[d]:y})};return n.jsxs(n.Fragment,{children:[n.jsxs("div",{className:"page-header",children:[n.jsx("h2",{children:"Other Features"}),n.jsx("p",{children:"Additional macro capabilities and experimental options"})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"⚡"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Rare Biome Actions"}),n.jsx("p",{children:"Actions to take when a rare biome is detected"})]})]}),n.jsx(ie,{label:"Enable buff when Glitched/Dreamspace",description:"ONLY use this feature when you have your buffs DISABLED while hunting for Glitched/Dreamspace",checked:o.enable_buff_glitched||!1,onChange:d=>r("enable_buff_glitched",d)}),n.jsx(ie,{label:"Reset character when there's a rare biome",description:"Reset character to Sol's Main Island during GLITCHED/DREAMSPACE/CYBERSPACE",checked:o.reset_on_rare||!1,onChange:d=>r("reset_on_rare",d)}),n.jsx(ie,{label:"Teleport back to Limbo when rare biome ends",description:"Return to limbo automatically when rare biome ended",checked:o.teleport_back_to_limbo||!1,onChange:d=>r("teleport_back_to_limbo",d)})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🛠️"}),n.jsxs("div",{children:[n.jsx("h3",{children:"System Settings"}),n.jsx("p",{children:"Application-wide preferences"})]})]}),n.jsxs("div",{className:"setting-row",style:{padding:"15px 20px",borderBottom:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"},children:[n.jsxs("div",{children:[n.jsx("div",{style:{fontWeight:600,color:"var(--text-bright)"},children:"Open AppData Folder"}),n.jsx("div",{style:{fontSize:"0.85rem",color:"var(--text-muted)"},children:"Opens the folder where logs, config, and macro data are stored"})]}),n.jsx("button",{className:"btn primary",onClick:()=>window.pywebview?.api?.open_appdata(),style:{padding:"8px 16px",borderRadius:"4px",cursor:"pointer",backgroundColor:"var(--primary)",color:"white",border:"none",fontWeight:600},children:"Open Folder"})]}),n.jsx(ie,{label:"GLITCHED visual effect on macro UI when GLITCHED biome is found (to look cool ofc)",description:n.jsx("span",{style:{color:"red",fontWeight:"bold"},children:"ONLY USE THIS IF YOU ARE NON PHOTOSENSITIVE"}),checked:o.enable_glitch_effect||!1,onChange:d=>r("enable_glitch_effect",d)}),n.jsx(ie,{label:"Anti-AFK",description:"Prevents Roblox disconnection even when Roblox isn't focused",checked:o.anti_afk||!1,onChange:d=>r("anti_afk",d)}),n.jsxs("div",{className:"setting-row",style:{padding:"0 20px 20px 20px",display:"flex",alignItems:"center",gap:"15px"},children:[n.jsx("span",{style:{fontSize:"0.9rem",color:"var(--text-muted)"},children:"Usage Duration (minutes):"}),n.jsx("input",{type:"number",className:"form-input",style:{width:"80px",textAlign:"center"},value:o.anti_afk_interval||"5",min:"1",max:"20",onChange:d=>r("anti_afk_interval",d.target.value)})]}),n.jsx(ie,{label:"Auto Update (startup)",description:"Automatically download the latest macro update when the app opens",checked:o.auto_update_enabled!==!1,onChange:d=>r("auto_update_enabled",d)}),n.jsx(ie,{label:"Enable Idle Mode",description:"Disable all automated actions except biome/aura detection and anti-afk.",checked:o.enable_idle_mode||!1,onChange:d=>r("enable_idle_mode",d)}),n.jsx(ie,{label:"Make Roblox instance on fullscreen",description:"Automatically fullscreen Roblox window when macro starts",checked:o.auto_roblox_fullscreen||!1,onChange:d=>r("auto_roblox_fullscreen",d)}),n.jsx(ie,{label:"AZERTY Keyboard Mode (experimental)",description:"Enable this if you currently using AZERTY keyboard layout :aga:",checked:o.azerty_mode||!1,onChange:d=>r("azerty_mode",d)})]})]})}function ug(){return n.jsxs(n.Fragment,{children:[n.jsxs("div",{className:"page-header",children:[n.jsx("h2",{children:"Credits"}),n.jsx("p",{children:"The people behind Coteab Macro"})]}),n.jsxs("div",{className:"card",children:[n.jsx("div",{style:{display:"flex",justifyContent:"center",marginBottom:"16px"},children:n.jsx("img",{src:"https://raw.githubusercontent.com/xVapure/Noteab-Macro/refs/heads/main/images/devteam3.png",alt:"Dev Team",style:{width:"120px",height:"120px",borderRadius:"8px",border:"1px solid var(--border)",boxShadow:"0 4px 6px rgba(0,0,0,0.1)"}})}),n.jsx("div",{className:"credits-list",children:n.jsxs("div",{className:"credit-item",children:[n.jsx("div",{className:"credit-avatar",children:"V"}),n.jsx("div",{className:"credit-info",children:n.jsxs("ul",{style:{margin:0,paddingLeft:"16px",listStyle:"disc"},children:[n.jsxs("li",{children:[n.jsx("strong",{children:'Vapure/"@criticize."'})," (Lead Developer, fullstack)"]}),n.jsxs("li",{children:[n.jsx("strong",{children:"Akito"})," (Lead Developer, fullstack)"]}),n.jsxs("li",{children:[n.jsx("strong",{children:"Til/Comet"})," (Developer, MacOS)"]}),n.jsxs("li",{children:[n.jsx("strong",{children:"ManasAarohi"})," (Developer, path maker)"]})]})})]})}),n.jsxs("div",{style:{display:"flex",flexDirection:"column",alignItems:"center",gap:"8px",marginTop:"16px"},children:[n.jsx("a",{href:"https://discord.gg/fw6q274Nrt",target:"_blank",rel:"noreferrer",style:{color:"var(--accent)",textDecoration:"underline"},children:"Join the Coteab Discord server!!!"}),n.jsx("a",{href:"https://github.com/xVapure/Noteab-Macro",target:"_blank",rel:"noreferrer",style:{color:"var(--accent)",fontSize:"13px"},children:"GitHub: Coteab Macro!"})]})]}),n.jsxs("div",{className:"card",style:{textAlign:"center"},children:[n.jsx("div",{style:{display:"flex",justifyContent:"center",marginBottom:"12px"},children:n.jsx("img",{src:"https://avatars.githubusercontent.com/u/93678379?v=4",alt:"Maxstellar",style:{width:"120px",height:"120px",objectFit:"cover",borderRadius:"8px",border:"1px solid var(--border)"}})}),n.jsx("h3",{children:"Inspired Biome Macro Creator: maxstellar"}),n.jsx("p",{children:n.jsx("a",{href:"https://www.youtube.com/@maxstellar_",target:"_blank",rel:"noreferrer",style:{color:"var(--accent)",textDecoration:"underline",cursor:"pointer"},children:"Their YT channel"})})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🏅"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Extra Credits"}),n.jsx("p",{children:"Thank you to everyone who helped along the way"})]})]}),n.jsxs("div",{style:{padding:"14px 16px",background:"var(--bg-input)",border:"1px solid var(--border)",borderRadius:"var(--radius-md)",fontSize:"13px",lineHeight:"1.8",color:"var(--text-secondary)"},children:[n.jsx("div",{children:"- maxstellar - Inspiration and I used some of his logic & former developer."}),n.jsx("div",{children:"- Vexthecoder - Thank you for the icons <3"}),n.jsx("div",{children:"- Cresqnt, Baz & the Scope Team - Anti-AFK inspiration."}),n.jsx("div",{children:"- rnd.xy, imsomeone - For doing external works that I was too lazy to do tysm."}),n.jsx("div",{children:"- Finnerinch - Former developer."}),n.jsx("div",{children:"- .ivelchampion249._30053 - Fishing logic inspiration."}),n.jsx("div",{children:'- All the testers that made the update possible with as less flaws as possible. Notably: "gummyballer", "mightbeanormalguest", "xdec27.", "gonebon", "kira_drago2",  and others.'})]})]}),n.jsxs("div",{className:"info-banner",style:{marginTop:"16px"},children:["🌐 ",n.jsx("a",{href:"https://discord.gg/fw6q274Nrt",target:"_blank",rel:"noreferrer",children:"JOIN OUR DEVELOPMENT SERVER"})," to keep in touch with the latest Coteab Macro updates!"]})]})}function rg(){const[o,j]=z.useState("Loading appreciation list...");return z.useEffect(()=>{fetch("https://raw.githubusercontent.com/xVapure/Noteab-Macro/refs/heads/main/assets/appreciation_list.txt").then(p=>p.text()).then(p=>j(p)).catch(p=>j(`Unable to load appreciation list.
 `+p))},[]),n.jsxs(n.Fragment,{children:[n.jsxs("div",{className:"page-header",children:[n.jsxs("h2",{children:["Donations ","<3"]}),n.jsx("p",{children:"Support the development of Coteab Macro"})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"💎"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Support Us"}),n.jsx("p",{children:"Help us keep the project alive"})]})]}),n.jsxs("div",{style:{padding:"0 15px 15px 15px",color:"var(--text-secondary)",lineHeight:"1.6"},children:[n.jsx("p",{style:{marginBottom:"12px"},children:"Our projects are 100% free to use and you're allowed to recycle any fraction of our code with proper credits. However, if you want to support our team, you can help us by purchasing any of the gamepasses below :)"}),n.jsx("p",{style:{marginBottom:"12px"},children:"It helps us out a lot mentally, any donations above 100 Robux will get you on the appreciation list below, 500 Robux will give you the permission to leave a special message on the appreciation list (must be sfw though) & 1000 Robux will give you access to early Coteab macro releases (beta vers) :D"}),n.jsx("p",{style:{marginBottom:"15px"},children:`Normally we will check donations history daily, but if your Roblox username isn't displayed here please DM "@criticize." on Discord. The appreciation list also takes up to 5 minutes to update due to Github.`}),n.jsx("a",{href:"https://www.roblox.com/games/18203398779/Medival-castle#!/store",target:"_blank",rel:"noreferrer",className:"btn btn-accent",style:{width:"100%",justifyContent:"center",fontWeight:"bold",textDecoration:"none",display:"flex",alignItems:"center"},children:"Visit Gamepass Store"}),n.jsx("div",{style:{textAlign:"center",marginTop:"8px",fontSize:"12px",opacity:.7},children:"https://www.roblox.com/games/18203398779/Medival-castle#!/store"})]})]}),n.jsxs("div",{className:"card",style:{flex:1,display:"flex",flexDirection:"column",minHeight:"300px"},children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🏆"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Donators Hall of Fame"}),n.jsx("p",{children:"It automatically updates from GitHub"})]})]}),n.jsx("div",{style:{padding:"15px",flex:1,display:"flex",flexDirection:"column"},children:n.jsx("textarea",{readOnly:!0,value:o,style:{flex:1,width:"100%",resize:"none",backgroundColor:"rgba(0,0,0,0.2)",color:"var(--text-primary)",border:"1px solid var(--border-color)",borderRadius:"8px",padding:"12px",fontFamily:"monospace",fontSize:"13px",lineHeight:"1.5",outline:"none"}})})]})]})}function fg(){const{config:o,saveConfig:j,error:p}=ot();if(p)return n.jsxs("div",{style:{padding:"20px",color:"red"},children:["Error: ",p]});if(!o)return n.jsx("div",{style:{padding:"20px"},children:"Loading..."});const r=(v,b)=>{j({...o,[v]:b})},d=v=>{if(Nn(v)){alert(Vi(v,"Discord Bot Token"));return}r("remote_bot_token",v)},y=v=>{if(Nn(v)){alert(Vi(v,"Allowed User ID"));return}r("remote_allowed_user_id",v)};return n.jsxs(n.Fragment,{children:[n.jsxs("div",{className:"page-header",children:[n.jsx("h2",{children:"Remote Access"}),n.jsx("p",{children:"Control your macro remotely via a Discord bot"})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🔑"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Remote Access Control"}),n.jsx("p",{children:"Enable and configure remote macro control"})]})]}),n.jsx(ie,{label:"Enable Remote Access Control",checked:o.remote_access_enabled||!1,onChange:v=>r("remote_access_enabled",v)}),o.remote_access_enabled&&n.jsxs("div",{style:{marginTop:"12px",display:"flex",flexDirection:"column",gap:"12px"},children:[n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Discord Bot Token:"}),n.jsx("input",{className:"form-input",type:"password",value:o.remote_bot_token||"",onChange:v=>d(v.target.value),placeholder:"Enter your Discord bot token",style:{width:"100%",maxWidth:"440px"}})]}),n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Allowed User ID:"}),n.jsx("input",{className:"form-input",value:o.remote_allowed_user_id||"",onChange:v=>y(v.target.value),placeholder:"123456789012345678",style:{width:"220px"}})]}),n.jsx("div",{children:n.jsx("a",{href:"https://www.youtube.com/watch?v=s2S7Bncx9ns",target:"_blank",rel:"noreferrer",style:{color:"royalblue",textDecoration:"underline",cursor:"pointer",fontSize:"13px"},children:"Setup tutorial"})})]})]})]})}const dg=({mode:o})=>{const[j,p]=z.useState(null),[r,d]=z.useState(null),[y,v]=z.useState(!1),[b,A]=z.useState(null),[_,q]=z.useState({w:1920,h:1080}),[g,Y]=z.useState(!0),J=z.useRef(null),R=(L,K)=>{const T=J.current;if(!T)return{px:L,py:K};const G=T.getBoundingClientRect(),V=(L-G.left)/G.width,X=(K-G.top)/G.height;return{px:Math.round(V*_.w),py:Math.round(X*_.h)}};z.useEffect(()=>{const L=document.documentElement.style.background,K=document.body.style.background;document.documentElement.style.background="transparent",document.body.style.background="transparent",o==="region"&&window.pywebview&&window.pywebview.api?window.pywebview.api.take_calibration_screenshot().then(G=>{const[V,X,D]=G;q({w:X,h:D});const le=`file://${V}`;A(le),Y(!1),console.log(`[Calibration] Screenshot loaded: ${X}x${D} from ${V}`)}).catch(G=>{console.error("Failed to take calibration screenshot",G),Y(!1)}):Y(!1);const T=async G=>{G.key==="Escape"&&window.pywebview&&window.pywebview.api.close_window()};return window.addEventListener("keydown",T),()=>{document.documentElement.style.background=L,document.body.style.background=K,window.removeEventListener("keydown",T)}},[o]);const Z=L=>{if(L.target.tagName!=="BUTTON")if(o==="point"){const K=window.devicePixelRatio||1;F({x:Math.round(L.screenX*K),y:Math.round(L.screenY*K)})}else{const{px:K,py:T}=R(L.clientX,L.clientY);p({x:L.clientX,y:L.clientY,px:K,py:T}),d({x:L.clientX,y:L.clientY}),v(!0)}},$=L=>{y&&d({x:L.clientX,y:L.clientY})},H=L=>{if(o==="region"&&y&&j){v(!1);const{px:K,py:T}=R(L.clientX,L.clientY),G=Math.min(j.px,K),V=Math.min(j.py,T),X=Math.abs(K-j.px),D=Math.abs(T-j.py);F({x:G,y:V,w:X,h:D})}},F=async L=>{console.log("[Calibration] Result:",L);try{window.pywebview&&window.pywebview.api&&(await window.pywebview.api.emit_calibration_result(L),await window.pywebview.api.close_window())}catch(K){console.error("Failed to emit/close",K),window.pywebview&&window.pywebview.api.close_window()}};return n.jsxs("div",{ref:J,style:{width:"100vw",height:"100vh",cursor:"crosshair",position:"relative",userSelect:"none",overflow:"hidden",background:b?"none":"rgba(0, 0, 0, 0.5)"},onMouseDown:Z,onMouseMove:$,onMouseUp:H,children:[b&&n.jsx("img",{src:b,alt:"",style:{position:"absolute",top:0,left:0,width:"100%",height:"100%",objectFit:"fill",pointerEvents:"none",zIndex:0}}),n.jsx("div",{style:{position:"absolute",top:0,left:0,width:"100%",height:"100%",background:"rgba(0, 0, 0, 0.15)",pointerEvents:"none",zIndex:1}}),n.jsx("button",{onClick:()=>{window.pywebview&&window.pywebview.api.close_window()},style:{position:"absolute",top:"20px",right:"20px",background:"#ef4444",color:"white",border:"none",padding:"8px 16px",borderRadius:"4px",cursor:"pointer",zIndex:1e3,fontWeight:"bold",pointerEvents:"auto"},children:"Cancel (ESC)"}),o==="region"&&y&&j&&r&&n.jsx("div",{style:{position:"absolute",left:Math.min(j.x,r.x),top:Math.min(j.y,r.y),width:Math.abs(r.x-j.x),height:Math.abs(r.y-j.y),border:"2px solid #00ff00",background:"rgba(0, 255, 0, 0.15)",pointerEvents:"none",zIndex:500}}),!y&&n.jsx("div",{style:{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%, -50%)",pointerEvents:"none",textAlign:"center",color:"white",textShadow:"0 2px 4px black, 0 0 10px black",zIndex:10},children:g?n.jsx("p",{style:{fontWeight:"bold",fontSize:"20px"},children:"Taking screenshot... (This shouldn't take long)"}):n.jsxs(n.Fragment,{children:[n.jsx("p",{style:{fontWeight:"bold",fontSize:"20px"},children:o==="point"?"Click to Select Position":"Drag to Select Region"}),n.jsx("p",{style:{fontSize:"14px"},children:"Press ESC to cancel"}),n.jsxs("p",{style:{fontSize:"12px",opacity:.7},children:["Screenshot: ",_.w,"×",_.h,"px"]})]})})]})};function hg({version:o,downloadUrl:j,updateStatus:p,onDismiss:r,onDontAskAgain:d}){const[y,v]=z.useState(!1),b=async()=>{v(!0);try{window.pywebview&&window.pywebview.api&&await window.pywebview.api.apply_update(j,o)}catch{v(!1)}},A=p==="failed",_=p?.startsWith("done|")??!1,q=_?p.split("|")[1]:"",g=y||p==="downloading";return(A||_)&&y&&v(!1),n.jsxs("div",{className:`update-banner ${A?"update-banner-error":""} ${_?"update-banner-success":""}`,children:[n.jsxs("div",{className:"update-banner-content",children:[n.jsx("span",{className:"update-icon",children:A?"⚠️":_?"✅":"❗"}),n.jsx("span",{className:"update-text",children:A?"Update failed. Please try downloading again.":_?`Updated! ${q||"Restarting"}`:g?"Downloading update...":`New Coteab Macro ${o} is available!!!`})]}),!g&&!_&&n.jsxs("div",{className:"update-banner-actions",children:[n.jsx("button",{className:"update-btn update-btn-primary",onClick:b,children:A?"Retry Update":"Update Now"}),n.jsx("button",{className:"update-btn update-btn-secondary",onClick:r,children:"Dismiss"}),n.jsx("button",{className:"update-btn update-btn-secondary",onClick:d,children:"Don't Ask Again"})]}),g&&!A&&!_&&n.jsx("div",{className:"update-spinner"})]})}function mg(){const{config:o,saveConfig:j}=ot(),p=H=>{j(H)},[r,d]=z.useState({}),[y,v]=z.useState(""),b=z.useRef(null);z.useEffect(()=>{let H=!0;return(async()=>{if(o)try{let L={};window.pywebview&&window.pywebview.api&&typeof window.pywebview.api.get_full_biome_data=="function"&&(L=await window.pywebview.api.get_full_biome_data());const K=o.custom_biome_overrides||{},T={};for(const G of Object.keys(L))T[G]={...L[G],...K[G]};for(const G of Object.keys(K))T[G]||(T[G]=K[G]);if(H&&(d(T),!y)){const G=Object.keys(T).filter(V=>V!=="NORMAL");G.length>0&&v(G[0])}}catch(L){console.error("Failed to load full biome data",L)}})(),()=>{H=!1}},[o]);const A=(H,F)=>{y&&d(L=>({...L,[y]:{...L[y],[H]:F}}))},_=async()=>{if(!o)return;let H={};window.pywebview&&window.pywebview.api&&typeof window.pywebview.api.get_full_biome_data=="function"&&(H=await window.pywebview.api.get_full_biome_data());const F={};for(const[L,K]of Object.entries(r)){const T=H[L]||{},G=K.color!==T.color&&K.color!==void 0,V=K.thumbnail_url!==T.thumbnail_url&&K.thumbnail_url!==void 0;(G||V)&&(F[L]={...G&&{color:K.color},...V&&{thumbnail_url:K.thumbnail_url}})}p({...o,custom_biome_overrides:F})};if(!o)return n.jsx("div",{children:"Loading..."});const q=Object.keys(r).filter(H=>H!=="NORMAL");z.useEffect(()=>{const H=b.current;if(!H)return;const F=L=>{L.preventDefault(),q.length&&v(K=>{const T=q.indexOf(K);if(T===-1)return K;let G=T;return L.deltaY<0?G=(T-1+q.length)%q.length:L.deltaY>0&&(G=(T+1)%q.length),q[G]})};return H.addEventListener("wheel",F,{passive:!1}),()=>H.removeEventListener("wheel",F)},[q]);const g=r[y]||{color:"#ffffff",thumbnail_url:""},Y=g.color||"#ffffff",J=Y.startsWith("0x")?"#"+Y.slice(2):Y,R=new Date,Z={weekday:"long",year:"numeric",month:"long",day:"numeric",hour:"numeric",minute:"numeric",hour12:!0},$=R.toLocaleDateString("en-US",Z);return n.jsxs("div",{className:"page-container fade-in",style:{display:"flex",flexDirection:"column",height:"100%"},children:[n.jsxs("div",{className:"page-header",children:[n.jsx("h2",{children:"Discord Webhook Customization"}),n.jsx("p",{children:"Dynamically configure what your webhook embeds look like when a biome starts"})]}),n.jsxs("div",{style:{display:"flex",flexDirection:"column",gap:"16px",marginTop:"10px",minHeight:"0",maxWidth:"560px",margin:"0 auto",paddingBottom:"30px"},children:[n.jsx("div",{style:{backgroundColor:"#313338",borderRadius:"8px",border:"1px solid rgba(255,255,255,0.05)",padding:"16px",height:"fit-content",overflowY:"auto",display:"flex",fontFamily:"'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif"},children:n.jsxs("div",{style:{display:"flex",gap:"12px",width:"100%"},children:[n.jsx("div",{style:{width:"40px",height:"40px",borderRadius:"50%",backgroundColor:"#5865F2",flexShrink:0,backgroundImage:"url('https://i.postimg.cc/rsXpGncL/Noteab-Biome-Tracker.png')",backgroundSize:"cover"}}),n.jsxs("div",{style:{flex:1,display:"flex",flexDirection:"column",minWidth:0},children:[n.jsxs("div",{style:{display:"flex",alignItems:"baseline",gap:"6px",marginBottom:"2px",flexWrap:"wrap"},children:[n.jsx("span",{style:{color:"#F2F3F5",fontSize:"15px",fontWeight:"500",lineHeight:"1.2"},children:"Your webhook name go here cuz idk"}),n.jsx("span",{style:{backgroundColor:"#5865F2",color:"#FFFFFF",fontSize:"9px",padding:"0 4px",borderRadius:"3px",fontWeight:"600",lineHeight:"13px",height:"13px",verticalAlign:"middle"},children:"APP"}),n.jsxs("span",{style:{color:"#949BA4",fontSize:"11px",marginLeft:"2px"},children:["Today at ",R.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})]})]}),n.jsxs("div",{style:{backgroundColor:"#2b2d31",borderLeft:`4px solid ${J||"#FFFFFF"}`,borderRadius:"4px",display:"flex",padding:"12px 14px",marginTop:"4px"},children:[n.jsxs("div",{style:{display:"flex",flexDirection:"column",gap:"6px",flex:1,minWidth:0},children:[n.jsx("div",{style:{color:"#F2F3F5",fontSize:"14px",fontWeight:"600",wordBreak:"break-word",marginBottom:"2px"},children:n.jsxs("span",{style:{backgroundColor:"rgba(255,255,255,0.06)",padding:"2px 4px",borderRadius:"3px"},children:[$," (just now)"]})}),n.jsx("div",{style:{fontSize:"13px",color:"#DBDEE1",lineHeight:"1.2",whiteSpace:"pre-wrap"},children:n.jsxs("div",{style:{borderLeft:"4px solid #4e5058",padding:"0 10px",marginLeft:"0"},children:[n.jsx("div",{style:{fontSize:"18px",fontWeight:"700",color:"#F2F3F5",marginTop:"16px",marginBottom:"12px",lineHeight:"1.4",display:"flex",gap:"6px",wordBreak:"break-word"},children:`Biome Started - ${y||"SNOWY"}`}),n.jsx("div",{style:{fontSize:"16px",fontWeight:"600",marginTop:"12px",marginBottom:"6px"},children:n.jsx("a",{href:"#",style:{color:"#00A8FC",textDecoration:"none"},onClick:H=>H.preventDefault(),children:"Join Server"})})]})}),n.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"6px",marginTop:"4px"},children:[n.jsx("img",{src:"https://i.postimg.cc/rsXpGncL/Noteab-Biome-Tracker.png",style:{width:"16px",height:"16px",borderRadius:"50%"},alt:"footer"}),n.jsxs("span",{style:{color:"#949BA4",fontSize:"11px",fontWeight:"500"},children:["Coteab Macro v2.1.6-beta1 • Today at ",R.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})]})]})]}),g.thumbnail_url&&n.jsx("div",{style:{marginLeft:"12px",flexShrink:0},children:n.jsx("img",{src:g.thumbnail_url,style:{maxWidth:"60px",maxHeight:"60px",borderRadius:"4px",objectFit:"contain"},alt:"thumbnail",onError:H=>{H.target.style.display="none"},onLoad:H=>{H.target.style.display="block"}})})]})]})]})}),n.jsxs("div",{className:"card",title:"Scroll with your mouse wheel here to quickly cycle through biomes!",children:[n.jsxs("label",{className:"form-label",style:{display:"flex",justifyContent:"space-between"},children:["Select Biome",n.jsx("span",{style:{fontSize:"0.8em",color:"#64748b",fontWeight:"normal"},children:"(Scroll wheel supported)"})]}),n.jsx("select",{ref:b,className:"form-input",style:{width:"100%",padding:"10px",fontSize:"1.1em",cursor:"pointer",appearance:"auto"},value:y,onChange:H=>v(H.target.value),children:q.map(H=>n.jsx("option",{value:H,children:H},H))})]}),n.jsxs("div",{className:"card",style:{display:"flex",flexDirection:"column",gap:"15px"},children:[n.jsxs("div",{children:[n.jsxs("label",{className:"form-label",style:{display:"flex",justifyContent:"space-between"},children:["Hex Color",n.jsx("a",{href:"#",style:{color:"#0ea5e9",fontSize:"0.8em",textDecoration:"none"},onClick:H=>{H.preventDefault(),window.pywebview&&window.pywebview.api.open_url("https://htmlcolorcodes.com/")},children:"Get Colors"})]}),n.jsxs("div",{style:{display:"flex",gap:"10px",alignItems:"center"},children:[n.jsx("input",{type:"color",style:{width:"40px",height:"40px",padding:"0",border:"none",borderRadius:"8px",cursor:"pointer",background:"none"},value:J,onChange:H=>A("color",H.target.value)}),n.jsx("input",{type:"text",className:"form-input",style:{flex:1,fontFamily:"monospace"},value:g.color,onChange:H=>A("color",H.target.value),placeholder:"#FFFFFF"})]})]}),n.jsxs("div",{children:[n.jsx("label",{className:"form-label",children:"Thumbnail URL"}),n.jsx("input",{type:"text",className:"form-input",style:{width:"100%",fontSize:"0.95em"},value:g.thumbnail_url,onChange:H=>A("thumbnail_url",H.target.value),placeholder:"https://..."})]}),n.jsx("button",{className:"btn btn-primary",style:{backgroundColor:"#d97706",marginTop:"10px"},onClick:_,children:"Save Configuration (reopen the macro to take effect!)"})]})]})]})}function pg(){const{config:o,saveConfig:j,error:p}=ot();if(p)return n.jsxs("div",{style:{padding:"20px",color:"red"},children:["Error: ",p]});if(!o)return n.jsx("div",{style:{padding:"20px"},children:"Loading..."});const r=(v,b)=>{j({...o,[v]:b})},[d,y]=z.useState(!1);return z.useEffect(()=>{if(d)return window.onCalibrationResult=async v=>{if(!v||typeof v.key!="string"||!v.key.startsWith("egg_click_failsafe_"))return;const b=v.key.replace("egg_click_failsafe_",""),A=parseInt(b);if(isNaN(A))return;let _=v.value;if(_&&Array.isArray(_)&&_.length>=2){const q=o.egg_click_failsafe?[...o.egg_click_failsafe]:[];q[A]=[Math.round(_[0]),Math.round(_[1])];const g={...o,egg_click_failsafe:q};delete g[v.key],j(g)}},()=>{delete window.onCalibrationResult}},[d,o]),n.jsxs(n.Fragment,{children:[d&&n.jsx("div",{style:{position:"fixed",top:0,left:0,right:0,bottom:0,backgroundColor:"rgba(0,0,0,0.8)",zIndex:9999,display:"flex",justifyContent:"center",alignItems:"center"},children:n.jsxs("div",{style:{background:"var(--bg-color, #1e1e24)",padding:"20px",borderRadius:"8px",width:"90%",maxWidth:"500px",maxHeight:"80vh",overflowY:"auto",border:"1px solid var(--border-color, #333)"},children:[n.jsxs("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"15px"},children:[n.jsx("h3",{style:{margin:0},children:"Configure Egg Path Failsafe"}),n.jsx("button",{className:"btn btn-sm",onClick:()=>y(!1),children:"Close"})]}),n.jsx("p",{style:{fontSize:"13px",color:"var(--text-secondary)",marginBottom:"15px"},children:"Add failsafe click actions that will execute after an egg path finishes."}),n.jsx("button",{className:"btn",style:{width:"100%",padding:"8px",marginBottom:"15px",background:"var(--accent)"},onClick:()=>{const v=o.egg_click_failsafe?[...o.egg_click_failsafe]:[];v.push([0,0]),r("egg_click_failsafe",v)},children:"+ Add mouse click action"}),n.jsxs("div",{style:{display:"flex",flexDirection:"column",gap:"10px"},children:[(o.egg_click_failsafe||[]).map((v,b)=>n.jsxs("div",{style:{display:"flex",alignItems:"center",gap:"10px",background:"rgba(255,255,255,0.05)",padding:"10px",borderRadius:"6px"},children:[n.jsxs("span",{style:{fontWeight:"bold",width:"30px",color:"var(--text-muted)"},children:["#",b+1]}),n.jsxs("div",{style:{flex:1,display:"flex",gap:"10px"},children:[n.jsx("span",{style:{fontSize:"14px",alignSelf:"center"},children:"X:"}),n.jsx("input",{className:"form-input",style:{width:"65px",textAlign:"center"},type:"number",value:v[0],onChange:A=>{const _=[...o.egg_click_failsafe];_[b]=[..._[b]],_[b][0]=parseInt(A.target.value)||0,r("egg_click_failsafe",_)}}),n.jsx("span",{style:{fontSize:"14px",alignSelf:"center"},children:"Y:"}),n.jsx("input",{className:"form-input",style:{width:"65px",textAlign:"center"},type:"number",value:v[1],onChange:A=>{const _=[...o.egg_click_failsafe];_[b]=[..._[b]],_[b][1]=parseInt(A.target.value)||0,r("egg_click_failsafe",_)}})]}),n.jsx("button",{className:"btn btn-sm",style:{background:"var(--accent)",color:"white"},onClick:()=>{window.pywebview?.api&&window.pywebview.api.create_calibration_window(`egg_click_failsafe_${b}`,"point")},children:"Select Pos"}),n.jsx("button",{className:"btn btn-sm",style:{background:"#ef4444",color:"white",padding:"4px 8px"},onClick:()=>{const A=[...o.egg_click_failsafe];A.splice(b,1),r("egg_click_failsafe",A)},children:"X"})]},b)),(!o.egg_click_failsafe||o.egg_click_failsafe.length===0)&&n.jsx("div",{style:{textAlign:"center",color:"var(--text-muted)",padding:"15px"},children:"No click actions added yet."})]})]})}),n.jsxs("div",{className:"page-header",children:[n.jsx("h2",{children:"Movements"}),n.jsx("p",{children:"Automated movement and pathing configurations"})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"⚙️"}),n.jsx("div",{children:n.jsx("h3",{children:"General Pathing Settings"})})]}),n.jsx(ie,{label:"Non-VIP Movement Path",description:"Slow down to applied movement paths (egg collection, basic obby, fishing, etc...) to compensate for non-VIP walkspeed",checked:o.non_vip_movement_path||!1,onChange:v=>r("non_vip_movement_path",v)}),n.jsx(ie,{label:"Close Roblox chat before pathing (DO MACRO CALIBRATION - IMPORTANT)",description:"Automatically close the in-game chat using OCR detection before obby/fishing/events path sequences",checked:o.auto_chat_close||!1,onChange:v=>r("auto_chat_close",v)})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🗺️"}),n.jsx("div",{children:n.jsx("h3",{children:"Basic Obby"})})]}),n.jsxs("div",{children:[n.jsx(ie,{label:"Auto complete Basic Obby",checked:o.enable_auto_obby||!1,onChange:async v=>{if(v)try{if(window.pywebview?.api&&!await window.pywebview.api.check_obby_path_exists()){alert(`No obby path found!
 
-Please record an obby path first using the obby recorder above.`);return}}catch(b){console.error("Failed to check obby path:",b)}r("enable_auto_obby",v)}}),o.enable_auto_obby&&n.jsxs("div",{className:"form-group",style:{marginTop:"15px",marginLeft:"10px"},children:[n.jsx("label",{className:"form-label",children:"Interval (min):"}),n.jsx("input",{className:"form-input",type:"number",min:"1",value:o.auto_obby_interval||"15",onChange:v=>r("auto_obby_interval",v.target.value),style:{width:"80px"}})]}),n.jsxs("div",{style:{marginTop:"15px",borderTop:"1px solid var(--border-color)",paddingTop:"15px"},children:[n.jsx(ie,{label:"Use aura that can float on water",checked:o.use_float_aura||!1,onChange:v=>r("use_float_aura",v)}),o.use_float_aura&&n.jsxs("div",{className:"form-group",style:{marginTop:"10px",marginLeft:"10px"},children:[n.jsx("label",{className:"form-label",children:"Aura Name:"}),n.jsx("input",{className:"form-input",type:"text",value:o.float_aura_name||"",onChange:v=>r("float_aura_name",v.target.value),placeholder:"e.g. Sailor",style:{width:"200px"}})]})]})]})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🥚"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Collect Easter Egg"}),n.jsx("p",{children:"Automatically collect easter eggs spawned around the map"})]})]}),n.jsx(ie,{label:"Enable Easter Egg Collection",description:"Walk around the map to collect easter eggs at set intervals.",checked:o.collect_easter_egg||!1,onChange:v=>r("collect_easter_egg",v)}),o.collect_easter_egg&&n.jsxs(n.Fragment,{children:[n.jsx("div",{className:"form-row",style:{marginTop:"8px"},children:n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Collection interval (minutes)"}),n.jsx("input",{className:"form-input",type:"number",min:"1",value:o.egg_collect_interval_min??"5",onChange:v=>r("egg_collect_interval_min",v.target.value),style:{width:"90px"}})]})}),Number(o.egg_collect_interval_min||0)<5&&n.jsx("div",{className:"info-banner",style:{marginTop:"10px",color:"var(--warning-color, #ffaa00)"},children:"⚠️ Warning: Setting the interval too low (under 5 minutes) is highly inefficient! It is strongly recommended to set it around 20-30 minutes per run."}),n.jsx("div",{className:"form-row",style:{marginTop:"15px",marginLeft:"10px",paddingBottom:"10px"},children:n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",style:{fontWeight:"bold"},children:"Egg Path Playback Multiplier (FPS Compensation)"}),n.jsx("p",{style:{margin:"2px 0 8px 0",fontSize:"0.85em",color:"var(--text-color)",opacity:.8},children:"If you get stuck or fall off during paths (due to low FPS), increase this (e.g. 1.1 or 1.25). Higher multiplier = character walks for longer (otherwise keep it at 1.0 if you got consistent fps around 60+)"}),n.jsx("input",{className:"form-input",type:"number",step:"0.01",min:"1.0",max:"2.0",value:o.egg_playback_multiplier??"1.0",onChange:v=>r("egg_playback_multiplier",v.target.value),onBlur:v=>{let b=parseFloat(v.target.value);(isNaN(b)||b<1)&&r("egg_playback_multiplier","1.0")},style:{width:"90px"}})]})}),Number(o.egg_playback_multiplier)<1&&n.jsx("div",{className:"info-banner",style:{marginTop:"5px",color:"var(--warning-color, #ffaa00)"},children:"⚠️ If you set the multiplier below 1.0, the macro will automatically default it back to 1.0 :aga:"}),n.jsx("div",{style:{marginTop:"15px",padding:"10px",borderBottom:"1px solid var(--border-color)",borderTop:"1px solid var(--border-color)"},children:n.jsx("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"},children:n.jsx("button",{className:"btn",onClick:()=>y(!0),style:{padding:"8px 16px",background:"rgba(239, 68, 68, 0.15)",color:"#ef4444",border:"1px solid rgba(239, 68, 68, 0.3)"},children:"Configure Egg Path Failsafe"})})})]}),n.jsx(ie,{label:"Equip an aura before egg collection",description:"Before walking to collect eggs, equip the aura name below using Aura calibration (under Macro Calibrations)",checked:o.equip_aura_before_egg_collect||!1,onChange:v=>r("equip_aura_before_egg_collect",v)}),o.equip_aura_before_egg_collect&&n.jsx("div",{className:"form-row",style:{marginTop:"8px"},children:n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Aura name to equip"}),n.jsx("input",{className:"form-input",value:o.egg_collect_aura_name||"",onChange:v=>r("egg_collect_aura_name",v.target.value),style:{width:"220px"},placeholder:"Enter aura name"})]})}),n.jsxs("div",{style:{marginTop:"15px",borderTop:"1px solid var(--border-color)",paddingTop:"15px"},children:[n.jsx(ie,{label:"OCR check to detect special egg on roblox chat (optional)",description:"Use OCR to read the roblox chat box for special egg messages. Requires Roblox Chat Box Region calibration.",checked:o.egg_ocr_detect_special||!1,onChange:v=>r("egg_ocr_detect_special",v)}),o.egg_ocr_detect_special&&n.jsxs(n.Fragment,{children:[n.jsx("div",{className:"form-row",style:{marginTop:"8px"},children:n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Your Discord User ID (to ping whenever special egg is found on roblox chat)"}),n.jsx("input",{className:"form-input",type:"text",value:o.egg_ocr_discord_userid||"",onChange:v=>r("egg_ocr_discord_userid",v.target.value),placeholder:"Enter your Discord user ID",style:{width:"220px"}})]})}),n.jsx("div",{className:"info-banner",style:{marginTop:"10px"},children:"⚠️ Enabling this OCR feature would HAVE A CHANCE of false detection of special eggs so use it with your caution!! (Simply ignore the ping if it does that)"}),n.jsx("div",{className:"info-banner",style:{marginTop:"10px",opacity:.85},children:"ℹ️ Egg OCR check will temporarily stop during: Rare biomes (Glitched, Dreamspace, Cyberspace), reconnecting, egg collection pathing, fishing (when is in reeling minigame), basic obby, merchant was found and in autobuy stage, potion crafting, auto pop is ON (Except for Idle mode)"})]})]})]})]})}function gg({initialMode:o,onClose:j}={}){const[p,r]=z.useState(!1),[d,y]=z.useState(0),[v,b]=z.useState("Ready"),[A,_]=z.useState(o||"obby"),[q,g]=z.useState(""),[Y,J]=z.useState(!1),[R,Z]=z.useState(null),[$,H]=z.useState(null);z.useEffect(()=>{if(o){o==="potion"&&b("Potion Mode: Ready");return}new URLSearchParams(window.location.search).get("mode")==="potion"&&(_("potion"),b("Potion Mode: Ready"))},[]),z.useEffect(()=>{let D;return p?D=setInterval(()=>{y(le=>le+1)},1e3):clearInterval(D),()=>clearInterval(D)},[p]),z.useEffect(()=>{let D;return R!==null&&R>0?D=setInterval(()=>{Z(le=>le!==null?le-1:null)},1e3):R===0&&(Z(null),$==="replay"?V():$==="align"&&X(),H(null)),()=>clearInterval(D)},[R,$]);const F=D=>{const le=Math.floor(D/60).toString().padStart(2,"0"),se=(D%60).toString().padStart(2,"0");return`${le}:${se} `},L=async()=>{if(!(R!==null||Y)){if(A==="potion"&&!q.trim()){b("Error: Enter a name first!");return}try{window.pywebview&&window.pywebview.api?(await window.pywebview.api.start_macro_recording(),r(!0),y(0),b("Recording...")):b("Error: pywebview API not available.")}catch(D){b(`Error: ${D} `)}}},K=async()=>{if(!Y)try{window.pywebview&&window.pywebview.api?A==="potion"?(await window.pywebview.api.stop_macro_recording_potion(q),r(!1),b(`Saved to ${q}.json!`)):(await window.pywebview.api.stop_macro_recording(),r(!1),b("Saved!")):b("Error: pywebview API not available.")}catch(D){b(`Error: ${D} `)}},T=()=>{p||Y||(H("replay"),Z(5),b("Replaying in 5s..."))},G=()=>{p||Y||(H("align"),Z(5),b("Aligning in 5s..."))},V=async()=>{b("Replaying..."),J(!0);try{if(window.pywebview&&window.pywebview.api){let D;A==="potion"?D=await window.pywebview.api.replay_potion_recording(q):D=await window.pywebview.api.replay_recording(),D&&D.startsWith("Error:")?b(D):b(D==="Cancelled"?"Replay Cancelled":"Replay Finished")}}catch(D){b(`Error: ${D} `)}finally{J(!1)}},X=async()=>{b("Aligning..."),J(!0);try{window.pywebview&&window.pywebview.api&&await window.pywebview.api.align_camera(),b("Aligned!")}catch(D){b(`Error: ${D} `)}finally{J(!1)}};return n.jsxs("div",{style:{height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"var(--bg-dark)",color:"var(--text-primary)",padding:"20px",border:"1px solid var(--border-color)",position:"relative"},children:[n.jsx("div",{className:"corner-bracket tl",style:{top:5,left:5}}),n.jsx("div",{className:"corner-bracket tr",style:{top:5,right:5}}),n.jsx("div",{className:"corner-bracket bl",style:{bottom:5,left:5}}),n.jsx("div",{className:"corner-bracket br",style:{bottom:5,right:5}}),j&&n.jsx("button",{onClick:j,style:{position:"absolute",top:8,right:12,background:"none",border:"none",color:"var(--text-secondary)",fontSize:"18px",cursor:"pointer",padding:"4px 8px",lineHeight:1},title:"Close",children:"✕"}),n.jsx("h3",{style:{margin:"0 0 10px 0",color:"var(--accent)"},children:A==="potion"?"Potion Recorder":"Obby Recorder"}),n.jsx("div",{style:{fontSize:"24px",fontFamily:"monospace",marginBottom:"15px"},children:R!==null?`Starting in ${R}...`:F(d)}),n.jsx("div",{style:{marginBottom:"10px",fontSize:"12px",color:p||Y?"var(--accent)":"var(--text-secondary)"},children:v}),A==="potion"&&!p&&n.jsx("div",{style:{marginBottom:"10px",width:"100%"},children:n.jsx("input",{type:"text",placeholder:"Potion Name (e.g. Heavenly)",value:q,onChange:D=>g(D.target.value),className:"form-input",style:{width:"100%",textAlign:"center"}})}),n.jsx("div",{style:{display:"flex",gap:"10px"},children:p?n.jsx("button",{className:"btn btn-stop",onClick:K,style:{padding:"8px 20px"},children:"Stop & Save"}):n.jsxs(n.Fragment,{children:[n.jsx("button",{className:"btn btn-start",onClick:L,disabled:R!==null||Y,style:{padding:"8px 20px",opacity:R!==null||Y?.5:1},children:"Start"}),n.jsx("button",{className:"btn",onClick:T,disabled:R!==null||Y||A==="potion"&&!q,style:{padding:"8px 20px",backgroundColor:"#2196F3",color:"white",opacity:R!==null||Y||A==="potion"&&!q?.5:1},children:A==="potion"?"Replay Save":"Replay"}),A==="obby"&&n.jsx("button",{className:"btn",onClick:G,disabled:R!==null||Y,style:{padding:"8px 20px",backgroundColor:"#9C27B0",color:"white",opacity:R!==null||Y?.5:1},children:"Align Camera"})]})}),n.jsx("div",{style:{marginTop:"10px",fontSize:"10px",color:"gray"},children:A==="potion"?"Make sure to save the record file name as same as the ingame potion name so macro can find the potion and do auto craft for you!":"Obby Recorder"})]})}function yg(){const o=new URLSearchParams(window.location.search),j=window.__INJECTED_BIOME__||o.get("biome")||"UNKNOWN",[p,r]=z.useState(10),[d,y]=z.useState(!1);z.useEffect(()=>{if(d||p<=0)return;const A=setInterval(()=>{r(_=>_-1)},1e3);return()=>clearInterval(A)},[p,d]);const v=async()=>{if(!d){y(!0);try{window.pywebview?.api?.confirm_biome_response&&await window.pywebview.api.confirm_biome_response(!0)}catch(A){console.error("confirm_biome_response error:",A)}}},b=async()=>{if(!d){y(!0);try{window.pywebview?.api?.confirm_biome_response&&await window.pywebview.api.confirm_biome_response(!1)}catch(A){console.error("confirm_biome_response error:",A)}}};return n.jsxs("div",{style:{height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"var(--bg-dark)",color:"var(--text-primary)",padding:"24px",position:"relative",textAlign:"center",overflow:"hidden"},children:[n.jsx("div",{className:"corner-bracket tl",style:{top:5,left:5}}),n.jsx("div",{className:"corner-bracket tr",style:{top:5,right:5}}),n.jsx("div",{className:"corner-bracket bl",style:{bottom:5,left:5}}),n.jsx("div",{className:"corner-bracket br",style:{bottom:5,right:5}}),n.jsx("div",{style:{fontSize:"42px",marginBottom:"10px"},children:"⚠️"}),n.jsx("h2",{style:{fontSize:"18px",fontWeight:700,color:"#ff6b6b",marginBottom:"8px"},children:"Rare Biome Detected After Rejoin!"}),n.jsx("div",{style:{fontSize:"28px",fontWeight:800,color:"var(--accent)",marginBottom:"14px"},children:j}),n.jsxs("p",{style:{fontSize:"13px",lineHeight:1.5,color:"var(--text-secondary)",marginBottom:"20px"},children:["You just rejoined a server that has a ",n.jsx("b",{style:{color:"#ff6b6b"},children:"rare biome"})," active.",n.jsx("br",{}),"Did you forget to close the macro before joining?",n.jsx("br",{}),n.jsx("br",{}),"If you forgot, the macro will ",n.jsx("b",{style:{color:"#ff6b6b"},children:"stop immediately!!"})]}),d?n.jsx("div",{style:{fontSize:"14px",color:"var(--accent)"},children:"Response sent!"}):n.jsxs("div",{style:{display:"flex",flexDirection:"column",gap:"10px",width:"100%"},children:[n.jsx("button",{onClick:v,style:{padding:"12px 20px",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:600,cursor:"pointer",background:"linear-gradient(135deg, #00b894, #00cec9)",color:"#fff"},children:"✅ Nah. I'm good, keep this tuff macro running 🗣️🔥"}),n.jsx("button",{onClick:b,style:{padding:"12px 20px",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:600,cursor:"pointer",background:"linear-gradient(135deg, #e74c3c, #fd79a8)",color:"#fff"},children:"❌ I forgot to turn the macro off please spare me 😭🥀"})]}),n.jsx("div",{style:{marginTop:"14px",fontSize:"12px",color:"var(--text-secondary)",opacity:.6},children:d?"":p>0?`Auto-continuing in ${p}s...`:"Auto-continuing..."})]})}const bg=new URLSearchParams(window.location.search).get("safe_mode");bg&&!window.pywebview&&(console.log("[SafeMode] Initializing HTTP bridge..."),window.isSafeMode=!0,window.pywebview={api:new Proxy({},{get:(o,j)=>async(...p)=>{try{const r=await fetch(`/api/${j}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json()}catch(r){throw console.error(`[SafeMode] API Error (${j}):`,r),r}}})});const Yd={notice:Qd,webhook:Up,calibrations:qp,remoteaccess:fg,misc:Gp,fishing:Zp,merchant:Kp,autopopbuff:tg,auras:lg,movements:pg,potioncraft:ag,stats:sg,status:ng,otherfeatures:og,customization:mg,credits:ug,donations:rg};function vg(){const[o,j]=z.useState("notice"),{config:p,saveConfig:r,isMacroRunning:d,setMacroRunning:y}=ot(),[v,b]=z.useState(new URLSearchParams(window.location.search).get("safe_mode")!==null),[A,_]=z.useState("midnight"),[q,g]=z.useState(!1),[Y,J]=z.useState("v?.?.?"),[R,Z]=z.useState(null),[$,H]=z.useState(null),F=z.useRef(null),L=z.useRef(!1),K=p?p.auto_update_enabled!==!1:!1,T=async()=>{if(!d){y(!0),document.activeElement instanceof HTMLElement&&document.activeElement.blur();try{window.pywebview&&window.pywebview.api&&await window.pywebview.api.set_biome_detection(!0)}catch(ce){console.error("Failed to start macro api:",ce)}}},G=async()=>{if(d){y(!1);try{window.pywebview&&window.pywebview.api&&await window.pywebview.api.set_biome_detection(!1)}catch(ce){console.error("Failed to stop macro api:",ce)}}},V=()=>{d?G():T()},X=z.useRef(d),D=z.useRef(!1);z.useEffect(()=>{X.current=d},[d]),z.useEffect(()=>((async()=>{try{console.log("Setting up global listeners"),window.onShortcutEvent=async B=>{if(!D.current){D.current=!0;try{B==="START"?X.current||(console.log("Start Shortcut (Backend) - Starting"),y(!0)):B==="STOP"&&X.current&&(console.log("Stop Shortcut (Backend) - Stopping"),y(!1))}finally{setTimeout(()=>{D.current=!1},300)}}},window.onMacroStatus=B=>{console.log("Macro Status Event:",B),B==="RUNNING"||B.includes("RUNNING")?y(!0):y(!1)}}catch(B){console.error("Failed to setup listeners:",B)}})(),()=>{delete window.onShortcutEvent,delete window.onMacroStatus}),[]),z.useEffect(()=>(window.onFishingFailsafeWarning=ce=>{ce&&alert(ce),j("misc")},()=>{delete window.onFishingFailsafeWarning}),[]),z.useEffect(()=>((async()=>window.onBiomeUpdate=B=>{(B||"").toUpperCase().trim()==="GLITCHED"&&p?.enable_glitch_effect?g(!0):g(!1)})(),()=>{delete window.onBiomeUpdate}),[p]),z.useEffect(()=>(window.onUpdateAvailable=(ce,B)=>{console.log("Update available:",ce,B),Z({version:ce,url:B})},window.onUpdateStatus=ce=>{console.log("Update status:",ce),H(ce)},()=>{delete window.onUpdateAvailable,delete window.onUpdateStatus}),[]),z.useEffect(()=>{if(!R||!K)return;const B=`${R.version}|${R.url}`;if(F.current===B)return;F.current=B,(async()=>{try{H("downloading"),window.pywebview?.api?.apply_update&&await window.pywebview.api.apply_update(R.url,R.version)}catch(Q){console.error("Auto update apply failed:",Q),H("failed"),F.current=null}})()},[R,K]),z.useEffect(()=>{if(!p||L.current)return;L.current=!0;const ce=async()=>{try{if(p&&p.dont_ask_for_update)return;if(window.pywebview?.api?.get_update_available){const N=await window.pywebview.api.get_update_available();if(N&&N.version&&N.url){Z({version:String(N.version),url:String(N.url)});return}}window.pywebview?.api?.check_for_updates&&await window.pywebview.api.check_for_updates()}catch(N){console.error("Startup update check failed:",N),L.current=!1}},B=()=>{b(!0),ce()};if(window.pywebview?.api||window.isSafeMode){b(!0),ce();return}return window.addEventListener("pywebviewready",B,{once:!0}),()=>{window.removeEventListener("pywebviewready",B)}},[p]),z.useEffect(()=>(window.onNavigateTab=ce=>{const B=String(ce||"").trim().toLowerCase();B&&Yd[B]&&j(B)},()=>{delete window.onNavigateTab}),[]),z.useEffect(()=>{let ce=!1;const B=P=>{const be=String(P??"").trim();return be?(ce||J(be),document.title=`Coteab Macro ${be}`,!0):!1},N=async()=>{try{if(window.pywebview?.api&&typeof window.pywebview.api.get_macro_version=="function"){const P=await window.pywebview.api.get_macro_version();return B(P)}}catch(P){console.error("Failed to load macro version:",P)}return!1};return(async()=>{for(let P=0;P<10&&!ce;P++){if(await N())return;await new Promise(be=>setTimeout(be,500))}})(),()=>{ce=!0}},[]),z.useEffect(()=>{const ce=B=>{B.key==="F1"?(console.log("Frontend Listener: F1 Pressed"),T()):B.key==="F2"&&(console.log("Frontend Listener: F2 Pressed"),G())};return window.addEventListener("keydown",ce),()=>window.removeEventListener("keydown",ce)},[d]),z.useEffect(()=>{p&&p.selected_theme&&_(p.selected_theme)},[p]),z.useEffect(()=>{document.body.setAttribute("data-theme",A)},[A]);const le=ce=>{_(ce),p&&r({...p,selected_theme:ce})},se=window.__INJECTED_OVERLAY__||new URLSearchParams(window.location.search).get("overlay"),ve=window.__INJECTED_WINDOW_TYPE__||new URLSearchParams(window.location.search).get("window");if(ve==="recorder")return n.jsx(gg,{});if(ve==="biome_confirm")return n.jsx(yg,{});if(se){const ce=se==="region"?"region":"point";return n.jsx(dg,{mode:ce})}const Me=Yd[o]??Qd;return n.jsxs("div",{className:`window-frame ${q?"is-glitching":""}`,style:{backgroundImage:p?.custom_background_image?`url("file://${p.custom_background_image}")`:void 0,backgroundSize:"cover",backgroundPosition:"center",backgroundRepeat:"no-repeat"},children:[n.jsx("div",{className:"corner-bracket tl"}),n.jsx("div",{className:"corner-bracket tr"}),n.jsx("div",{className:"corner-bracket bl"}),n.jsx("div",{className:"corner-bracket br"}),n.jsxs("div",{className:"app-layout",style:!v&&!window.isSafeMode?{pointerEvents:"none",opacity:.7}:{},children:[n.jsx(Mp,{activeTab:o,onTabChange:j,isGlitching:q,macroVersion:Y}),n.jsxs("div",{className:"main-content",style:{position:"relative"},children:[n.jsx(Op,{isRunning:d,onToggle:V,theme:A,onThemeChange:le,isGlitching:q,setActiveTab:j}),R&&n.jsx(hg,{version:R.version,downloadUrl:R.url,updateStatus:$,onDismiss:()=>Z(null),onDontAskAgain:async()=>{p&&await r({...p,dont_ask_for_update:!0}),Z(null)}}),n.jsx("div",{className:"page-content",children:n.jsx("div",{className:"fade-in",children:n.jsx(Me,{})},o)})]})]}),q&&n.jsx(Xd,{})]})}document.addEventListener("contextmenu",o=>o.preventDefault());Ep.createRoot(document.getElementById("root")).render(n.jsx(vp.StrictMode,{children:n.jsx(Ap,{children:n.jsx(vg,{})})}));</script>
+Please record an obby path first using the obby recorder above.`);return}}catch(b){console.error("Failed to check obby path:",b)}r("enable_auto_obby",v)}}),o.enable_auto_obby&&n.jsxs("div",{className:"form-group",style:{marginTop:"15px",marginLeft:"10px"},children:[n.jsx("label",{className:"form-label",children:"Interval (min):"}),n.jsx("input",{className:"form-input",type:"number",min:"1",value:o.auto_obby_interval||"15",onChange:v=>r("auto_obby_interval",v.target.value),style:{width:"80px"}})]}),n.jsxs("div",{style:{marginTop:"15px",borderTop:"1px solid var(--border-color)",paddingTop:"15px"},children:[n.jsx(ie,{label:"Use aura that can float on water",checked:o.use_float_aura||!1,onChange:v=>r("use_float_aura",v)}),o.use_float_aura&&n.jsxs("div",{className:"form-group",style:{marginTop:"10px",marginLeft:"10px"},children:[n.jsx("label",{className:"form-label",children:"Aura Name:"}),n.jsx("input",{className:"form-input",type:"text",value:o.float_aura_name||"",onChange:v=>r("float_aura_name",v.target.value),placeholder:"e.g. Sailor",style:{width:"200px"}})]})]})]})]}),n.jsxs("div",{className:"card",children:[n.jsxs("div",{className:"card-header",children:[n.jsx("div",{className:"card-icon",children:"🥚"}),n.jsxs("div",{children:[n.jsx("h3",{children:"Collect Easter Egg"}),n.jsx("p",{children:"Automatically collect easter eggs spawned around the map"})]})]}),n.jsx(ie,{label:"Enable Easter Egg Collection",description:"Walk around the map to collect easter eggs at set intervals.",checked:o.collect_easter_egg||!1,onChange:v=>r("collect_easter_egg",v)}),o.collect_easter_egg&&n.jsxs(n.Fragment,{children:[n.jsx("div",{className:"form-row",style:{marginTop:"8px"},children:n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Collection interval (minutes)"}),n.jsx("input",{className:"form-input",type:"number",min:"1",value:o.egg_collect_interval_min??"5",onChange:v=>r("egg_collect_interval_min",v.target.value),style:{width:"90px"}})]})}),Number(o.egg_collect_interval_min||0)<5&&n.jsx("div",{className:"info-banner",style:{marginTop:"10px",color:"var(--warning-color, #ffaa00)"},children:"⚠️ Warning: Setting the interval too low (under 5 minutes) is highly inefficient! It is strongly recommended to set it around 20-30 minutes per run."}),n.jsx("div",{className:"form-row",style:{marginTop:"15px",marginLeft:"10px",paddingBottom:"10px"},children:n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",style:{fontWeight:"bold"},children:"Egg Path Playback Multiplier (FPS Compensation)"}),n.jsx("p",{style:{margin:"2px 0 8px 0",fontSize:"0.85em",color:"var(--text-color)",opacity:.8},children:"If you get stuck or fall off during paths (due to low FPS), increase this (e.g. 1.1 or 1.25). Higher multiplier = character walks for longer (otherwise keep it at 1.0 if you got consistent fps around 60+)"}),n.jsx("input",{className:"form-input",type:"number",step:"0.01",min:"1.0",max:"2.0",value:o.egg_playback_multiplier??"1.0",onChange:v=>r("egg_playback_multiplier",v.target.value),onBlur:v=>{let b=parseFloat(v.target.value);(isNaN(b)||b<1)&&r("egg_playback_multiplier","1.0")},style:{width:"90px"}})]})}),Number(o.egg_playback_multiplier)<1&&n.jsx("div",{className:"info-banner",style:{marginTop:"5px",color:"var(--warning-color, #ffaa00)"},children:"⚠️ If you set the multiplier below 1.0, the macro will automatically default it back to 1.0 :aga:"}),n.jsx("div",{style:{marginTop:"15px",padding:"10px",borderBottom:"1px solid var(--border-color)",borderTop:"1px solid var(--border-color)"},children:n.jsx("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center"},children:n.jsx("button",{className:"btn",onClick:()=>y(!0),style:{padding:"8px 16px",background:"rgba(239, 68, 68, 0.15)",color:"#ef4444",border:"1px solid rgba(239, 68, 68, 0.3)"},children:"Configure Egg Path Failsafe"})})})]}),n.jsx(ie,{label:"Equip an aura before egg collection",description:"Before walking to collect eggs, equip the aura name below using Aura calibration (under Macro Calibrations)",checked:o.equip_aura_before_egg_collect||!1,onChange:v=>r("equip_aura_before_egg_collect",v)}),o.equip_aura_before_egg_collect&&n.jsx("div",{className:"form-row",style:{marginTop:"8px"},children:n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Aura name to equip"}),n.jsx("input",{className:"form-input",value:o.egg_collect_aura_name||"",onChange:v=>r("egg_collect_aura_name",v.target.value),style:{width:"220px"},placeholder:"Enter aura name"})]})}),n.jsxs("div",{style:{marginTop:"15px",borderTop:"1px solid var(--border-color)",paddingTop:"15px"},children:[n.jsx(ie,{label:"OCR check to detect special egg on roblox chat (optional)",description:"Use OCR to read the roblox chat box for special egg messages. Requires Roblox Chat Box Region calibration.",checked:o.egg_ocr_detect_special||!1,onChange:v=>r("egg_ocr_detect_special",v)}),o.egg_ocr_detect_special&&n.jsxs(n.Fragment,{children:[n.jsx("div",{className:"form-row",style:{marginTop:"8px"},children:n.jsxs("div",{className:"form-group",children:[n.jsx("label",{className:"form-label",children:"Your Discord User ID (to ping whenever special egg is found on roblox chat)"}),n.jsx("input",{className:"form-input",type:"text",value:o.egg_ocr_discord_userid||"",onChange:v=>r("egg_ocr_discord_userid",v.target.value),placeholder:"Enter your Discord user ID",style:{width:"220px"}})]})}),n.jsx("div",{className:"info-banner",style:{marginTop:"10px"},children:"⚠️ Enabling this OCR feature would HAVE A CHANCE of false detection of special eggs so use it with your caution!! (Simply ignore the ping if it does that)"}),n.jsx("div",{className:"info-banner",style:{marginTop:"10px",opacity:.85},children:"ℹ️ Egg OCR check will temporarily stop during: Rare biomes (Glitched, Dreamspace, Cyberspace), reconnecting, egg collection pathing, fishing (when is in reeling minigame), basic obby, merchant was found and in autobuy stage, potion crafting, auto pop is ON (Except for Idle mode)"})]})]})]})]})}function gg({initialMode:o,onClose:j}={}){const[p,r]=z.useState(!1),[d,y]=z.useState(0),[v,b]=z.useState("Ready"),[A,_]=z.useState(o||"obby"),[q,g]=z.useState(""),[Y,J]=z.useState(!1),[R,Z]=z.useState(null),[$,H]=z.useState(null);z.useEffect(()=>{if(o){o==="potion"&&b("Potion Mode: Ready");return}new URLSearchParams(window.location.search).get("mode")==="potion"&&(_("potion"),b("Potion Mode: Ready"))},[]),z.useEffect(()=>{let D;return p?D=setInterval(()=>{y(le=>le+1)},1e3):clearInterval(D),()=>clearInterval(D)},[p]),z.useEffect(()=>{let D;return R!==null&&R>0?D=setInterval(()=>{Z(le=>le!==null?le-1:null)},1e3):R===0&&(Z(null),$==="replay"?V():$==="align"&&X(),H(null)),()=>clearInterval(D)},[R,$]);const F=D=>{const le=Math.floor(D/60).toString().padStart(2,"0"),se=(D%60).toString().padStart(2,"0");return`${le}:${se} `},L=async()=>{if(!(R!==null||Y)){if(A==="potion"&&!q.trim()){b("Error: Enter a name first!");return}try{window.pywebview&&window.pywebview.api?(await window.pywebview.api.start_macro_recording(),r(!0),y(0),b("Recording...")):b("Error: pywebview API not available.")}catch(D){b(`Error: ${D} `)}}},K=async()=>{if(!Y)try{window.pywebview&&window.pywebview.api?A==="potion"?(await window.pywebview.api.stop_macro_recording_potion(q),r(!1),b(`Saved to ${q}.json!`)):(await window.pywebview.api.stop_macro_recording(),r(!1),b("Saved!")):b("Error: pywebview API not available.")}catch(D){b(`Error: ${D} `)}},T=()=>{p||Y||(H("replay"),Z(0),b("Replaying..."))},G=()=>{p||Y||(H("align"),Z(0),b("Aligning..."))},V=async()=>{b("Replaying..."),J(!0);try{if(window.pywebview&&window.pywebview.api){let D;A==="potion"?D=await window.pywebview.api.replay_potion_recording(q):D=await window.pywebview.api.replay_recording(),D&&D.startsWith("Error:")?b(D):b(D==="Cancelled"?"Replay Cancelled":"Replay Finished")}}catch(D){b(`Error: ${D} `)}finally{J(!1)}},X=async()=>{b("Aligning..."),J(!0);try{window.pywebview&&window.pywebview.api&&await window.pywebview.api.align_camera(),b("Aligned!")}catch(D){b(`Error: ${D} `)}finally{J(!1)}};return n.jsxs("div",{style:{height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"var(--bg-dark)",color:"var(--text-primary)",padding:"20px",border:"1px solid var(--border-color)",position:"relative"},children:[n.jsx("div",{className:"corner-bracket tl",style:{top:5,left:5}}),n.jsx("div",{className:"corner-bracket tr",style:{top:5,right:5}}),n.jsx("div",{className:"corner-bracket bl",style:{bottom:5,left:5}}),n.jsx("div",{className:"corner-bracket br",style:{bottom:5,right:5}}),j&&n.jsx("button",{onClick:j,style:{position:"absolute",top:8,right:12,background:"none",border:"none",color:"var(--text-secondary)",fontSize:"18px",cursor:"pointer",padding:"4px 8px",lineHeight:1},title:"Close",children:"✕"}),n.jsx("h3",{style:{margin:"0 0 10px 0",color:"var(--accent)"},children:A==="potion"?"Potion Recorder":"Obby Recorder"}),n.jsx("div",{style:{fontSize:"24px",fontFamily:"monospace",marginBottom:"15px"},children:R!==null?`Starting in ${R}...`:F(d)}),n.jsx("div",{style:{marginBottom:"10px",fontSize:"12px",color:p||Y?"var(--accent)":"var(--text-secondary)"},children:v}),A==="potion"&&!p&&n.jsx("div",{style:{marginBottom:"10px",width:"100%"},children:n.jsx("input",{type:"text",placeholder:"Potion Name (e.g. Heavenly)",value:q,onChange:D=>g(D.target.value),className:"form-input",style:{width:"100%",textAlign:"center"}})}),n.jsx("div",{style:{display:"flex",gap:"10px"},children:p?n.jsx("button",{className:"btn btn-stop",onClick:K,style:{padding:"8px 20px"},children:"Stop & Save"}):n.jsxs(n.Fragment,{children:[n.jsx("button",{className:"btn btn-start",onClick:L,disabled:R!==null||Y,style:{padding:"8px 20px",opacity:R!==null||Y?.5:1},children:"Start"}),n.jsx("button",{className:"btn",onClick:T,disabled:R!==null||Y||A==="potion"&&!q,style:{padding:"8px 20px",backgroundColor:"#2196F3",color:"white",opacity:R!==null||Y||A==="potion"&&!q?.5:1},children:A==="potion"?"Replay Save":"Replay"}),A==="obby"&&n.jsx("button",{className:"btn",onClick:G,disabled:R!==null||Y,style:{padding:"8px 20px",backgroundColor:"#9C27B0",color:"white",opacity:R!==null||Y?.5:1},children:"Align Camera"})]})}),n.jsx("div",{style:{marginTop:"10px",fontSize:"10px",color:"gray"},children:A==="potion"?"Make sure to save the record file name as same as the ingame potion name so macro can find the potion and do auto craft for you!":"Obby Recorder"})]})}function yg(){const o=new URLSearchParams(window.location.search),j=window.__INJECTED_BIOME__||o.get("biome")||"UNKNOWN",[p,r]=z.useState(10),[d,y]=z.useState(!1);z.useEffect(()=>{if(d||p<=0)return;const A=setInterval(()=>{r(_=>_-1)},1e3);return()=>clearInterval(A)},[p,d]);const v=async()=>{if(!d){y(!0);try{window.pywebview?.api?.confirm_biome_response&&await window.pywebview.api.confirm_biome_response(!0)}catch(A){console.error("confirm_biome_response error:",A)}}},b=async()=>{if(!d){y(!0);try{window.pywebview?.api?.confirm_biome_response&&await window.pywebview.api.confirm_biome_response(!1)}catch(A){console.error("confirm_biome_response error:",A)}}};return n.jsxs("div",{style:{height:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:"var(--bg-dark)",color:"var(--text-primary)",padding:"24px",position:"relative",textAlign:"center",overflow:"hidden"},children:[n.jsx("div",{className:"corner-bracket tl",style:{top:5,left:5}}),n.jsx("div",{className:"corner-bracket tr",style:{top:5,right:5}}),n.jsx("div",{className:"corner-bracket bl",style:{bottom:5,left:5}}),n.jsx("div",{className:"corner-bracket br",style:{bottom:5,right:5}}),n.jsx("div",{style:{fontSize:"42px",marginBottom:"10px"},children:"⚠️"}),n.jsx("h2",{style:{fontSize:"18px",fontWeight:700,color:"#ff6b6b",marginBottom:"8px"},children:"Rare Biome Detected After Rejoin!"}),n.jsx("div",{style:{fontSize:"28px",fontWeight:800,color:"var(--accent)",marginBottom:"14px"},children:j}),n.jsxs("p",{style:{fontSize:"13px",lineHeight:1.5,color:"var(--text-secondary)",marginBottom:"20px"},children:["You just rejoined a server that has a ",n.jsx("b",{style:{color:"#ff6b6b"},children:"rare biome"})," active.",n.jsx("br",{}),"Did you forget to close the macro before joining?",n.jsx("br",{}),n.jsx("br",{}),"If you forgot, the macro will ",n.jsx("b",{style:{color:"#ff6b6b"},children:"stop immediately!!"})]}),d?n.jsx("div",{style:{fontSize:"14px",color:"var(--accent)"},children:"Response sent!"}):n.jsxs("div",{style:{display:"flex",flexDirection:"column",gap:"10px",width:"100%"},children:[n.jsx("button",{onClick:v,style:{padding:"12px 20px",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:600,cursor:"pointer",background:"linear-gradient(135deg, #00b894, #00cec9)",color:"#fff"},children:"✅ Nah. I'm good, keep this tuff macro running 🗣️🔥"}),n.jsx("button",{onClick:b,style:{padding:"12px 20px",border:"none",borderRadius:"8px",fontSize:"13px",fontWeight:600,cursor:"pointer",background:"linear-gradient(135deg, #e74c3c, #fd79a8)",color:"#fff"},children:"❌ I forgot to turn the macro off please spare me 😭🥀"})]}),n.jsx("div",{style:{marginTop:"14px",fontSize:"12px",color:"var(--text-secondary)",opacity:.6},children:d?"":p>0?`Auto-continuing in ${p}s...`:"Auto-continuing..."})]})}const bg=new URLSearchParams(window.location.search).get("safe_mode");bg&&!window.pywebview&&(console.log("[SafeMode] Initializing HTTP bridge..."),window.isSafeMode=!0,window.pywebview={api:new Proxy({},{get:(o,j)=>async(...p)=>{try{const r=await fetch(`/api/${j}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(p)});if(!r.ok)throw new Error(`HTTP ${r.status}`);return await r.json()}catch(r){throw console.error(`[SafeMode] API Error (${j}):`,r),r}}})});const Yd={notice:Qd,webhook:Up,calibrations:qp,remoteaccess:fg,misc:Gp,fishing:Zp,merchant:Kp,autopopbuff:tg,auras:lg,movements:pg,potioncraft:ag,stats:sg,status:ng,otherfeatures:og,customization:mg,credits:ug,donations:rg};function vg(){const[o,j]=z.useState("notice"),{config:p,saveConfig:r,isMacroRunning:d,setMacroRunning:y}=ot(),[v,b]=z.useState(new URLSearchParams(window.location.search).get("safe_mode")!==null),[A,_]=z.useState("midnight"),[q,g]=z.useState(!1),[Y,J]=z.useState("v?.?.?"),[R,Z]=z.useState(null),[$,H]=z.useState(null),F=z.useRef(null),L=z.useRef(!1),K=p?p.auto_update_enabled!==!1:!1,T=async()=>{if(!d){y(!0),document.activeElement instanceof HTMLElement&&document.activeElement.blur();try{window.pywebview&&window.pywebview.api&&await window.pywebview.api.set_biome_detection(!0)}catch(ce){console.error("Failed to start macro api:",ce)}}},G=async()=>{if(d){y(!1);try{window.pywebview&&window.pywebview.api&&await window.pywebview.api.set_biome_detection(!1)}catch(ce){console.error("Failed to stop macro api:",ce)}}},V=()=>{d?G():T()},X=z.useRef(d),D=z.useRef(!1);z.useEffect(()=>{X.current=d},[d]),z.useEffect(()=>((async()=>{try{console.log("Setting up global listeners"),window.onShortcutEvent=async B=>{if(!D.current){D.current=!0;try{B==="START"?X.current||(console.log("Start Shortcut (Backend) - Starting"),y(!0)):B==="STOP"&&X.current&&(console.log("Stop Shortcut (Backend) - Stopping"),y(!1))}finally{setTimeout(()=>{D.current=!1},300)}}},window.onMacroStatus=B=>{console.log("Macro Status Event:",B),B==="RUNNING"||B.includes("RUNNING")?y(!0):y(!1)}}catch(B){console.error("Failed to setup listeners:",B)}})(),()=>{delete window.onShortcutEvent,delete window.onMacroStatus}),[]),z.useEffect(()=>(window.onFishingFailsafeWarning=ce=>{ce&&alert(ce),j("misc")},()=>{delete window.onFishingFailsafeWarning}),[]),z.useEffect(()=>((async()=>window.onBiomeUpdate=B=>{(B||"").toUpperCase().trim()==="GLITCHED"&&p?.enable_glitch_effect?g(!0):g(!1)})(),()=>{delete window.onBiomeUpdate}),[p]),z.useEffect(()=>(window.onUpdateAvailable=(ce,B)=>{console.log("Update available:",ce,B),Z({version:ce,url:B})},window.onUpdateStatus=ce=>{console.log("Update status:",ce),H(ce)},()=>{delete window.onUpdateAvailable,delete window.onUpdateStatus}),[]),z.useEffect(()=>{if(!R||!K)return;const B=`${R.version}|${R.url}`;if(F.current===B)return;F.current=B,(async()=>{try{H("downloading"),window.pywebview?.api?.apply_update&&await window.pywebview.api.apply_update(R.url,R.version)}catch(Q){console.error("Auto update apply failed:",Q),H("failed"),F.current=null}})()},[R,K]),z.useEffect(()=>{if(!p||L.current)return;L.current=!0;const ce=async()=>{try{if(p&&p.dont_ask_for_update)return;if(window.pywebview?.api?.get_update_available){const N=await window.pywebview.api.get_update_available();if(N&&N.version&&N.url){Z({version:String(N.version),url:String(N.url)});return}}window.pywebview?.api?.check_for_updates&&await window.pywebview.api.check_for_updates()}catch(N){console.error("Startup update check failed:",N),L.current=!1}},B=()=>{b(!0),ce()};if(window.pywebview?.api||window.isSafeMode){b(!0),ce();return}return window.addEventListener("pywebviewready",B,{once:!0}),()=>{window.removeEventListener("pywebviewready",B)}},[p]),z.useEffect(()=>(window.onNavigateTab=ce=>{const B=String(ce||"").trim().toLowerCase();B&&Yd[B]&&j(B)},()=>{delete window.onNavigateTab}),[]),z.useEffect(()=>{let ce=!1;const B=P=>{const be=String(P??"").trim();return be?(ce||J(be),document.title=`Coteab Macro ${be}`,!0):!1},N=async()=>{try{if(window.pywebview?.api&&typeof window.pywebview.api.get_macro_version=="function"){const P=await window.pywebview.api.get_macro_version();return B(P)}}catch(P){console.error("Failed to load macro version:",P)}return!1};return(async()=>{for(let P=0;P<10&&!ce;P++){if(await N())return;await new Promise(be=>setTimeout(be,500))}})(),()=>{ce=!0}},[]),z.useEffect(()=>{const ce=B=>{B.key==="F1"?(console.log("Frontend Listener: F1 Pressed"),T()):B.key==="F2"&&(console.log("Frontend Listener: F2 Pressed"),G())};return window.addEventListener("keydown",ce),()=>window.removeEventListener("keydown",ce)},[d]),z.useEffect(()=>{p&&p.selected_theme&&_(p.selected_theme)},[p]),z.useEffect(()=>{document.body.setAttribute("data-theme",A)},[A]);const le=ce=>{_(ce),p&&r({...p,selected_theme:ce})},se=window.__INJECTED_OVERLAY__||new URLSearchParams(window.location.search).get("overlay"),ve=window.__INJECTED_WINDOW_TYPE__||new URLSearchParams(window.location.search).get("window");if(ve==="recorder")return n.jsx(gg,{});if(ve==="biome_confirm")return n.jsx(yg,{});if(se){const ce=se==="region"?"region":"point";return n.jsx(dg,{mode:ce})}const Me=Yd[o]??Qd;return n.jsxs("div",{className:`window-frame ${q?"is-glitching":""}`,style:{backgroundImage:p?.custom_background_image?`url("file://${p.custom_background_image}")`:void 0,backgroundSize:"cover",backgroundPosition:"center",backgroundRepeat:"no-repeat"},children:[n.jsx("div",{className:"corner-bracket tl"}),n.jsx("div",{className:"corner-bracket tr"}),n.jsx("div",{className:"corner-bracket bl"}),n.jsx("div",{className:"corner-bracket br"}),n.jsxs("div",{className:"app-layout",style:!v&&!window.isSafeMode?{pointerEvents:"none",opacity:.7}:{},children:[n.jsx(Mp,{activeTab:o,onTabChange:j,isGlitching:q,macroVersion:Y}),n.jsxs("div",{className:"main-content",style:{position:"relative"},children:[n.jsx(Op,{isRunning:d,onToggle:V,theme:A,onThemeChange:le,isGlitching:q,setActiveTab:j}),R&&n.jsx(hg,{version:R.version,downloadUrl:R.url,updateStatus:$,onDismiss:()=>Z(null),onDontAskAgain:async()=>{p&&await r({...p,dont_ask_for_update:!0}),Z(null)}}),n.jsx("div",{className:"page-content",children:n.jsx("div",{className:"fade-in",children:n.jsx(Me,{})},o)})]})]}),q&&n.jsx(Xd,{})]})}document.addEventListener("contextmenu",o=>o.preventDefault());Ep.createRoot(document.getElementById("root")).render(n.jsx(vp.StrictMode,{children:n.jsx(Ap,{children:n.jsx(vg,{})})}));</script>
   <style rel="stylesheet" crossorigin>:root,[data-theme=midnight]{--bg-root: #09090b;--bg-sidebar: #0f0f14;--bg-main: #0d0d11;--bg-card: #15151e;--bg-card-hover: #1a1a28;--bg-input: #111119;--bg-input-focus: #18182a;--accent: #7c5bf5;--accent-dim: #6344d4;--accent-glow: rgba(124, 91, 245, .15);--accent-text: #b8a4fa;--success: #22c55e;--success-dim: #16a34a;--danger: #ef4444;--danger-dim: #dc2626;--warning: #f59e0b;--text-primary: #e4e4e7;--text-secondary: #a1a1aa;--text-muted: #636370;--border: #1f1f2e;--border-hover: #2d2d44;--border-accent: rgba(124, 91, 245, .3);--radius-sm: 0px;--radius-md: 0px;--radius-lg: 0px;--radius-xl: 0px;--shadow-card: 0 2px 12px rgba(0, 0, 0, .3);--shadow-glow: 0 0 20px rgba(124, 91, 245, .08);--corner-color: rgba(124, 91, 245, 1);--transition: .2s cubic-bezier(.4, 0, .2, 1);font-family:Sarpanch,Inter,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;font-size:13px;color:var(--text-primary);background:var(--bg-root)}[data-theme=solar]{--bg-root: #0a1520;--bg-sidebar: #0c1a28;--bg-main: #0b1620;--bg-card: #0f2030;--bg-card-hover: #142838;--bg-input: #0d1a28;--bg-input-focus: #122230;--accent: #e09f3e;--accent-dim: #c78a2f;--accent-glow: rgba(224, 159, 62, .15);--accent-text: #f0c87a;--border: #162535;--border-hover: #1e3045;--border-accent: rgba(224, 159, 62, .3);--shadow-card: 0 2px 12px rgba(0, 0, 0, .4);--shadow-glow: 0 0 20px rgba(224, 159, 62, .08);--corner-color: rgba(224, 159, 62, 1)}[data-theme=arctic]{--bg-root: #0a0f18;--bg-sidebar: #0d1420;--bg-main: #0b1118;--bg-card: #111c2a;--bg-card-hover: #162333;--bg-input: #0f1820;--bg-input-focus: #142030;--accent: #38bdf8;--accent-dim: #0ea5e9;--accent-glow: rgba(56, 189, 248, .12);--accent-text: #7dd3fc;--border: #152030;--border-hover: #1e2d42;--border-accent: rgba(56, 189, 248, .3);--shadow-card: 0 2px 12px rgba(0, 0, 0, .35);--shadow-glow: 0 0 20px rgba(56, 189, 248, .08);--corner-color: rgba(56, 189, 248, 1)}[data-theme=neon]{--bg-root: #0a0a10;--bg-sidebar: #0e0e18;--bg-main: #0c0c12;--bg-card: #14141f;--bg-card-hover: #1a1a28;--bg-input: #101018;--bg-input-focus: #161622;--accent: #f43f5e;--accent-dim: #e11d48;--accent-glow: rgba(244, 63, 94, .15);--accent-text: #fb7185;--border: #1e1e30;--border-hover: #2a2a42;--border-accent: rgba(244, 63, 94, .3);--shadow-card: 0 2px 12px rgba(0, 0, 0, .4);--shadow-glow: 0 0 20px rgba(244, 63, 94, .1);--corner-color: rgba(244, 63, 94, 1)}[data-theme=sunset]{--bg-root: #0f0a0a;--bg-sidebar: #150e0e;--bg-main: #110c0c;--bg-card: #1c1414;--bg-card-hover: #241a1a;--bg-input: #161010;--bg-input-focus: #1e1515;--accent: #f97316;--accent-dim: #ea580c;--accent-glow: rgba(249, 115, 22, .15);--accent-text: #fdba74;--border: #261c1c;--border-hover: #352828;--border-accent: rgba(249, 115, 22, .3);--shadow-card: 0 2px 12px rgba(0, 0, 0, .35);--shadow-glow: 0 0 20px rgba(249, 115, 22, .08);--corner-color: rgba(249, 115, 22, 1)}[data-theme=ocean]{--bg-root: #060d12;--bg-sidebar: #081218;--bg-main: #070f14;--bg-card: #0e1a22;--bg-card-hover: #13222c;--bg-input: #0a1518;--bg-input-focus: #0f1c22;--accent: #14b8a6;--accent-dim: #0d9488;--accent-glow: rgba(20, 184, 166, .12);--accent-text: #5eead4;--border: #122028;--border-hover: #1a2e38;--border-accent: rgba(20, 184, 166, .3);--shadow-card: 0 2px 12px rgba(0, 0, 0, .4);--shadow-glow: 0 0 20px rgba(20, 184, 166, .08);--corner-color: rgba(20, 184, 166, 1)}[data-theme=forest]{--bg-root: #080d08;--bg-sidebar: #0c130c;--bg-main: #0a0f0a;--bg-card: #121e14;--bg-card-hover: #18261a;--bg-input: #0e170e;--bg-input-focus: #142018;--accent: #22c55e;--accent-dim: #16a34a;--accent-glow: rgba(34, 197, 94, .12);--accent-text: #86efac;--border: #162418;--border-hover: #1e3222;--border-accent: rgba(34, 197, 94, .3);--shadow-card: 0 2px 12px rgba(0, 0, 0, .35);--shadow-glow: 0 0 20px rgba(34, 197, 94, .08);--corner-color: rgba(34, 197, 94, 1)}[data-theme=cyberpunk]{--bg-root: #0c0810;--bg-sidebar: #100c16;--bg-main: #0e0a12;--bg-card: #18121e;--bg-card-hover: #201828;--bg-input: #140e18;--bg-input-focus: #1a1420;--accent: #e040fb;--accent-dim: #c026d3;--accent-glow: rgba(224, 64, 251, .15);--accent-text: #f0abfc;--border: #221a2e;--border-hover: #302440;--border-accent: rgba(224, 64, 251, .3);--shadow-card: 0 2px 12px rgba(0, 0, 0, .4);--shadow-glow: 0 0 20px rgba(224, 64, 251, .1);--corner-color: rgba(224, 64, 251, 1)}[data-theme=lavender]{--bg-root: #0c0a12;--bg-sidebar: #110e18;--bg-main: #0e0c14;--bg-card: #1a1622;--bg-card-hover: #201c2a;--bg-input: #14101c;--bg-input-focus: #1a1624;--accent: #a78bfa;--accent-dim: #8b5cf6;--accent-glow: rgba(167, 139, 250, .12);--accent-text: #c4b5fd;--border: #1e1a2e;--border-hover: #2a2640;--border-accent: rgba(167, 139, 250, .3);--shadow-card: 0 2px 12px rgba(0, 0, 0, .35);--shadow-glow: 0 0 20px rgba(167, 139, 250, .08);--corner-color: rgba(167, 139, 250, 1)}*{margin:0;padding:0;box-sizing:border-box}body{overflow:hidden;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;background:transparent}#root{width:100vw;height:100vh;display:flex}.window-frame{display:flex;flex-direction:column;width:100%;height:100%;border:2px solid #2a2a38;border-radius:0;overflow:hidden;background:var(--bg-root);box-shadow:0 0 0 1px #5050784d,inset 0 0 0 1px #3c3c5a26,0 8px 40px #000000b3,0 0 60px #0006;position:relative}.corner-bracket{position:absolute;width:18px;height:18px;z-index:10000;pointer-events:none}.corner-bracket.tl{top:0;left:0;border-top:2px solid var(--corner-color);border-left:2px solid var(--corner-color)}.corner-bracket.tr{top:0;right:0;border-top:2px solid var(--corner-color);border-right:2px solid var(--corner-color)}.corner-bracket.bl{bottom:0;left:0;border-bottom:2px solid var(--corner-color);border-left:2px solid var(--corner-color)}.corner-bracket.br{bottom:0;right:0;border-bottom:2px solid var(--corner-color);border-right:2px solid var(--corner-color)}.titlebar{display:flex;align-items:center;justify-content:space-between;height:32px;min-height:32px;padding:0 6px 0 14px;background:linear-gradient(180deg,#1a1a28,#111119);border-bottom:1px solid #2a2a38;-webkit-user-select:none;user-select:none;-webkit-app-region:drag;position:relative}.titlebar:after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(100,100,160,.2) 30%,rgba(100,100,160,.2) 70%,transparent)}.titlebar-title{font-family:Sarpanch,sans-serif;font-size:12px;font-weight:700;color:var(--text-secondary);letter-spacing:1px;text-transform:uppercase;position:absolute;left:50%;transform:translate(-50%);pointer-events:none}.titlebar-spacer{width:100px}.titlebar-controls{display:flex;align-items:center;gap:2px;-webkit-app-region:no-drag}.titlebar-btn{width:34px;height:26px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:var(--text-muted);cursor:pointer;border-radius:4px;transition:all .15s ease}.titlebar-btn:hover{color:var(--text-primary);background:#ffffff12}.titlebar-btn.close:hover{color:#fff;background:#e81123}::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border-hover);border-radius:10px}::-webkit-scrollbar-thumb:hover{background:var(--text-muted)}.app-layout{display:flex;width:100%;height:100%;flex:1;min-height:0}.sidebar{width:220px;min-width:220px;background:var(--bg-sidebar);border-right:1px solid var(--border);display:flex;flex-direction:column;height:100%;-webkit-user-select:none;user-select:none}.sidebar-brand{padding:20px 18px 10px;border-bottom:1px solid var(--border)}.sidebar-brand h1{font-family:Sarpanch,sans-serif;font-size:17px;font-weight:800;letter-spacing:.5px;background:linear-gradient(135deg,#a78bfa,#7c5bf5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.sidebar-brand .version{font-size:10.5px;color:var(--text-muted);margin-top:3px;font-weight:500}.sidebar-nav{flex:1;overflow-y:auto;padding:8px}.sidebar-section-label{font-size:10px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;padding:14px 10px 6px}.sidebar-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--radius-md);cursor:pointer;transition:var(--transition);color:var(--text-secondary);font-size:13px;font-weight:450;position:relative;margin-bottom:4px;background:linear-gradient(to right,var(--corner-color),var(--corner-color)) no-repeat top left / 10px 1.5px,linear-gradient(to bottom,var(--corner-color),var(--corner-color)) no-repeat top left / 1.5px 7px,linear-gradient(to left,var(--corner-color),var(--corner-color)) no-repeat top right / 10px 1.5px,linear-gradient(to bottom,var(--corner-color),var(--corner-color)) no-repeat top right / 1.5px 7px,linear-gradient(to right,var(--corner-color),var(--corner-color)) no-repeat bottom left / 10px 1.5px,linear-gradient(to top,var(--corner-color),var(--corner-color)) no-repeat bottom left / 1.5px 7px,linear-gradient(to left,var(--corner-color),var(--corner-color)) no-repeat bottom right / 10px 1.5px,linear-gradient(to top,var(--corner-color),var(--corner-color)) no-repeat bottom right / 1.5px 7px,transparent}.sidebar-item:hover{background-color:#7c5bf50f;color:var(--text-primary)}.sidebar-item.active{background-color:var(--accent-glow);color:var(--accent-text)}.sidebar-item.active:before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:18px;background:var(--accent);border-radius:0 4px 4px 0}.sidebar-item .icon{width:18px;height:18px;flex-shrink:0;opacity:.7}.sidebar-item.active .icon{opacity:1}.sidebar-footer{padding:14px 16px;border-top:1px solid var(--border);text-align:center}.sidebar-footer .by-line{font-size:10.5px;color:var(--text-muted)}.sidebar-footer .by-line span{color:var(--accent-text);font-weight:600}.main-content{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg-main)}.header-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--bg-sidebar);gap:16px;-webkit-app-region:drag}.header-left{display:flex;align-items:center;gap:14px;-webkit-app-region:no-drag}.header-title{font-size:15px;font-weight:600;color:var(--text-primary);letter-spacing:-.2px}.header-right{display:flex;align-items:center;gap:10px;-webkit-app-region:no-drag}.status-badge{display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:11.5px;font-weight:600;letter-spacing:.3px}.status-badge.idle{background:#63637026;color:var(--text-muted);border:1px solid rgba(99,99,112,.2)}.status-badge.running{background:#22c55e1f;color:var(--success);border:1px solid rgba(34,197,94,.2);animation:pulse-glow 2s ease-in-out infinite}@keyframes pulse-glow{0%,to{box-shadow:0 0 #22c55e00}50%{box-shadow:0 0 12px 2px #22c55e1a}}.status-dot{width:7px;height:7px;border-radius:50%;background:currentColor}.pin-btn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--bg-input);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:13px;transition:all .15s ease;opacity:.5;padding:0}.pin-btn:hover{opacity:.8;border-color:var(--border-hover)}.pin-btn.active{opacity:1;border-color:var(--accent);background:var(--accent-glow);box-shadow:0 0 8px var(--accent-glow)}.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 16px;border:none;border-radius:0;font-size:12.5px;font-weight:600;cursor:pointer;transition:var(--transition);font-family:inherit;letter-spacing:.2px;position:relative;background-image:linear-gradient(to right,#ffffffb3,#ffffffb3),linear-gradient(to bottom,#ffffffb3,#ffffffb3),linear-gradient(to left,#ffffffb3,#ffffffb3),linear-gradient(to bottom,#ffffffb3,#ffffffb3),linear-gradient(to right,#ffffffb3,#ffffffb3),linear-gradient(to top,#ffffffb3,#ffffffb3),linear-gradient(to left,#ffffffb3,#ffffffb3),linear-gradient(to top,#ffffffb3,#ffffffb3);background-size:8px 2px,2px 8px,8px 2px,2px 8px,8px 2px,2px 8px,8px 2px,2px 8px;background-position:top left,top left,top right,top right,bottom left,bottom left,bottom right,bottom right;background-repeat:no-repeat}.btn-start{background-color:#1aad52;color:#fff;box-shadow:0 2px 8px #22c55e40}.btn-start:hover{background-color:#22c55e;box-shadow:0 4px 16px #22c55e59;transform:translateY(-1px)}.btn-stop{background-color:#e53935;color:#fff;box-shadow:0 2px 8px #ef444440}.btn-stop:hover{background-color:#ef4444;box-shadow:0 4px 16px #ef444459;transform:translateY(-1px)}.btn-secondary{background-color:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border)}.btn-secondary:hover{background-color:var(--bg-card-hover);color:var(--text-primary);border-color:var(--border-hover)}.btn-accent{background-color:var(--accent);color:#fff;box-shadow:0 2px 10px #7c5bf54d}.btn-accent:hover{background-color:var(--accent-dim);box-shadow:0 4px 18px #7c5bf566;transform:translateY(-1px)}.btn:active{transform:translateY(0) scale(.98)}.btn-import{background-color:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border);font-weight:500}.btn-import:hover{background-color:var(--bg-card-hover);color:var(--text-primary);border-color:var(--accent);box-shadow:0 2px 8px var(--accent-glow)}.page-content{flex:1;overflow-y:auto;padding:24px}.page-header{margin-bottom:20px}.page-header h2{font-size:20px;font-weight:700;letter-spacing:-.4px;color:var(--text-primary)}.page-header p{font-size:13px;color:var(--text-secondary);margin-top:4px}.card{background:linear-gradient(to right,var(--corner-color),var(--corner-color)) no-repeat top left / 18px 2px,linear-gradient(to bottom,var(--corner-color),var(--corner-color)) no-repeat top left / 2px 18px,linear-gradient(to left,var(--corner-color),var(--corner-color)) no-repeat top right / 18px 2px,linear-gradient(to bottom,var(--corner-color),var(--corner-color)) no-repeat top right / 2px 18px,linear-gradient(to right,var(--corner-color),var(--corner-color)) no-repeat bottom left / 18px 2px,linear-gradient(to top,var(--corner-color),var(--corner-color)) no-repeat bottom left / 2px 18px,linear-gradient(to left,var(--corner-color),var(--corner-color)) no-repeat bottom right / 18px 2px,linear-gradient(to top,var(--corner-color),var(--corner-color)) no-repeat bottom right / 2px 18px,var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;transition:var(--transition)}.card:hover{border-color:var(--border-hover);box-shadow:var(--shadow-card)}.card-header{display:flex;align-items:center;gap:10px;margin-bottom:16px}.card-header .card-icon{width:32px;height:32px;border-radius:var(--radius-md);background:var(--accent-glow);display:flex;align-items:center;justify-content:center;color:var(--accent);font-size:15px}.card-header h3{font-size:14px;font-weight:600;color:var(--text-primary)}.card-header p{font-size:11.5px;color:var(--text-muted)}.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0}.toggle-row+.toggle-row{border-top:1px solid var(--border)}.toggle-label{display:flex;flex-direction:column;gap:2px}.toggle-label .label-text{font-size:13px;font-weight:500;color:var(--text-primary)}.toggle-label .label-desc{font-size:11px;color:var(--text-muted)}.toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0}.toggle-switch input{opacity:0;width:0;height:0}.toggle-slider{position:absolute;inset:0;background:var(--border-hover);border-radius:12px;cursor:pointer;transition:var(--transition)}.toggle-slider:before{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--text-muted);transition:var(--transition)}.toggle-switch input:checked+.toggle-slider{background:var(--accent);box-shadow:0 0 10px #7c5bf54d}.toggle-switch input:checked+.toggle-slider:before{transform:translate(18px);background:#fff}.form-group{display:flex;flex-direction:column;gap:6px}.form-label{font-size:12px;font-weight:500;color:var(--text-secondary)}.form-input{padding:9px 12px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-size:13px;font-family:inherit;transition:var(--transition);outline:none}.form-input:focus{background:var(--bg-input-focus);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}.form-input::placeholder{color:var(--text-muted)}.form-row{display:flex;gap:12px;align-items:flex-end}.form-row .form-group{flex:1}.duration-input{display:flex;align-items:center;gap:8px}.duration-input .form-input{width:70px;text-align:center}.duration-input .unit{font-size:12px;color:var(--text-muted)}.page-header h2,.card-header h3{font-family:Sarpanch,sans-serif}.changelog-item{padding:16px;background:var(--bg-input);border-radius:var(--radius-md);border-left:3px solid var(--accent);margin-bottom:12px}.changelog-item h4{font-size:13.5px;font-weight:600;color:var(--accent-text);margin-bottom:8px}.changelog-item ul{list-style:none;padding:0}.changelog-item ul li{font-size:12.5px;color:var(--text-secondary);padding:3px 0 3px 14px;position:relative}.changelog-item ul li:before{content:"→";position:absolute;left:0;color:var(--text-muted);font-size:11px}.info-banner{padding:14px 16px;background:#7c5bf514;border:1px solid var(--border-accent);border-radius:var(--radius-md);margin-bottom:16px;font-size:12.5px;color:var(--accent-text);line-height:1.5}.info-banner a{color:var(--accent);font-weight:600;text-decoration:none}.info-banner a:hover{text-decoration:underline}.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}.stat-card{padding:16px;background:linear-gradient(to right,var(--corner-color),var(--corner-color)) no-repeat top left / 14px 2px,linear-gradient(to bottom,var(--corner-color),var(--corner-color)) no-repeat top left / 2px 14px,linear-gradient(to left,var(--corner-color),var(--corner-color)) no-repeat top right / 14px 2px,linear-gradient(to bottom,var(--corner-color),var(--corner-color)) no-repeat top right / 2px 14px,linear-gradient(to right,var(--corner-color),var(--corner-color)) no-repeat bottom left / 14px 2px,linear-gradient(to top,var(--corner-color),var(--corner-color)) no-repeat bottom left / 2px 14px,linear-gradient(to left,var(--corner-color),var(--corner-color)) no-repeat bottom right / 14px 2px,linear-gradient(to top,var(--corner-color),var(--corner-color)) no-repeat bottom right / 2px 14px,var(--bg-input);border-radius:var(--radius-md);border:1px solid var(--border);text-align:center;transition:var(--transition)}.stat-card:hover{border-color:var(--border-hover);transform:translateY(-2px)}.stat-card .stat-value{font-family:Sarpanch,sans-serif;font-size:22px;font-weight:700;color:var(--text-primary);font-variant-numeric:tabular-nums}.stat-card .stat-label{font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;margin-top:4px}.stat-card.accent .stat-value{color:var(--accent-text)}.glitch-text{font-family:Courier New,monospace;font-size:10.5px;font-weight:700;color:#fff;text-shadow:0 0 6px rgba(255,255,255,.5),2px 0 0 rgba(255,20,20,.8),-2px 0 0 rgba(0,255,60,.8),0 2px 0 rgba(0,180,255,.5);letter-spacing:.5px;white-space:nowrap;overflow:hidden;max-width:100%;display:inline-block;text-overflow:clip}.webhook-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}.webhook-entry{display:flex;align-items:center;gap:8px}.webhook-entry .form-input{flex:1}.webhook-entry .btn-remove{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:#ef44441a;border:1px solid rgba(239,68,68,.2);border-radius:var(--radius-md);color:var(--danger);cursor:pointer;transition:var(--transition);font-size:16px}.webhook-entry .btn-remove:hover{background:#ef444433}.keybind-badge{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;font-weight:600;color:var(--text-secondary);font-family:JetBrains Mono,Cascadia Code,monospace}.calibration-btn{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg-input);border:1px dashed var(--border-hover);border-radius:var(--radius-md);cursor:pointer;transition:var(--transition);color:var(--text-secondary);font-size:12.5px;font-family:inherit;width:100%}.calibration-btn:hover{background:var(--bg-input-focus);border-color:var(--accent);color:var(--accent-text)}.calibration-btn .coords{margin-left:auto;font-family:JetBrains Mono,Cascadia Code,monospace;font-size:11px;color:var(--text-muted)}.credits-list{display:flex;flex-direction:column;gap:10px}.credit-item{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg-input);border-radius:var(--radius-md);border:1px solid var(--border)}.credit-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent-glow);display:flex;align-items:center;justify-content:center;color:var(--accent);font-weight:700;font-size:14px}.credit-info .credit-name{font-size:13px;font-weight:600;color:var(--text-primary)}.credit-info .credit-role{font-size:11px;color:var(--text-muted)}.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;color:var(--text-muted);text-align:center}.empty-state .empty-icon{font-size:40px;margin-bottom:12px;opacity:.5}.empty-state h3{font-size:15px;font-weight:600;color:var(--text-secondary);margin-bottom:4px}.empty-state p{font-size:12.5px;max-width:300px}.fade-in{animation:fadeIn .2s ease-out}@keyframes fadeIn{0%{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}.buff-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.buff-item{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-md);transition:var(--transition)}.buff-item:hover{border-color:var(--border-hover)}.buff-item .buff-name{font-size:12.5px;font-weight:500;color:var(--text-primary)}.buff-item .buff-amount{width:48px;text-align:center}.item-table{margin-top:10px;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}.item-table-header{display:flex;align-items:center;padding:10px 16px;background:#7c5bf514;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.05em}.item-table-row{display:flex;align-items:center;padding:8px 16px;border-bottom:1px solid var(--border);transition:var(--transition)}.item-table-row:last-child{border-bottom:none}.item-table-row:hover{background:#7c5bf50a}.item-table-row.item-row-active{background:#7c5bf514}.item-col-name{flex:1;font-size:13px;font-weight:500;color:var(--text-primary)}.item-checkbox-label{display:flex;align-items:center;gap:10px;cursor:pointer}.item-checkbox{width:16px;height:16px;cursor:pointer;border-radius:3px}.item-col-amount{width:72px;text-align:center}.item-col-rebuy{width:52px;text-align:center;display:flex;align-items:center;justify-content:center}.item-amount-input{width:56px;padding:4px 6px;background:var(--bg-input);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-size:13px;text-align:center;transition:var(--transition)}.item-amount-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow)}.item-amount-input::-webkit-outer-spin-button,.item-amount-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.form-hint{font-size:12px;color:var(--text-muted);margin-top:2px}.calib-row{display:flex;align-items:center}.settings-grid{display:flex;flex-direction:column;gap:12px;padding:0 12px}.setting-row{display:flex;align-items:center;justify-content:space-between}.setting-label{font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.5px}.header-bar{z-index:50}.title-bar{position:relative;z-index:110!important}.header-bar{z-index:100!important}.glitch-container{z-index:90!important}.biome-confirm-overlay{position:fixed;inset:0;background:#000000bf;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:9999;animation:fadeIn .2s ease}.biome-confirm-modal{background:var(--bg-card, #15151e);border:1px solid rgba(255,71,87,.3);border-radius:16px;padding:36px 40px;max-width:480px;width:90%;text-align:center;box-shadow:0 0 40px #ff475726,0 8px 32px #00000080;animation:scaleIn .25s ease}.biome-confirm-icon{font-size:52px;margin-bottom:12px}.biome-confirm-title{font-size:20px;font-weight:700;color:#ff4757;margin:0 0 8px}.biome-confirm-name{font-size:28px;font-weight:800;color:gold;text-shadow:0 0 14px rgba(255,215,0,.4);margin-bottom:14px}.biome-confirm-warning{font-size:13px;color:#ff6b6b;line-height:1.7;margin:0 0 24px}.biome-confirm-buttons{display:flex;flex-direction:column;gap:10px}.biome-confirm-btn{padding:13px 18px;border:none;border-radius:10px;font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;transition:transform .15s,filter .15s;color:#fff}.biome-confirm-btn:hover{transform:scale(1.02);filter:brightness(1.1)}.biome-confirm-btn.confirm{background:linear-gradient(135deg,#2ed573,#17c261)}.biome-confirm-btn.cancel{background:linear-gradient(135deg,#ff4757,#e63946)}@keyframes scaleIn{0%{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}.glitch-container{position:absolute;inset:0;pointer-events:none;z-index:9999;overflow:hidden;background:repeating-linear-gradient(0deg,rgba(0,0,0,.15),rgba(0,0,0,.15) 1px,transparent 1px,transparent 2px);animation:master-shake .15s infinite}.glitch-noise{position:absolute;inset:-200%;background-image:url('data:image/svg+xml,%3Csvg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"%3E%3Cfilter id="noiseFilter"%3E%3CfeTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="3" stitchTiles="stitch"/%3E%3C/filter%3E%3Crect width="100%25" height="100%25" filter="url(%23noiseFilter)"/%3E%3C/svg%3E');opacity:.15;animation:tv-static .15s steps(10) infinite;mix-blend-mode:overlay}.glitch-rgb-split{position:absolute;inset:0;animation:color-split .1s infinite;mix-blend-mode:color-dodge}.glitch-bar{position:absolute;left:0;width:100%;background:#fff6;animation:glitch-tear .1s infinite linear}.glitch-bar:nth-child(odd){background:#f003;mix-blend-mode:difference;animation-duration:.08s}.glitch-bar:nth-child(2n){background:#0ff3;mix-blend-mode:exclusion;animation-duration:.05s}@keyframes tv-static{0%{transform:translate(0)}10%{transform:translate(-5%,-5%)}20%{transform:translate(-10%,5%)}30%{transform:translate(5%,-10%)}40%{transform:translate(-5%,15%)}50%{transform:translate(-10%,5%)}60%{transform:translate(15%)}70%{transform:translateY(10%)}80%{transform:translate(-15%)}90%{transform:translate(10%,5%)}to{transform:translate(5%)}}@keyframes color-split{0%{box-shadow:inset 10px 0 #ff000080,inset -10px 0 #00ffff80}25%{box-shadow:inset -15px 0 #ff00ff80,inset 15px 0 #00ff0080}50%{box-shadow:inset 12px 0 #0000ff80,inset -12px 0 #ffff0080}75%{box-shadow:inset -8px 0 #ff000080,inset 8px 0 #00ffff80}to{box-shadow:inset 10px 0 #ff000080,inset -10px 0 #00ffff80}}@keyframes glitch-tear{0%{transform:translate(0);opacity:0}10%{transform:translate(-40px);opacity:1}20%{transform:translate(40px);opacity:.8}30%{transform:translate(-15px);opacity:0}40%{transform:translate(25px);opacity:1}50%{transform:translate(-50px);opacity:.5}60%{transform:translate(50px);opacity:0}70%{transform:translate(-20px);opacity:1}80%{transform:translate(35px);opacity:.8}90%{transform:translate(-10px);opacity:0}to{transform:translate(10px);opacity:1}}.glitch-gibberish{position:absolute;inset:0;pointer-events:none;z-index:10000}.glitch-text-element{position:absolute;color:#ff003c;font-family:Courier New,Courier,monospace;font-size:1.5rem;font-weight:900;text-transform:uppercase;text-shadow:2px 0 0 #00ffff,-2px 0 0 #ff00ff;opacity:0;animation:text-spawn .8s infinite;mix-blend-mode:color-dodge;white-space:nowrap}@keyframes text-spawn{0%{opacity:0;transform:scale(.9) translate(20px)}10%{opacity:1;transform:scale(1.1) translate(-5px)}20%{opacity:0;transform:scale(.8) translate(10px)}30%{opacity:.8;transform:scale(1) translate(0);filter:hue-rotate(90deg)}40%{opacity:0;transform:scale(1.2) translate(-15px)}50%{opacity:1;transform:scale(.9) translate(5px);filter:saturate(3)}60%{opacity:0}to{opacity:0}}.glitch-scanlines{position:absolute;inset:0;pointer-events:none;z-index:9998;background:linear-gradient(to bottom,#fff0,#fff0 50%,#0003 50%,#0003);background-size:100% 4px;animation:scanline-scroll 10s linear infinite;opacity:.6}@keyframes scanline-scroll{0%{background-position:0 0}to{background-position:0 100vh}}.glitch-vignette{position:absolute;inset:0;pointer-events:none;z-index:9997;background:radial-gradient(circle,transparent 60%,rgba(0,0,0,.8) 100%);mix-blend-mode:multiply}.glitch-block{position:absolute;z-index:9996;animation:block-flash .2s infinite;mix-blend-mode:overlay}.glitch-block.red{background:#f006;box-shadow:0 0 10px #ff000080}.glitch-block.blue{background:#0ff6;box-shadow:0 0 10px #00ffff80}.glitch-block.green{background:#0f06;box-shadow:0 0 10px #00ff0080}@keyframes block-flash{0%,to{opacity:0}10%{opacity:1;transform:scale(1.1)}30%{opacity:0;transform:scale(.9)}50%{opacity:.5}70%{opacity:0}}@keyframes master-shake{0%,to{transform:translate(0) skew(0)}10%{transform:translate(-3px,2px) skew(1deg);filter:hue-rotate(90deg) contrast(1.5)}20%{transform:translate(3px,-2px) skew(-2deg);filter:invert(.2) saturate(2)}30%{transform:translate(-2px,3px) skew(0)}40%{transform:translate(2px,-3px) skew(3deg);filter:hue-rotate(-90deg) brightness(1.2)}50%{transform:translate(-3px,-2px) skew(-3deg)}60%{transform:translate(3px,2px) skew(0);filter:invert(.1)}70%{transform:translate(-2px,-3px) skew(2deg)}80%{transform:translate(2px,3px) skew(-2deg);filter:hue-rotate(45deg)}90%{transform:translate(-3px,-3px) skew(0)}}.update-banner{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:linear-gradient(135deg,#22c55e26,#22c55e0d);border-bottom:1px solid rgba(34,197,94,.3);gap:12px;z-index:100;flex-shrink:0;animation:banner-slide-in .3s ease-out}.update-banner-error{background:linear-gradient(135deg,#ef444426,#ef44440d);border-bottom:1px solid rgba(239,68,68,.3)}.update-banner-success{background:linear-gradient(135deg,#22c55e40,#22c55e1a);border-bottom:1px solid rgba(34,197,94,.5)}@keyframes banner-slide-in{0%{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}.update-banner-content{display:flex;align-items:center;gap:10px}.update-icon{font-size:16px}.update-text{font-size:12.5px;font-weight:500;color:var(--text-primary)}.update-banner-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}.update-btn{padding:5px 14px;border:none;border-radius:4px;font-size:11.5px;font-weight:600;cursor:pointer;transition:all .15s ease;font-family:inherit}.update-btn-primary{background:#22c55e;color:#fff;box-shadow:0 2px 8px #22c55e4d}.update-btn-primary:hover{background:#16a34a;transform:translateY(-1px)}.update-btn-secondary{background:var(--bg-card);color:var(--text-secondary);border:1px solid var(--border)}.update-btn-secondary:hover{background:var(--bg-card-hover);color:var(--text-primary)}.update-btn-muted{background:transparent;color:var(--text-muted);font-size:10.5px}.update-btn-muted:hover{color:var(--text-secondary)}.update-spinner{width:18px;height:18px;border:2px solid rgba(34,197,94,.3);border-top-color:#22c55e;border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}@keyframes spin{to{transform:rotate(360deg)}}</style>
+  <style id="material-ui-refresh">
+    :root,
+    [data-theme] {
+      --radius-sm: 6px;
+      --radius-md: 8px;
+      --radius-lg: 10px;
+      --radius-xl: 12px;
+      --shadow-card: 0 1px 2px rgba(0, 0, 0, .24);
+      --transition: .15s ease;
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    html,
+    body,
+    #root {
+      background: var(--bg-root);
+    }
+
+    .window-frame {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border);
+      border-radius: 0;
+      background: var(--bg-root);
+      box-shadow: none;
+      overflow: hidden;
+    }
+
+    .coteab-injected-titlebar {
+      flex-shrink: 0;
+      z-index: 1000;
+      background: var(--bg-root);
+    }
+
+    .window-frame .app-layout,
+    .window-frame .app-layout * {
+      -webkit-app-region: no-drag;
+      app-region: no-drag;
+    }
+
+    .corner-bracket {
+      display: none !important;
+    }
+
+    .titlebar {
+      position: relative;
+      display: flex;
+      align-items: center;
+      height: 40px;
+      min-height: 40px;
+      padding: 0 0 0 14px;
+      background: var(--bg-sidebar);
+      border-bottom: 1px solid var(--border);
+      -webkit-app-region: drag;
+      app-region: drag;
+      user-select: none;
+      cursor: default;
+    }
+
+    .titlebar:before,
+    .titlebar:after {
+      display: none;
+    }
+
+    .titlebar-drag-region {
+      position: absolute;
+      inset: 0;
+      right: 144px;
+      z-index: 0;
+      -webkit-app-region: drag;
+      app-region: drag;
+    }
+
+    .titlebar-title {
+      position: relative;
+      z-index: 1;
+      left: auto;
+      transform: none;
+      margin-left: 4px;
+      color: var(--text-secondary);
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+      pointer-events: none;
+    }
+
+    .titlebar-spacer {
+      flex: 1;
+      -webkit-app-region: drag;
+      app-region: drag;
+    }
+
+    .titlebar-controls {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: stretch;
+      gap: 0;
+      margin-left: auto;
+      -webkit-app-region: no-drag;
+      app-region: no-drag;
+    }
+
+    .titlebar-btn {
+      width: 48px;
+      height: 40px;
+      min-width: 48px;
+      padding: 0;
+      border: none;
+      border-radius: 0;
+      background: transparent;
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background .15s ease, color .15s ease;
+    }
+
+    .titlebar-btn svg {
+      width: 16px;
+      height: 16px;
+      pointer-events: none;
+    }
+
+    .titlebar-btn.minimize:hover,
+    .titlebar-btn.maximize:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, .1);
+    }
+
+    .titlebar-btn.close:hover {
+      background: #e81123;
+      color: #fff;
+    }
+
+    .app-layout {
+      flex: 1;
+      min-height: 0;
+      background: var(--bg-main);
+    }
+
+    .sidebar {
+      width: 220px;
+      min-width: 220px;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border);
+    }
+
+    .sidebar-brand {
+      padding: 18px 16px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-brand h1 {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -.02em;
+      background: none;
+      -webkit-text-fill-color: var(--text-primary);
+      color: var(--text-primary);
+    }
+
+    .sidebar-brand .version {
+      margin-top: 4px;
+      font-size: 11px;
+    }
+
+    .sidebar-nav {
+      padding: 8px;
+    }
+
+    .sidebar-section-label {
+      padding: 14px 10px 6px;
+      font-size: 10px;
+      letter-spacing: .08em;
+    }
+
+    .sidebar-item {
+      margin-bottom: 2px;
+      padding: 9px 10px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: transparent !important;
+      font-size: 13px;
+      font-weight: 500;
+      transform: none;
+    }
+
+    .sidebar-item:hover {
+      background: rgba(255, 255, 255, .04) !important;
+      color: var(--text-primary);
+    }
+
+    .sidebar-item.active {
+      background: var(--accent-glow) !important;
+      color: var(--accent-text);
+      box-shadow: none;
+    }
+
+    .sidebar-item.active:before {
+      display: none;
+    }
+
+    .sidebar-footer {
+      margin: 0;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .main-content {
+      background: var(--bg-main);
+    }
+
+    .header-bar {
+      margin: 0;
+      padding: 10px 16px;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      border-radius: 0;
+      background: var(--bg-sidebar);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      -webkit-app-region: no-drag;
+      app-region: no-drag;
+    }
+
+    .header-left,
+    .header-right,
+    .header-bar button,
+    .header-bar input,
+    .header-bar select {
+      -webkit-app-region: no-drag;
+      app-region: no-drag;
+    }
+
+    .header-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .page-content {
+      padding: 20px 24px;
+    }
+
+    .page-header h2,
+    .card-header h3,
+    .stat-card .stat-value {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .page-header h2 {
+      font-size: 20px;
+      letter-spacing: -.02em;
+    }
+
+    .card,
+    .stat-card,
+    .changelog-item,
+    .credit-item,
+    .buff-item,
+    .item-table,
+    .info-banner {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    .card {
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .card:hover,
+    .stat-card:hover,
+    .credit-item:hover,
+    .buff-item:hover {
+      border-color: var(--border-hover);
+      box-shadow: none;
+      transform: none;
+    }
+
+    .card-header .card-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-md);
+      background: var(--accent-glow);
+      box-shadow: none;
+    }
+
+    .btn {
+      min-height: 32px;
+      padding: 7px 14px;
+      border-radius: var(--radius-md);
+      background-image: none !important;
+      font-weight: 600;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .btn:hover {
+      transform: none;
+    }
+
+    .btn-start {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .btn-stop {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-secondary,
+    .btn-import,
+    .pin-btn,
+    .update-btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .status-badge,
+    .keybind-badge {
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+    }
+
+    .form-input,
+    select.form-input,
+    textarea.form-input,
+    .item-amount-input,
+    .calibration-btn,
+    .coord-box {
+      border-radius: var(--radius-md);
+      border-color: var(--border);
+      background: var(--bg-input);
+      box-shadow: none;
+    }
+
+    .form-input:focus,
+    .item-amount-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent-glow);
+    }
+
+    .toggle-slider {
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--border-hover);
+      box-shadow: none;
+    }
+
+    .toggle-slider:before {
+      top: 2px;
+      left: 2px;
+      box-shadow: none;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: var(--accent);
+      box-shadow: none;
+    }
+
+    .item-table-header,
+    .item-table-row.item-row-active,
+    .info-banner {
+      background: var(--bg-input);
+    }
+
+    .biome-confirm-modal {
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+    }
+
+    .biome-confirm-btn {
+      border-radius: var(--radius-md);
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border-hover);
+      border-radius: 999px;
+    }
+
+    @keyframes ui-slide-up {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes ui-scale-in {
+      from {
+        opacity: 0;
+        transform: scale(0.96);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes ui-morph-in {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.94);
+        border-radius: 24px;
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        border-radius: var(--radius-lg);
+      }
+    }
+
+    .page-content > .fade-in {
+      animation: ui-slide-up 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .sidebar-brand,
+    .header-bar {
+      animation: ui-scale-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .card {
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.28s ease,
+        border-color 0.28s ease;
+      animation: ui-morph-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .card:hover {
+      transform: translateY(-2px) scale(1.008);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
+    }
+
+    .sidebar-item {
+      transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+        background 0.2s ease,
+        color 0.2s ease;
+    }
+
+    .sidebar-item:hover {
+      transform: translateX(3px);
+    }
+
+    .sidebar-item:active {
+      transform: scale(0.97);
+    }
+
+    .btn,
+    .toggle-switch,
+    .form-input {
+      transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s ease,
+        border-color 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .btn:active {
+      transform: scale(0.96);
+    }
+
+    .window-frame {
+      animation: ui-scale-in 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .page-content > .fade-in,
+      .sidebar-brand,
+      .header-bar,
+      .card,
+      .window-frame {
+        animation: none !important;
+      }
+
+      .card:hover,
+      .btn:hover,
+      .sidebar-item:hover {
+        transform: none !important;
+      }
+    }
+  </style>
 </head>
 
 <body>
   <div id="root"></div>
+  <script id="material-titlebar-enhancement">
+    (() => {
+      const api = () => window.pywebview && window.pywebview.api;
+
+      const debugLog = (message, data, hypothesisId) => {
+        // #region agent log
+        fetch('http://127.0.0.1:7595/ingest/bb42d011-0452-4cb5-a4c3-f72388f18687', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': 'f8c06d' }, body: JSON.stringify({ sessionId: 'f8c06d', runId: 'initial', hypothesisId, location: 'assets/index.html:local-potion-calibrated-crafting', message, data, timestamp: Date.now() }) }).catch(() => {});
+        // #endregion
+      };
+      const callFirst = async (names) => {
+        const bridge = api();
+        if (!bridge) return false;
+        for (const name of names) {
+          if (typeof bridge[name] === "function") {
+            await bridge[name]();
+            return true;
+          }
+        }
+        return false;
+      };
+
+      const actions = [
+        {
+          label: "Minimize",
+          title: "Minimize",
+          className: "minimize",
+          methods: ["minimize_window", "minimize", "window_minimize"]
+        },
+        {
+          label: "Maximize or restore",
+          title: "Maximize / Restore",
+          className: "maximize",
+          methods: ["toggle_maximize", "maximize_window", "restore_window", "window_toggle_maximize"]
+        },
+        {
+          label: "Close",
+          title: "Close",
+          className: "close",
+          methods: ["close_window", "close", "quit_app", "window_close"]
+        }
+      ];
+
+      const titlebarIcons = {
+        minimize: `<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="11" width="10" height="1.5" rx="0.75" fill="currentColor"></rect></svg>`,
+        maximize: `<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3.25" y="3.25" width="9.5" height="9.5" rx="0.5" fill="none" stroke="currentColor" stroke-width="1.35"></rect></svg>`,
+        close: `<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.1 4.1l7.8 7.8M11.9 4.1l-7.8 7.8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"></path></svg>`
+      };
+
+      const bindControls = (titlebar) => {
+        const controls = titlebar.querySelectorAll(".titlebar-controls .titlebar-btn");
+        if (controls.length === 0) return false;
+
+        if (!titlebar.querySelector(".titlebar-drag-region")) {
+          const dragRegion = document.createElement("div");
+          dragRegion.className = "titlebar-drag-region";
+          dragRegion.setAttribute("aria-hidden", "true");
+          titlebar.prepend(dragRegion);
+        }
+
+        controls.forEach((button, index) => {
+          const action = actions[index];
+          if (!action) return;
+
+          button.classList.add(action.className);
+          button.setAttribute("aria-label", action.label);
+          button.setAttribute("title", action.title);
+          if (titlebarIcons[action.className]) {
+            button.innerHTML = titlebarIcons[action.className];
+          }
+
+          if (button.dataset.materialTitlebarBound === "true") return;
+          button.dataset.materialTitlebarBound = "true";
+          button.addEventListener("click", async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            try {
+              await callFirst(action.methods);
+            } catch (error) {
+              console.warn(`Coteab titlebar ${action.className} failed`, error);
+            }
+          });
+        });
+
+        return true;
+      };
+
+      const createTitlebar = (frame) => {
+        const titlebar = document.createElement("div");
+        titlebar.className = "titlebar coteab-injected-titlebar";
+        titlebar.innerHTML = `
+          <div class="titlebar-drag-region" aria-hidden="true"></div>
+          <span class="titlebar-title">Coteab Macro</span>
+          <div class="titlebar-spacer"></div>
+          <div class="titlebar-controls">
+            <button type="button" class="titlebar-btn minimize" aria-label="Minimize"></button>
+            <button type="button" class="titlebar-btn maximize" aria-label="Maximize"></button>
+            <button type="button" class="titlebar-btn close" aria-label="Close"></button>
+          </div>
+        `;
+        frame.insertBefore(titlebar, frame.firstChild);
+        return titlebar;
+      };
+
+      const setupTitlebar = () => {
+        const frame = document.querySelector(".window-frame");
+        if (!frame) return false;
+
+        let titlebar = frame.querySelector(".titlebar");
+        if (!titlebar) {
+          titlebar = createTitlebar(frame);
+        }
+
+        return bindControls(titlebar);
+      };
+
+      if (!setupTitlebar()) {
+        const observer = new MutationObserver(() => {
+          if (setupTitlebar()) observer.disconnect();
+        });
+        observer.observe(document.documentElement, { childList: true, subtree: true });
+      }
+    })();
+  </script>
+  <script id="local-ui-feature-enhancements">
+    (function () {
+      const SECTION_ID = "coteab-br-sc-biome-exclusion";
+      const BIOME_ORDER = [
+        "GLITCHED", "DREAMSPACE", "CYBERSPACE", "WINDY", "RAINY", "SNOWY", "SAND STORM",
+        "HELL", "STARFALL", "CORRUPTION", "NULL", "AURORA", "HEAVEN", "EGGLAND", "SINGULARITY",
+      ];
+
+      let cachedConfig = null;
+      let saving = false;
+
+      const getApi = () => window.pywebview && window.pywebview.api;
+
+      const loadConfig = async () => {
+        const api = getApi();
+        if (!api || typeof api.get_config !== "function") return cachedConfig;
+        try {
+          cachedConfig = await api.get_config();
+        } catch (error) {
+          console.warn("Failed to load config for BR/SC exclusion UI", error);
+        }
+        return cachedConfig;
+      };
+
+      const saveDisabledBiomes = async (disabled) => {
+        const api = getApi();
+        if (!api || typeof api.save_config !== "function" || saving) return;
+        saving = true;
+        try {
+          const config = cachedConfig || (await loadConfig()) || {};
+          const next = { ...config, disabled_biomes_br_sc: disabled };
+          cachedConfig = next;
+          await api.save_config(next);
+        } catch (error) {
+          console.warn("Failed to save disabled_biomes_br_sc", error);
+        } finally {
+          saving = false;
+        }
+      };
+
+      const isAutomatedActionsPage = () => {
+        const header = document.querySelector(".page-header h2");
+        return header && header.textContent.trim() === "Automated Actions";
+      };
+
+      const findItemUsageCard = () => {
+        const cards = document.querySelectorAll(".card");
+        for (const card of cards) {
+          const title = card.querySelector("h3");
+          if (title && title.textContent.trim() === "Item Usage") return card;
+        }
+        return null;
+      };
+
+      const renderSection = (card, disabledSet) => {
+        if (card.querySelector("#" + SECTION_ID)) return;
+
+        const wrapper = document.createElement("div");
+        wrapper.id = SECTION_ID;
+        wrapper.style.marginTop = "14px";
+        wrapper.style.borderTop = "1px solid rgba(255,255,255,0.1)";
+        wrapper.style.paddingTop = "14px";
+        wrapper.innerHTML = `
+          <label class="form-label" style="display:block;margin-bottom:4px;">Don't use BR/SC when in biome</label>
+          <div class="form-hint" style="margin-bottom:10px;">
+            When you're currently in a checked biome, Biome Randomizer and Strange Controller will not run.
+          </div>
+          <div class="coteab-br-sc-biome-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;"></div>
+        `;
+
+        const grid = wrapper.querySelector(".coteab-br-sc-biome-grid");
+        for (const biome of BIOME_ORDER) {
+          const label = document.createElement("label");
+          label.style.display = "flex";
+          label.style.alignItems = "center";
+          label.style.gap = "8px";
+          label.style.padding = "8px 10px";
+          label.style.border = "1px solid var(--border-color)";
+          label.style.background = "rgba(255,255,255,0.02)";
+          label.style.color = "var(--text-secondary)";
+          label.style.fontSize = "12px";
+          label.style.cursor = "pointer";
+
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.checked = disabledSet.has(biome);
+          checkbox.style.width = "16px";
+          checkbox.style.height = "16px";
+          checkbox.addEventListener("change", async () => {
+            const next = new Set(Array.from(grid.querySelectorAll("input:checked")).map((el) => el.dataset.biome));
+            if (checkbox.checked) next.add(biome);
+            else next.delete(biome);
+            await saveDisabledBiomes(Array.from(next).sort());
+          });
+
+          checkbox.dataset.biome = biome;
+          const text = document.createElement("span");
+          text.textContent = biome;
+          label.appendChild(checkbox);
+          label.appendChild(text);
+          grid.appendChild(label);
+        }
+
+        card.appendChild(wrapper);
+      };
+
+      const syncSection = async () => {
+        if (!isAutomatedActionsPage()) return;
+        const card = findItemUsageCard();
+        if (!card) return;
+
+        const config = (await loadConfig()) || {};
+        const disabled = Array.isArray(config.disabled_biomes_br_sc) ? config.disabled_biomes_br_sc : [];
+        renderSection(card, new Set(disabled));
+      };
+
+      const boot = () => {
+        syncSection();
+        const observer = new MutationObserver(() => syncSection());
+        observer.observe(document.body, { childList: true, subtree: true });
+        window.addEventListener("pywebviewready", syncSection);
+      };
+
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", boot);
+      } else {
+        boot();
+      }
+    })();
+  </script>
+  <script id="local-potion-calibrated-crafting">
+    (function () {
+      const CAL_ID = "coteab-potion-calibration-extra";
+      const CRAFT_ID = "coteab-potion-craft-buttons";
+      const POTION_KEYS = [
+        ["potion_items_tab", "1. Stella Items Tab"],
+        ["potion_search_bar", "2. Potion Search Bar"],
+        ["potion_first_potion_slot_pos", "3. First Potion Result"],
+        ["potion_recipe_button", "4. Recipe Button"],
+        ["potion_auto_add_button", "5. Add Everything Button"],
+        ["potion_craft_button", "6. Craft Button"],
+      ];
+
+      const api = () => window.pywebview && window.pywebview.api;
+
+      const loadConfig = async () => {
+        const bridge = api();
+        if (!bridge || typeof bridge.get_config !== "function") return {};
+        try {
+          return await bridge.get_config();
+        } catch {
+          return {};
+        }
+      };
+
+      const pageTitle = () => document.querySelector(".page-header h2")?.textContent?.trim() || "";
+
+      const ensureCalibrationExtras = async () => {
+        const title = pageTitle();
+        // #region agent log
+        debugLog("calibration extras sync", { title, hasPanel: !!document.getElementById(CAL_ID) }, "P1,P2");
+        // #endregion
+        if (title !== "Macro Calibrations" || document.getElementById(CAL_ID)) return;
+        const cards = Array.from(document.querySelectorAll(".card"));
+        const potionCard = cards.find((card) => card.textContent.includes("Potion Crafting Calibration")) || cards[cards.length - 1];
+        if (!potionCard) {
+          // #region agent log
+          debugLog("calibration panel target missing", { title, cardCount: cards.length }, "P1");
+          // #endregion
+          return;
+        }
+
+        const config = await loadConfig();
+        // #region agent log
+        debugLog("calibration panel creating", { title, cardCount: cards.length, hasConfig: !!config }, "P1,P2");
+        // #endregion
+        const panel = document.createElement("div");
+        panel.id = CAL_ID;
+        panel.style.padding = "16px";
+        panel.style.borderTop = "1px solid var(--border-color)";
+        panel.style.background = "rgba(14,165,233,0.06)";
+        panel.innerHTML = `
+          <div style="font-weight:700;color:#7dd3fc;margin-bottom:6px;">Calibrated Potion Crafting</div>
+          <div class="form-hint" style="margin-bottom:10px;">Hover the matching Roblox button, then press F8 to save its position.</div>
+          <div class="coteab-potion-cal-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;"></div>
+          <div class="form-hint" id="coteab-potion-cal-status" style="margin-top:10px;"></div>
+        `;
+        const grid = panel.querySelector(".coteab-potion-cal-grid");
+        const status = panel.querySelector("#coteab-potion-cal-status");
+        for (const [key, label] of POTION_KEYS) {
+          const value = Array.isArray(config[key]) ? config[key].slice(0, 2).join(", ") : "not set";
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "calibration-btn";
+          button.innerHTML = `<span>Arm F8: ${label}</span><span class="coords">${value}</span>`;
+          button.addEventListener("click", async () => {
+            const bridge = api();
+            if (!bridge || typeof bridge.begin_calibration_point !== "function") return;
+            debugLog("calibration arm clicked", { key, label }, "C1,C2");
+            const result = await bridge.begin_calibration_point(key);
+            status.textContent = result && result.status ? result.status : (result && result.error) || "Calibration armed";
+            debugLog("calibration arm backend result", { key, result }, "C1,C2");
+            if (!result || result.ok === false) return;
+            const startSeq = Number(result.seq || 0);
+            const coordsEl = button.querySelector(".coords");
+            let attempts = 0;
+            const poll = setInterval(async () => {
+              attempts += 1;
+              let captureStatus = null;
+              try {
+                if (bridge && typeof bridge.get_calibration_status === "function") {
+                  captureStatus = await bridge.get_calibration_status();
+                }
+              } catch {}
+              const capture = captureStatus && captureStatus.capture;
+              if (capture && capture.key === key && Number(capture.seq || 0) > startSeq && Array.isArray(capture.value)) {
+                const nextValue = capture.value.slice(0, 2).join(", ");
+                coordsEl.textContent = nextValue;
+                status.textContent = `${label} saved at ${nextValue}`;
+                debugLog("calibration value updated in ui", { key, nextValue, attempts, seq: capture.seq }, "C2,C3");
+                clearInterval(poll);
+              } else if (attempts >= 40) {
+                debugLog("calibration value did not update in ui", { key, attempts, startSeq, captureStatus }, "C2,C3");
+                status.textContent = `${label} was armed, but F8 capture was not seen. Arm it again and press F8 while hovering Roblox.`;
+                clearInterval(poll);
+              }
+            }, 500);
+          });
+          grid.appendChild(button);
+        }
+        potionCard.appendChild(panel);
+      };
+
+      const potionNameFromFile = (name) => String(name || "").replace(/\.json$/i, "").trim();
+
+      const ensureCraftButtons = async () => {
+        if (pageTitle() !== "Potion Crafting" || document.getElementById(CRAFT_ID)) return;
+        const cards = Array.from(document.querySelectorAll(".card"));
+        const card = cards.find((item) => item.textContent.includes("Selected Recipe")) || cards[0];
+        if (!card) return;
+        const config = await loadConfig();
+        const names = [config.selected_potion_file, config.potion_file_1, config.potion_file_2, config.potion_file_3]
+          .map(potionNameFromFile)
+          .filter(Boolean);
+        const uniqueNames = Array.from(new Set(names));
+        if (!uniqueNames.length) return;
+
+        const panel = document.createElement("div");
+        panel.id = CRAFT_ID;
+        panel.style.marginTop = "14px";
+        panel.style.borderTop = "1px solid var(--border-color)";
+        panel.style.paddingTop = "14px";
+        panel.innerHTML = `
+          <label class="form-label" style="display:block;margin-bottom:8px;">Craft potion by name</label>
+          <div class="coteab-potion-name-buttons" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+          <div class="form-hint" id="coteab-potion-craft-status" style="margin-top:10px;"></div>
+        `;
+        const list = panel.querySelector(".coteab-potion-name-buttons");
+        const status = panel.querySelector("#coteab-potion-craft-status");
+        for (const name of uniqueNames) {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "btn btn-accent";
+          button.textContent = name;
+          button.addEventListener("click", async () => {
+            const bridge = api();
+            if (!bridge || typeof bridge.craft_potion_by_name !== "function") return;
+            debugLog("potion name craft button clicked", { name }, "T5");
+            const result = await bridge.craft_potion_by_name(name);
+            debugLog("potion name craft backend result", { name, result }, "T5");
+            status.textContent = (result && (result.status || result.error)) || `Craft requested: ${name}`;
+          });
+          list.appendChild(button);
+        }
+        card.appendChild(panel);
+      };
+
+      const sync = () => {
+        ensureCalibrationExtras();
+        ensureCraftButtons();
+      };
+
+      const boot = () => {
+        sync();
+        new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
+      };
+
+      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+      else boot();
+      window.addEventListener("pywebviewready", sync);
+    })();
+  </script>
 </body>
 
 </html>
