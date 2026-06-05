@@ -2,7 +2,7 @@
 
 Blossom runs Sol's RNG for you — biomes, auras, merchants, potions, fishing — while you're AFK.
 
-Fork of the Noteab / Coteab macro with a new UI and updated modules.
+Fork of the Coteab macro with a new UI and updated modules. The lineage runs Noteab → Coteab → Blossom: the original Noteab biome macro came first, Coteab (by Vapure) is the version most players run today, and Blossom builds on Coteab.
 
 ## What it does
 

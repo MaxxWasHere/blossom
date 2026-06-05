@@ -18,12 +18,32 @@
     document.querySelector(".page-header h2")?.textContent?.trim() || "";
 
   const MACRO_CAL_PAGE = "Macro Calibrations";
+  const WEBHOOK_PAGE = "Webhook";
+
+  // Mark the old React "Biome Configuration" card so CSS can hide it before it
+  // paints. Runs in the pre-paint pass instead of the debounced module flush, so
+  // the legacy card never flashes before the Biome Notifier hub takes over.
+  const markLegacyWebhookCard = (active) => {
+    if (!active) return;
+    const main = document.querySelector(".page-content, .main-content");
+    if (!main) return;
+    for (const card of main.querySelectorAll(".card")) {
+      if (card.id === "blsm-biome-webhooks-hub") continue;
+      const h3 = card.querySelector("h3");
+      if (h3 && h3.textContent.trim() === "Biome Configuration") {
+        card.classList.add("blsm-legacy-biome-config-card");
+      }
+    }
+  };
 
   const setPageAttr = () => {
     const title = pageHeaderTitle();
     const main = document.querySelector(".page-content, .main-content");
     if (main && title) main.setAttribute("data-blossom-page", title);
     document.documentElement.classList.toggle("blsm-page-macro-calibrations", title === MACRO_CAL_PAGE);
+    const onWebhook = title === WEBHOOK_PAGE;
+    document.documentElement.classList.toggle("blsm-biome-webhooks-active", onWebhook);
+    markLegacyWebhookCard(onWebhook);
   };
 
   const pageMatches = (pages, title) => {

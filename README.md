@@ -1,6 +1,8 @@
 # Blossom
 
-Macro for **Sol's RNG** — biomes, auras, merchants, potions, fishing. Fork of Noteab / Coteab; free on stable releases.
+Macro for **Sol's RNG** — biomes, auras, merchants, potions, fishing. Free on stable releases.
+
+Based on the **Coteab** macro by Vapure (xVapure), which itself grew out of the original Noteab biome macro. Blossom keeps that core and adds its own UI and backend.
 
 ## Download
 

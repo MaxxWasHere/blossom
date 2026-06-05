@@ -36,8 +36,9 @@
             <h3>Blossom</h3>
             <p>
               Fork of the
-              <a href="https://github.com/xVapure/Noteab-Macro" target="_blank" rel="noreferrer">Noteab / Coteab Macro</a>
-              for Sol's RNG. Same idea — automate merchants, potions, biomes — with Blossom's own UI and backend.
+              <a href="https://github.com/xVapure/Noteab-Macro" target="_blank" rel="noreferrer">Coteab macro</a>
+              for Sol's RNG — the macro most players run, itself built on the original Noteab biome macro.
+              Same idea — automate merchants, potions, biomes — with Blossom's own UI and backend.
               Apache 2.0; keep upstream credit if you redistribute.
             </p>
             <p style="margin:8px 0 0;font-size:13px">

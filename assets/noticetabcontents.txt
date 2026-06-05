@@ -6,6 +6,7 @@
 
 ## Improved
 - In-app copy and docs use plainer wording — intro, credits, changelog, and README.
+- Credits screen and docs spell out the lineage — Blossom is a fork of the Coteab macro (by Vapure), which itself came from the original Noteab biome macro.
 - Project files reorganized into folders — Python app code lives under `src/`, docs under `docs/`; run the app the same way with `py run_local_ui.py` from the repo root.
 - README and docs trimmed for download-and-run setup — stable and beta release links, calibration, and optional webhooks up front.
 - Fishing uses built-in walk paths to the dock and seller. You can optionally drop `fishing.json` or `fishing_sell.json` in your paths folder if you want custom routes (`fishing_playback_multiplier` adjusts replay speed).
@@ -16,6 +17,7 @@
 
 ## Fixed
 - Legacy calibration accordions no longer flash before the unified hub appears; duplicate panels stay hidden from first paint.
+- The old Biome Configuration card on the Webhook tab no longer flashes before the Biome Notifier hub loads — it is hidden from first paint instead of after the page finishes loading.
 - Macro Calibrations page does less redundant DOM watching (removed burst polling and a duplicate page-sync script).
 - Merchant dialogue and E-key timing are more reliable.
 - Webhook ping validation reports clearer errors for bad user or role IDs.
@@ -49,6 +51,7 @@
 - Activation screen on first launch — paste the key from Discord `/getkey`.
 - Keys stay on one device; use `/resethwid` in Discord if you switch machines.
 - Built-in update check — your build only offers installs from its own release track.
+- Beta builds show a beta version label in the sidebar, so it is clear when you are running a beta rather than a stable release.
 - Stable downloads and updates use the `MaxxWasHere/blossom` GitHub repo (lowercase); beta stays on `blossombeta`.
 
 # Blossom 2.0.0
