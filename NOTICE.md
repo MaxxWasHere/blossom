@@ -1,0 +1,35 @@
+# Blossom — Notice & Credits
+
+Copyright 2026 MaxxWasHere
+
+Licensed under the Apache License, Version 2.0 (the "License"). You may not
+use this project except in compliance with the License. You may obtain a copy
+of the License at <https://www.apache.org/licenses/LICENSE-2.0>.
+
+See [LICENSE.txt](LICENSE.txt) for the full license text.
+
+## Lineage
+
+Blossom is a fork / derivative work. It builds directly on the Coteab macro
+and inherits from the original Noteab biome macro.
+
+1. **Noteab biome macro** (NotWindyZ) — the original public biome macro this
+   lineage grew from.
+   <https://github.com/NotWindyZ/Noteab-Macro>
+2. **Coteab macro** (Vapure / xVapure) — the macro most Sol's RNG players run
+   today, built on the Noteab foundation. This is the direct basis for Blossom.
+   <https://github.com/xVapure/Noteab-Macro>
+3. **Blossom** (MaxxWasHere) — this fork. Adds its own UI and Python backend on
+   top of the Coteab macro.
+   <https://github.com/MaxxWasHere/blossom>
+
+## Additional credit
+
+- **maxstellar** — biome thumbnail art and related imagery used in the upstream
+  Noteab / Coteab UI.
+  <https://maxstellar.github.io/biome_thumb/>
+
+## Redistribution
+
+If you redistribute Blossom or a derivative, keep this upstream credit intact
+as required by the Apache License, Version 2.0.
