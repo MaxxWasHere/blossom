@@ -1,0 +1,575 @@
+/* Blossom — Material-inspired surfaces (shared across pages) */
+
+:root,
+[data-theme] {
+  --md-radius-sm: 6px;
+  --md-radius-md: 10px;
+  --md-radius-lg: 12px;
+  --md-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --md-elevation-menu: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --md-z-card: 1;
+  --md-z-card-body: 2;
+  --md-z-dropdown: 12000;
+  --md-surface: var(--bg-card, #161014);
+  --md-surface-dim: var(--bg-input, #120e10);
+  --md-surface-high: var(--bg-card-hover, #1c1519);
+  --md-outline: var(--border, #241a1e);
+  --md-outline-strong: var(--border-hover, #32242a);
+  --md-primary: var(--accent, #e891a8);
+  --md-primary-container: rgba(232, 145, 168, 0.14);
+  --md-on-surface: var(--text-primary, #e4e4e7);
+  --md-on-surface-variant: var(--text-muted, #9ca3af);
+  --md-ease: cubic-bezier(0.2, 0, 0, 1);
+  --radius-sm: var(--md-radius-sm);
+  --radius-md: var(--md-radius-md);
+  --radius-lg: var(--md-radius-lg);
+  --radius-xl: var(--md-radius-lg);
+}
+
+/* ——— Page ——— */
+.page-content,
+.main-content {
+  padding: 16px 20px !important;
+}
+
+.page-header {
+  margin-bottom: 14px !important;
+}
+
+.page-header h2 {
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+  margin: 0 0 4px !important;
+  padding-bottom: 0 !important;
+}
+
+.page-header h2::after {
+  display: none !important;
+}
+
+.page-header p {
+  margin: 0 !important;
+  font-size: 12px !important;
+  color: var(--md-on-surface-variant) !important;
+  line-height: 1.45 !important;
+}
+
+/* ——— Cards (visible overflow so menus layer above) ——— */
+.page-content .card,
+.main-content .card,
+.blossom-cal-link-card {
+  position: relative;
+  z-index: var(--md-z-card);
+  padding: 0 !important;
+  margin-bottom: 8px !important;
+  border-radius: var(--md-radius-md) !important;
+  border: 1px solid var(--md-outline) !important;
+  border-top: 2px solid color-mix(in srgb, var(--md-primary) 55%, var(--md-outline)) !important;
+  background: var(--md-surface) !important;
+  box-shadow: var(--md-elevation-1) !important;
+  overflow: visible !important;
+  transition: border-color 0.15s ease !important;
+}
+
+.page-content .card::before,
+.main-content .card::before {
+  display: none !important;
+}
+
+.page-content .card:hover,
+.main-content .card:hover {
+  transform: none !important;
+  border-color: var(--md-outline-strong) !important;
+  background: color-mix(in srgb, var(--md-primary) 6%, var(--md-surface)) !important;
+}
+
+.blsm-md-card > .card-header,
+.page-content .card > .card-header,
+.main-content .card > .card-header {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 11px 14px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid transparent;
+  transition: background 0.16s var(--md-ease);
+}
+
+.blsm-md-accordion.is-expanded > .card-header,
+.page-content .blsm-md-accordion.is-expanded > .card-header {
+  border-bottom-color: var(--md-outline) !important;
+}
+
+.page-content .card-header .card-icon,
+.main-content .card-header .card-icon {
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px;
+  display: grid !important;
+  place-items: center;
+  font-size: 15px !important;
+  line-height: 1 !important;
+  border-radius: var(--md-radius-sm) !important;
+  border: 1px solid rgba(232, 145, 168, 0.28) !important;
+  background: var(--md-primary-container) !important;
+  box-shadow: none !important;
+}
+
+.page-content .card-header h3,
+.main-content .card-header h3 {
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  margin: 0 !important;
+  color: var(--md-on-surface) !important;
+}
+
+.blsm-md-sub-hide {
+  display: none !important;
+}
+
+/* ——— Global chevron: replaces React ▲ ▼ text (survives re-renders) ——— */
+.blsm-md-chevron-host,
+.page-content .card > .card-header[style*="cursor"] > div:last-child,
+.main-content .card > .card-header[style*="cursor"] > div:last-child,
+.blsm-page-macro-calibrations .blsm-native-cal > .card-header > div:last-child {
+  flex-shrink: 0 !important;
+  margin-left: auto !important;
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  font-size: 0 !important;
+  line-height: 0 !important;
+  color: transparent !important;
+  overflow: hidden !important;
+  border-radius: var(--md-radius-sm) !important;
+  border: 1px solid var(--md-outline) !important;
+  background: var(--md-surface-dim) !important;
+  box-shadow: none !important;
+  user-select: none !important;
+  pointer-events: none !important;
+}
+
+.blsm-md-chevron-host::before,
+.page-content .card > .card-header[style*="cursor"] > div:last-child::before,
+.main-content .card > .card-header[style*="cursor"] > div:last-child::before,
+.blsm-page-macro-calibrations .blsm-native-cal > .card-header > div:last-child::before {
+  content: "";
+  width: 16px;
+  height: 16px;
+  display: block;
+  background-color: var(--md-on-surface-variant);
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M6 9l6 6 6-6' stroke='black' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  transition: transform 0.28s var(--md-ease);
+}
+
+.blsm-md-accordion.is-expanded .blsm-md-chevron-host::before,
+.blsm-md-accordion.is-expanded > .card-header > div:last-child::before,
+.page-content .blsm-md-accordion.is-expanded > .card-header[style*="cursor"] > div:last-child::before,
+.main-content .blsm-md-accordion.is-expanded > .card-header[style*="cursor"] > div:last-child::before {
+  transform: rotate(180deg);
+}
+
+/* Hub section chevrons (button headers) */
+#blsm-cal-hub .blsm-cal-chevron {
+  width: 14px;
+  height: 14px;
+  opacity: 0.55;
+  transition: transform 0.28s var(--md-ease);
+}
+
+#blsm-cal-hub .blsm-cal-section.is-open .blsm-cal-chevron {
+  transform: rotate(180deg);
+}
+
+/* Card body (non-header direct children) */
+.page-content .card > div:not(.card-header),
+.main-content .card > div:not(.card-header) {
+  position: relative;
+  z-index: var(--md-z-card-body);
+  padding: 12px 14px 14px !important;
+  overflow: visible !important;
+}
+
+.page-content .card[style*="padding: 0"] > div:not(.card-header),
+.main-content .card[style*="padding: 0"] > div:not(.card-header) {
+  padding: 12px 14px 14px !important;
+}
+
+/* ——— Hub + special cards (no double accent bar) ——— */
+#blsm-cal-hub::before,
+.blsm-mouse-cal-card::before,
+.blossom-cal-link-card::before {
+  display: none;
+}
+
+#blsm-cal-hub {
+  border-radius: var(--md-radius-md) !important;
+  box-shadow: var(--md-elevation-1) !important;
+  border: 1px solid var(--md-outline) !important;
+  background: var(--md-surface) !important;
+}
+
+#blsm-cal-hub .blsm-cal-hub-top {
+  padding: 12px 14px !important;
+  border-bottom: 1px solid var(--md-outline);
+}
+
+#blsm-cal-hub .blsm-cal-hub-top h3 {
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+}
+
+/* Shared tab strip (hub, mouse-cal, etc.) */
+.blsm-md-tab-nav,
+.blsm-mouse-cal-tab-nav,
+.blsm-cal-tab-nav {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--md-radius-sm);
+  background: var(--md-surface-dim);
+  border: 1px solid var(--md-outline);
+  overflow-x: auto;
+}
+
+.blsm-md-tab,
+.blsm-mouse-cal-tab,
+.blsm-cal-tab,
+#blsm-cal-hub .blsm-cal-tab {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--md-radius-sm);
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  font: 600 11px/1.2 Inter, system-ui, sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.16s var(--md-ease), color 0.16s ease, border-color 0.16s ease;
+}
+
+.blsm-md-tab:hover,
+.blsm-mouse-cal-tab:hover,
+.blsm-cal-tab:hover {
+  background: var(--md-surface-high);
+  color: var(--text-secondary, #a1a1aa);
+}
+
+.blsm-md-tab.is-active,
+.blsm-mouse-cal-tab.is-active,
+.blsm-cal-tab.is-active {
+  color: var(--md-on-surface);
+  background: var(--md-surface);
+  border-color: rgba(232, 145, 168, 0.35);
+}
+
+/* ——— Lists / rows ——— */
+.blsm-md-row,
+.blsm-mouse-cal-row,
+.blsm-cal-mark-row,
+.blsm-cal-step-row {
+  border-radius: var(--md-radius-sm) !important;
+  border: 1px solid var(--md-outline) !important;
+  background: var(--md-surface-dim) !important;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.blsm-md-row:hover,
+.blsm-mouse-cal-row:hover,
+.blsm-cal-mark-row:hover,
+.blsm-cal-step-row:hover {
+  background: var(--md-surface-high) !important;
+  border-color: var(--md-outline-strong) !important;
+}
+
+/* ——— Forms ——— */
+.form-label {
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--md-on-surface-variant) !important;
+  margin-bottom: 5px !important;
+}
+
+.form-hint {
+  font-size: 11px !important;
+  line-height: 1.45 !important;
+  color: var(--md-on-surface-variant) !important;
+}
+
+.form-group {
+  margin-bottom: 12px !important;
+}
+
+.form-input,
+select.form-input,
+textarea.form-input,
+.coord-input,
+.item-amount-input {
+  min-height: 34px !important;
+  padding: 7px 10px !important;
+  border-radius: var(--md-radius-sm) !important;
+  border: 1px solid var(--md-outline) !important;
+  background: var(--md-surface-dim) !important;
+  color: var(--md-on-surface) !important;
+  box-shadow: none !important;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease !important;
+}
+
+.form-input:focus,
+.coord-input:focus,
+.item-amount-input:focus {
+  border-color: var(--md-primary) !important;
+  box-shadow: 0 0 0 2px var(--md-primary-container) !important;
+  outline: none !important;
+}
+
+.coord-input-group {
+  padding: 8px 10px !important;
+  margin-bottom: 6px !important;
+  border-radius: var(--md-radius-sm) !important;
+  border: 1px solid var(--md-outline) !important;
+  background: var(--md-surface-dim) !important;
+}
+
+.coord-box {
+  border-radius: var(--md-radius-sm) !important;
+  background: var(--md-surface) !important;
+}
+
+/* ——— Buttons ——— */
+.btn {
+  min-height: 34px !important;
+  padding: 7px 14px !important;
+  border-radius: var(--md-radius-sm) !important;
+  font-family: Inter, system-ui, sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  box-shadow: none !important;
+  transform: none !important;
+  transition: background 0.16s var(--md-ease), border-color 0.16s ease, color 0.16s ease !important;
+}
+
+.btn:hover,
+.calibration-btn:hover {
+  transform: none !important;
+}
+
+.btn-accent,
+.btn-primary {
+  background: var(--md-primary) !important;
+  color: #fff !important;
+  border: 1px solid transparent !important;
+}
+
+.btn-accent:hover,
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--md-primary) 88%, #fff) !important;
+}
+
+.btn-secondary,
+.btn-import {
+  background: var(--md-surface-dim) !important;
+  border: 1px solid var(--md-outline) !important;
+  color: var(--text-secondary, #a1a1aa) !important;
+}
+
+.btn-secondary:hover,
+.btn-import:hover {
+  background: var(--md-surface-high) !important;
+  border-color: var(--md-outline-strong) !important;
+}
+
+/* ——— Banners / stats ——— */
+.info-banner,
+.stat-card {
+  border-radius: var(--md-radius-md) !important;
+  border: 1px solid var(--md-outline) !important;
+  box-shadow: none !important;
+  padding: 12px 14px !important;
+}
+
+.stat-card {
+  background: var(--md-surface-dim) !important;
+}
+
+/* ——— Toggles ——— */
+.toggle-row {
+  padding: 8px 0 !important;
+}
+
+.toggle-slider {
+  background: var(--md-outline-strong) !important;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--md-primary) !important;
+}
+
+/* ——— Sidebar (Material nav rail) ——— */
+.sidebar-item {
+  border-radius: var(--md-radius-sm) !important;
+  margin: 2px 6px !important;
+  transform: none !important;
+}
+
+.sidebar-item:hover {
+  transform: none !important;
+  background: var(--md-primary-container) !important;
+}
+
+.sidebar-item::before {
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--md-primary) !important;
+}
+
+/* ——— Native cal list spacing ——— */
+.blsm-native-cal-list {
+  gap: 6px !important;
+}
+
+.blsm-page-macro-calibrations .blsm-native-cal.card {
+  border-radius: var(--md-radius-sm) !important;
+  box-shadow: none !important;
+}
+
+.blsm-page-macro-calibrations .blsm-native-cal.card::before {
+  display: none;
+}
+
+/* ——— Dropdowns (portaled to body) ——— */
+.blossom-dropdown {
+  position: relative;
+  z-index: 1;
+}
+
+.blossom-dropdown-trigger {
+  min-height: 36px !important;
+  padding: 8px 11px !important;
+  border-radius: var(--md-radius-sm) !important;
+  border: 1px solid var(--md-outline) !important;
+  background: var(--md-surface-dim) !important;
+  transition: border-color 0.12s ease, background 0.12s ease !important;
+}
+
+.blossom-dropdown-trigger:hover {
+  border-color: var(--md-outline-strong) !important;
+  background: var(--md-surface-high) !important;
+}
+
+.blossom-dropdown.is-open .blossom-dropdown-trigger {
+  border-color: var(--md-primary) !important;
+  background: var(--md-surface) !important;
+  box-shadow: 0 0 0 2px var(--md-primary-container) !important;
+}
+
+.blossom-dropdown.is-open .blossom-dropdown-chevron {
+  transform: rotate(180deg);
+  color: var(--md-primary);
+}
+
+.blossom-dropdown-menu--portal {
+  position: fixed !important;
+  border-radius: var(--md-radius-sm) !important;
+  border: 1px solid var(--md-outline-strong) !important;
+  background: var(--md-surface) !important;
+  box-shadow: var(--md-elevation-menu) !important;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.98);
+  transition: opacity 0.12s ease, transform 0.12s var(--md-ease);
+}
+
+.blossom-dropdown-menu--portal.is-open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1);
+}
+
+.blossom-dropdown-menu--portal[data-placement="up"].is-open {
+  transform-origin: bottom center;
+}
+
+.blossom-dropdown-menu--portal[data-placement="down"].is-open {
+  transform-origin: top center;
+}
+
+.blossom-dropdown-list {
+  max-height: inherit;
+  overflow-y: auto;
+  padding: 4px !important;
+}
+
+.blossom-dropdown-option {
+  border-radius: var(--md-radius-sm) !important;
+  margin: 1px 0 !important;
+  padding: 8px 10px !important;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.blossom-dropdown-option:hover {
+  background: var(--md-primary-container) !important;
+  color: var(--md-on-surface) !important;
+}
+
+.blossom-dropdown-option.is-selected {
+  background: color-mix(in srgb, var(--md-primary) 22%, transparent) !important;
+  color: var(--md-on-surface) !important;
+  font-weight: 600;
+}
+
+.blossom-dropdown-option:active {
+  background: color-mix(in srgb, var(--md-primary) 32%, transparent) !important;
+}
+
+/* Open card stacks above neighbors */
+.page-content .card:has(.blossom-dropdown.is-open),
+.main-content .card:has(.blossom-dropdown.is-open) {
+  z-index: 50;
+}
+
+/* Perf: skip painting off-screen collapsed cards */
+.page-content .card,
+.main-content .card {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 72px;
+}
+
+#blsm-cal-hub,
+.blsm-md-accordion.is-expanded,
+.page-content .card:has(.blossom-dropdown.is-open),
+.main-content .card:has(.blossom-dropdown.is-open) {
+  content-visibility: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-content .card,
+  .btn,
+  .blsm-md-tab,
+  .blsm-mouse-cal-tab,
+  .blossom-dropdown-menu--portal {
+    transition: none !important;
+  }
+}

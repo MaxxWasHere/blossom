@@ -1,0 +1,87 @@
+/* Hide the bundled React update banner; Blossom uses a modal prompt instead */
+.update-banner {
+  display: none !important;
+}
+
+.blossom-update-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.blossom-update-dialog {
+  position: relative;
+  width: min(420px, 100%);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  padding: 22px 24px 20px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.blossom-update-dialog .corner-bracket {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--corner-color, var(--accent));
+  border-style: solid;
+  pointer-events: none;
+}
+
+.blossom-update-dialog .corner-bracket.tl {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+}
+
+.blossom-update-dialog .corner-bracket.tr {
+  top: 0;
+  right: 0;
+  border-width: 2px 2px 0 0;
+}
+
+.blossom-update-dialog .corner-bracket.bl {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 2px 2px;
+}
+
+.blossom-update-dialog .corner-bracket.br {
+  bottom: 0;
+  right: 0;
+  border-width: 0 2px 2px 0;
+}
+
+.blossom-update-dialog h3 {
+  margin: 0 0 8px;
+  font-size: 1.15rem;
+  color: var(--accent-text);
+}
+
+.blossom-update-dialog p {
+  margin: 0 0 18px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  font-size: 13px;
+}
+
+.blossom-update-dialog .blossom-update-status {
+  margin: -8px 0 14px;
+  font-size: 12px;
+  color: var(--warning);
+}
+
+.blossom-update-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.blossom-update-actions .btn {
+  min-width: 96px;
+}

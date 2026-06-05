@@ -1,0 +1,84 @@
+/* Blossom main UI polish — GPU-cheap micro-interactions + QoL.
+   Rules: animate only transform / opacity / color / border-color. No blur,
+   no big box-shadows, no layout-thrashing properties. Everything degrades
+   gracefully and respects prefers-reduced-motion. */
+
+:root,
+[data-theme] {
+  --blsm-ease: cubic-bezier(.2, .8, .2, 1);
+  --accent-soft: color-mix(in srgb, var(--accent, #e891a8) 26%, transparent);
+}
+
+/* ——— Thin, themed scrollbars everywhere ——— */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-hover, #32242a) transparent;
+}
+::-webkit-scrollbar { width: 9px; height: 9px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover, #32242a);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dim, #c46d88);
+  background-clip: padding-box;
+}
+
+/* Buttons/cards/sidebar: see blossom-material.css */
+
+/* ——— Inputs: focus ring in accent ——— */
+.form-input:not(.blossom-dropdown-native):focus,
+.item-amount-input:focus,
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus {
+  border-color: var(--accent, #e891a8) !important;
+  box-shadow: 0 0 0 3px var(--accent-soft, rgba(232, 145, 168, .22)) !important;
+  outline: none !important;
+}
+
+/* Page transitions: blossom-animations.css */
+
+/* ——— Toggles / switches: smoother knob travel (if present) ——— */
+.toggle-switch,
+.switch,
+.toggle {
+  transition: background .2s ease, border-color .2s ease;
+}
+
+/* ——— Back-to-top pill (created by blossom-qol.js) ——— */
+#blsm-top {
+  position: absolute;
+  right: 16px; bottom: 16px;
+  z-index: 50;
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border: 1px solid var(--border, #241a1e);
+  background: var(--bg-card, #161014);
+  color: var(--text-secondary, #a1a1aa);
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(8px) scale(.9);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s var(--blsm-ease),
+    color .15s ease, border-color .15s ease;
+}
+#blsm-top.is-visible { opacity: 1; transform: none; pointer-events: auto; }
+#blsm-top:hover {
+  color: var(--text-primary, #e4e4e7);
+  border-color: var(--accent, #e891a8);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn, .calibration-btn, .card, .stat-card, .sidebar-item,
+  .blsm-page-enter > *, #blsm-top {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+}

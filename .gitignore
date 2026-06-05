@@ -1,0 +1,69 @@
+# Blossom — local / generated / secrets (see repo docs for shipped files)
+# Summary: Python caches & venvs; build/dist; .env & Wrangler secrets; bot/server deps;
+# debug logs; script scratch outputs; optional local build serial.
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+discord-bot/
+
+# --- Build / packaging ---
+build/
+dist/
+*.manifest
+build_serial.json
+# PyInstaller one-off local specs (keep BlossomMacro.spec in repo)
+BlossomMacro-*.spec
+!BlossomMacro.spec
+
+# --- Logs & debug ---
+debug-*.log
+*.log
+pin_debug.txt
+pyarmor.bug.log
+
+# --- Legacy / local binaries ---
+CoteabMacro.exe
+Blossom/
+
+# --- Secrets (templates: **/.env.example only) ---
+.env
+.env.*
+!.env.example
+!**/.env.example
+*.local
+**/.dev.vars
+
+# --- License server (Cloudflare) — never ship: reveals admin surface ---
+license-server/
+
+# --- Agent / editor scratch (never ship) ---
+_*.txt
+_brand_out.txt
+scripts/out_*.txt
+scripts/_tmp_*
+scripts/_*.txt
+scripts/_snip*.txt
+scripts/_m*.txt
+scripts/_scan_out.txt
+
+# --- OS / IDE (optional local) ---
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# --- Cursor / editor agent (local only) ---
+.cursor/

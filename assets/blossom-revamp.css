@@ -1,0 +1,286 @@
+/* ============================================================================
+   Blossom GUI Revamp
+   Loads AFTER the bundled inline <style> so it actually wins the cascade.
+   Theme-token aware: it reuses --accent / --bg-* etc, so all themes keep
+   working — we change SHAPE, DEPTH, LAYOUT and RHYTHM, not the palette.
+   Performance: only static gradients + transform/opacity/color transitions.
+   ========================================================================== */
+
+:root,
+[data-theme] {
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --blsm-ease: cubic-bezier(.2, .8, .2, 1);
+  --blsm-accent-soft: color-mix(in srgb, var(--accent, #e891a8) 22%, transparent);
+  --blsm-accent-faint: color-mix(in srgb, var(--accent, #e891a8) 10%, transparent);
+}
+
+/* ——— App background: layered mesh for depth (static, cheap) ——— */
+.window-frame .main-content {
+  background:
+    radial-gradient(900px 520px at 88% -8%, var(--blsm-accent-faint), transparent 60%),
+    radial-gradient(700px 480px at -6% 108%, color-mix(in srgb, var(--accent, #e891a8) 7%, transparent), transparent 60%),
+    var(--bg-main) !important;
+}
+
+/* ——— Header groups must stay horizontal (fix stacking) ——— */
+.window-frame .header-bar {
+  flex-wrap: nowrap !important;
+  width: 100%;
+}
+.window-frame .header-left,
+.window-frame .header-right {
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+}
+.window-frame .header-left .btn-start,
+.window-frame .header-left .btn-stop {
+  width: auto !important;
+  flex: 0 0 auto !important;
+  max-width: none !important;
+}
+
+/* ——— Window: softer rounding ——— */
+.window-frame {
+  border-radius: 12px !important;
+}
+
+/* ============================ SIDEBAR ============================ */
+.window-frame .sidebar {
+  width: 212px !important;
+  min-width: 212px !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent, #e891a8) 6%, var(--bg-sidebar)) 0%, var(--bg-sidebar) 180px) !important;
+  border-right: 1px solid var(--border) !important;
+}
+
+.window-frame .sidebar-brand {
+  padding: 14px 14px 12px !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.window-frame .sidebar-brand h1 {
+  font-size: 18px !important;
+  font-weight: 800 !important;
+  background: linear-gradient(92deg, var(--accent-text, #f5c6d4), var(--accent, #e891a8)) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+}
+.window-frame .sidebar-brand .version {
+  display: inline-block;
+  margin-top: 6px !important;
+  padding: 2px 8px;
+  font-size: 10.5px !important;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: var(--accent-text, #f5c6d4);
+  background: var(--blsm-accent-faint);
+  border: 1px solid var(--blsm-accent-soft);
+  border-radius: 999px;
+}
+
+.window-frame .sidebar-nav { padding: 7px !important; }
+
+.window-frame .sidebar-section-label {
+  padding: 11px 10px 5px !important;
+  font-size: 9.5px !important;
+  font-weight: 800 !important;
+  letter-spacing: .14em !important;
+  text-transform: uppercase;
+  color: var(--text-muted) !important;
+}
+
+.window-frame .sidebar-item {
+  position: relative;
+  margin-bottom: 2px !important;
+  padding: 7px 10px !important;
+  border-radius: var(--r-sm) !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
+  transition: color .15s ease, background .18s ease, transform .14s var(--blsm-ease) !important;
+}
+.window-frame .sidebar-item::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 50%;
+  width: 3px; height: 0;
+  border-radius: 0 4px 4px 0;
+  background: linear-gradient(180deg, var(--accent-text, #f5c6d4), var(--accent, #e891a8));
+  transform: translateY(-50%);
+  transition: height .2s var(--blsm-ease);
+}
+.window-frame .sidebar-item:hover {
+  background: var(--blsm-accent-faint) !important;
+  color: var(--text-primary) !important;
+  transform: translateX(3px);
+}
+.window-frame .sidebar-item.active {
+  background: linear-gradient(92deg, var(--blsm-accent-soft), var(--blsm-accent-faint)) !important;
+  color: var(--accent-text, #f5c6d4) !important;
+  box-shadow: none !important;
+}
+.window-frame .sidebar-item.active::before { height: 56% !important; display: block !important; }
+
+.window-frame .sidebar-footer {
+  padding: 10px 14px !important;
+  border-top: 1px solid var(--border) !important;
+}
+
+/* ============================ HEADER ============================ */
+.window-frame .header-bar {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.window-frame .header-bar::after {
+  display: none !important;
+}
+
+/* ============================ PAGE ============================ */
+.window-frame .page-content { padding: 16px 18px !important; }
+
+.window-frame .page-header { margin-bottom: 12px !important; }
+.window-frame .page-header h2 {
+  position: relative;
+  font-size: 19px !important;
+  font-weight: 800 !important;
+  padding-bottom: 6px;
+}
+.window-frame .page-header h2::after {
+  content: "";
+  position: absolute;
+  left: 0; bottom: 0; width: 34px; height: 2px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent, #e891a8), transparent);
+}
+
+/* ============================ CARDS ============================ */
+.window-frame .card,
+.window-frame .stat-card,
+.window-frame .changelog-item,
+.window-frame .credit-item,
+.window-frame .buff-item,
+.window-frame .info-banner {
+  border-radius: var(--r-lg) !important;
+  border: 1px solid var(--border) !important;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--accent, #e891a8) 4%, var(--bg-card)), var(--bg-card)) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, .03) inset, 0 6px 18px rgba(0, 0, 0, .28) !important;
+  transition: transform .18s var(--blsm-ease), border-color .18s ease, box-shadow .2s ease !important;
+}
+.window-frame .card { padding: 13px 14px !important; margin-bottom: 10px !important; }
+
+.window-frame .card:hover,
+.window-frame .stat-card:hover,
+.window-frame .credit-item:hover,
+.window-frame .buff-item:hover {
+  transform: translateY(-3px) !important;
+  border-color: var(--blsm-accent-soft) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, .38) !important;
+}
+
+.window-frame .stat-card {
+  background:
+    radial-gradient(120% 140% at 100% 0%, var(--blsm-accent-faint), transparent 55%),
+    var(--bg-card) !important;
+}
+
+.window-frame .card-header .card-icon {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: var(--r-sm) !important;
+  background: linear-gradient(135deg, var(--accent, #e891a8), var(--accent-dim, #c46d88)) !important;
+  color: #fff !important;
+  box-shadow: 0 4px 12px var(--blsm-accent-soft) !important;
+}
+
+/* ============================ BUTTONS ============================ */
+.window-frame .btn {
+  min-height: 30px !important;
+  padding: 6px 13px !important;
+  border-radius: var(--r-sm) !important;
+  font-weight: 700 !important;
+  font-size: 12.5px !important;
+  letter-spacing: .01em;
+  transition: transform .12s var(--blsm-ease), box-shadow .16s ease, filter .16s ease, background .16s ease !important;
+}
+.window-frame .btn:hover { transform: translateY(-1px) !important; filter: brightness(1.06); }
+.window-frame .btn:active { transform: translateY(0) scale(.98) !important; }
+
+.window-frame .header-bar .btn-start {
+  background: var(--success, #22c55e) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.window-frame .btn-start {
+  background: linear-gradient(180deg, var(--success, #22c55e), var(--success-dim, #16a34a)) !important;
+  color: #fff !important;
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--success, #22c55e) 22%, transparent) !important;
+}
+.window-frame .btn-stop {
+  background: linear-gradient(180deg, var(--danger, #ef4444), var(--danger-dim, #dc2626)) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--danger, #ef4444) 30%, transparent) !important;
+}
+.window-frame .btn-accent {
+  background: linear-gradient(180deg, var(--accent, #e891a8), var(--accent-dim, #c46d88)) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 16px var(--blsm-accent-soft) !important;
+}
+.window-frame .btn-secondary,
+.window-frame .btn-import,
+.window-frame .update-btn-secondary {
+  background: var(--bg-card) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text-secondary) !important;
+}
+.window-frame .btn-secondary:hover,
+.window-frame .btn-import:hover {
+  border-color: var(--blsm-accent-soft) !important;
+  color: var(--text-primary) !important;
+}
+
+/* ============================ MISC POLISH ============================ */
+.window-frame .form-input:not(.blossom-dropdown-native):focus,
+.window-frame .item-amount-input:focus,
+.window-frame input[type="text"]:focus,
+.window-frame input[type="number"]:focus,
+.window-frame textarea:focus {
+  border-color: var(--accent, #e891a8) !important;
+  box-shadow: 0 0 0 3px var(--blsm-accent-soft) !important;
+  outline: none !important;
+}
+
+.window-frame .status-badge,
+.window-frame .keybind-badge {
+  border-radius: 999px !important;
+  border: 1px solid var(--blsm-accent-soft) !important;
+  background: var(--blsm-accent-faint) !important;
+}
+
+/* Scrollbars (defined last so these win) */
+.window-frame ::-webkit-scrollbar { width: 10px; height: 10px; }
+.window-frame ::-webkit-scrollbar-track { background: transparent; }
+.window-frame ::-webkit-scrollbar-thumb {
+  background: var(--border-hover, #2d2d44);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+.window-frame ::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-dim, #c46d88);
+  background-clip: padding-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .window-frame .card, .window-frame .btn, .window-frame .sidebar-item,
+  .window-frame .stat-card {
+    transition: none !important;
+    transform: none !important;
+  }
+}

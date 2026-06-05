@@ -1,0 +1,101 @@
+/* Cleaner Blossom UI — calmer surfaces, room for side dock */
+
+/* Reserve right edge for floating pills */
+.window-frame .main-content.blsm-has-dock .page-content {
+  padding-right: 58px !important;
+}
+
+.window-frame .main-content.blsm-has-dock {
+  position: relative;
+}
+
+/* Less visual noise in header */
+.window-frame .header-bar {
+  background: var(--bg-sidebar, #100c0e) !important;
+  border-bottom: 1px solid var(--border, #241a1e) !important;
+  box-shadow: none !important;
+}
+
+.window-frame .header-bar::after {
+  display: none !important;
+}
+
+.window-frame .header-bar .btn-start {
+  box-shadow: 0 1px 4px rgba(34, 197, 94, 0.25) !important;
+}
+
+.window-frame .header-bar .btn-start:hover {
+  box-shadow: 0 2px 10px rgba(34, 197, 94, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Sidebar: calmer, no slide on hover */
+.window-frame .sidebar-item:hover {
+  transform: none !important;
+}
+
+.window-frame .sidebar {
+  background: var(--bg-sidebar, #100c0e) !important;
+}
+
+.window-frame .main-content {
+  background: var(--bg-main, #0d090b) !important;
+}
+
+/* Softer mesh — less busy background */
+.window-frame .main-content {
+  background-image: none !important;
+}
+
+/* Cards: flat, readable */
+.window-frame .card,
+.window-frame .changelog-item {
+  border-radius: 10px !important;
+  margin-bottom: 10px !important;
+  box-shadow: none !important;
+}
+
+.window-frame .card:hover {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.window-frame .page-header h2::after {
+  display: none !important;
+}
+
+/* Changelog: tighter, cleaner lists */
+.window-frame .changelog-item {
+  padding: 14px 16px !important;
+  border-left-width: 2px !important;
+  background: var(--bg-card, #161014) !important;
+}
+
+.window-frame .changelog-item ul {
+  margin-top: 6px !important;
+}
+
+.window-frame .changelog-item ul li {
+  padding: 2px 0 2px 12px !important;
+  line-height: 1.5 !important;
+  color: var(--text-secondary, #a1a1aa) !important;
+}
+
+.window-frame .changelog-item ul li::before {
+  content: "·" !important;
+  left: 2px !important;
+  color: var(--accent, #e891a8) !important;
+}
+
+.window-frame .changelog-item h4 {
+  font-size: 13px !important;
+  margin-bottom: 6px !important;
+}
+
+/* Page titles */
+.window-frame .page-header {
+  padding-bottom: 2px;
+}
+
+.window-frame .page-header p {
+  max-width: 52ch;
+}

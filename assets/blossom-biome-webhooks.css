@@ -1,0 +1,128 @@
+/* Biome notifier hub — Webhook tab overlay */
+
+.blsm-biome-webhooks-active .blsm-legacy-biome-config-card {
+  display: none !important;
+}
+
+#blsm-biome-webhooks-hub {
+  position: relative;
+  margin-bottom: 18px;
+  border: 1px solid var(--border-accent, rgba(232, 145, 168, 0.35));
+  box-shadow: var(--shadow-glow, 0 0 20px rgba(232, 145, 168, 0.08));
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 0;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-global {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: center;
+  padding: 0 16px 12px;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+  margin-bottom: 4px;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-global label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-secondary, #a1a1aa);
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-global select {
+  min-width: 160px;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-table-wrap {
+  max-height: min(62vh, 520px);
+  overflow: auto;
+  margin: 0 8px 12px;
+  border: 1px solid var(--border, #1f1f2e);
+  background: var(--bg-input, #111119);
+}
+
+#blsm-biome-webhooks-hub table.blsm-bwh-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  text-align: left;
+  padding: 10px 10px;
+  background: var(--bg-card-hover, #1a1a28);
+  color: var(--text-muted, #636370);
+  font-weight: 600;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+  vertical-align: middle;
+}
+
+#blsm-biome-webhooks-hub tr.blsm-bwh-row-rare td:first-child .blsm-bwh-name {
+  color: #fbbf24;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-rare-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fbbf24;
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  padding: 2px 6px;
+}
+
+#blsm-biome-webhooks-hub input.form-input,
+#blsm-biome-webhooks-hub select.form-input {
+  width: 100%;
+  min-width: 0;
+  font-size: 12px;
+  padding: 5px 8px;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-notify {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#blsm-biome-webhooks-hub .blsm-bwh-hint {
+  margin: 0 16px 14px;
+  font-size: 11px;
+  color: var(--text-muted, #636370);
+  line-height: 1.5;
+}

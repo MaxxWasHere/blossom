@@ -1,0 +1,157 @@
+/* Responsive auto-layout — sidebar, header, and content adapt to window size */
+
+.window-frame .app-layout {
+  display: flex !important;
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.window-frame .main-content {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.window-frame .page-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: clamp(10px, 1.8vw, 18px) !important;
+}
+
+/* Sidebar: fluid width */
+.window-frame .sidebar {
+  width: clamp(168px, 22vw, 212px) !important;
+  min-width: 0 !important;
+  flex: 0 0 clamp(168px, 22vw, 212px) !important;
+}
+
+.window-frame .sidebar-nav {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Header: wrap instead of overflow */
+.window-frame .header-bar {
+  flex-wrap: wrap !important;
+  align-content: center;
+  row-gap: 8px !important;
+  column-gap: 10px !important;
+  padding: 8px clamp(10px, 1.5vw, 14px) !important;
+  min-height: unset !important;
+  -webkit-app-region: no-drag !important;
+  app-region: no-drag !important;
+}
+
+.window-frame .header-left,
+.window-frame .header-right {
+  flex-wrap: wrap !important;
+  min-width: 0;
+}
+
+.window-frame .header-left {
+  flex: 1 1 200px !important;
+}
+
+.window-frame .header-right {
+  flex: 1 1 180px !important;
+  justify-content: flex-end;
+}
+
+.window-frame .header-right input.form-input,
+.window-frame .header-right input[type="text"] {
+  min-width: 0;
+  max-width: 100%;
+  flex: 1 1 100px;
+}
+
+/* Cards and grids */
+.window-frame .card-grid,
+.window-frame .stats-grid,
+.window-frame .buff-grid {
+  display: grid !important;
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(min(100%, 240px), 1fr)
+  ) !important;
+  gap: clamp(8px, 1.2vw, 14px) !important;
+}
+
+.window-frame .page-header {
+  margin-bottom: clamp(8px, 1.5vw, 14px) !important;
+}
+
+.window-frame .page-header h2 {
+  font-size: clamp(1rem, 2.2vw, 1.25rem) !important;
+}
+
+/* Narrow: compact sidebar labels */
+@media (max-width: 820px) {
+  .window-frame .sidebar {
+    flex: 0 0 152px !important;
+    width: 152px !important;
+  }
+
+  .window-frame .sidebar-brand h1 {
+    font-size: 15px !important;
+  }
+
+  .window-frame .sidebar-item {
+    padding: 6px 8px !important;
+    font-size: 11.5px !important;
+  }
+}
+
+@media (max-width: 680px) {
+  .window-frame .sidebar {
+    flex: 0 0 52px !important;
+    width: 52px !important;
+  }
+
+  .window-frame .sidebar-brand .version,
+  .window-frame .sidebar-section-label,
+  .window-frame .sidebar-footer,
+  .window-frame .sidebar-item {
+    font-size: 0 !important;
+    line-height: 0 !important;
+    color: transparent !important;
+  }
+
+  .window-frame .sidebar-item .icon,
+  .window-frame .sidebar-brand h1 {
+    font-size: 0 !important;
+  }
+
+  .window-frame .sidebar-brand {
+    padding: 10px 6px !important;
+  }
+
+  .window-frame .sidebar-brand::after {
+    content: "B";
+    display: block;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--accent-text, #f5c6d4);
+    line-height: 1.2;
+  }
+
+  .window-frame .sidebar-item {
+    justify-content: center;
+    padding: 8px 4px !important;
+  }
+
+  .window-frame .sidebar-item::before {
+    display: none !important;
+  }
+
+  .window-frame .header-bar .btn-start,
+  .window-frame .header-bar .btn-stop {
+    flex: 1 1 auto;
+    min-width: 120px;
+  }
+}

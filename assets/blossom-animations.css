@@ -1,0 +1,453 @@
+/* Blossom motion — global UI animations (transform + opacity only) */
+
+:root {
+  --blsm-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --blsm-ease-spring: cubic-bezier(0.34, 1.4, 0.64, 1);
+  --blsm-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.blsm-motion-on .page-content .card,
+html.blsm-motion-on .main-content .card {
+  content-visibility: visible !important;
+}
+
+/* Hold at animation start until .blsm-page-enter runs (no unstyled flash) */
+html.blsm-motion-on .page-content:not(.blsm-page-enter) > .page-header,
+html.blsm-motion-on .main-content:not(.blsm-page-enter) > .page-header {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+html.blsm-motion-on .page-content:not(.blsm-page-enter) > .card,
+html.blsm-motion-on .page-content:not(.blsm-page-enter) > .changelog-item,
+html.blsm-motion-on .page-content:not(.blsm-page-enter) > #blsm-cal-hub,
+html.blsm-motion-on .page-content:not(.blsm-page-enter) > .blsm-mouse-cal-card,
+html.blsm-motion-on .main-content:not(.blsm-page-enter) > .card,
+html.blsm-motion-on .main-content:not(.blsm-page-enter) > .changelog-item,
+html.blsm-motion-on .main-content:not(.blsm-page-enter) > #blsm-cal-hub,
+html.blsm-motion-on .main-content:not(.blsm-page-enter) > .blsm-mouse-cal-card {
+  opacity: 0;
+  transform: translateY(14px);
+}
+
+@keyframes blsm-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blsm-fade-down {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blsm-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes blsm-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blsm-row-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes blsm-expand-in {
+  from {
+    opacity: 0;
+    transform: scaleY(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes blsm-glow-pulse {
+  0%,
+  100% {
+    box-shadow: var(--md-elevation-1, 0 1px 2px rgba(0, 0, 0, 0.2));
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(232, 145, 168, 0.25), 0 4px 14px rgba(232, 145, 168, 0.12);
+  }
+}
+
+/* ——— Page transition ——— */
+.blsm-page-enter > .page-header {
+  animation: blsm-fade-down 0.42s var(--blsm-ease-out) both;
+}
+
+.blsm-page-enter > .card,
+.blsm-page-enter > .changelog-item,
+.blsm-page-enter > #blsm-cal-hub,
+.blsm-page-enter > .blsm-mouse-cal-card {
+  animation: blsm-fade-up 0.52s var(--blsm-ease-out) both;
+  animation-delay: calc(var(--blsm-stagger, 0) * 65ms + 45ms);
+}
+
+/* ——— Cards & headers ——— */
+html.blsm-motion-on .page-content .card,
+html.blsm-motion-on .main-content .card {
+  transition:
+    border-color 0.22s ease,
+    box-shadow 0.28s var(--blsm-ease-out),
+    transform 0.22s var(--blsm-ease-out) !important;
+}
+
+html.blsm-motion-on .page-content .card:hover,
+html.blsm-motion-on .main-content .card:hover {
+  transform: translateY(-2px) !important;
+}
+
+html.blsm-motion-on .card > .card-header {
+  transition: background 0.2s ease, transform 0.2s var(--blsm-ease-out);
+}
+
+html.blsm-motion-on .card > .card-header:active {
+  transform: scale(0.995);
+}
+
+html.blsm-motion-on .blsm-md-accordion.is-expanded > .card-header {
+  animation: blsm-glow-pulse 0.55s ease;
+}
+
+/* Card expand morph: blossom-morph.css */
+
+html.blsm-motion-on .card-header .card-icon {
+  transition: transform 0.25s var(--blsm-ease-spring), border-color 0.2s ease;
+}
+
+html.blsm-motion-on .card:hover > .card-header .card-icon {
+  transform: scale(1.06) rotate(-3deg);
+}
+
+/* ——— Buttons ——— */
+html.blsm-motion-on .btn,
+html.blsm-motion-on .calibration-btn {
+  transition:
+    transform 0.16s var(--blsm-ease-spring),
+    background 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.2s ease !important;
+}
+
+html.blsm-motion-on .btn:hover,
+html.blsm-motion-on .calibration-btn:hover {
+  transform: translateY(-2px) !important;
+}
+
+html.blsm-motion-on .btn:active,
+html.blsm-motion-on .calibration-btn:active {
+  transform: scale(0.96) !important;
+}
+
+html.blsm-motion-on .btn-accent:hover,
+html.blsm-motion-on .btn-start:hover {
+  box-shadow: 0 6px 18px rgba(232, 145, 168, 0.35) !important;
+}
+
+/* ——— Sidebar ——— */
+html.blsm-motion-on .sidebar-item {
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    transform 0.2s var(--blsm-ease-out),
+    padding-left 0.2s ease !important;
+}
+
+html.blsm-motion-on .sidebar-item:hover {
+  transform: translateX(4px) !important;
+}
+
+html.blsm-motion-on .sidebar-item.active,
+html.blsm-motion-on .sidebar-item.is-active {
+  animation: blsm-slide-in 0.35s var(--blsm-ease-out);
+}
+
+/* ——— Dropdowns ——— */
+html.blsm-motion-on .blossom-dropdown-trigger {
+  transition:
+    border-color 0.16s ease,
+    background 0.16s ease,
+    transform 0.18s var(--blsm-ease-out),
+    box-shadow 0.2s ease !important;
+}
+
+html.blsm-motion-on .blossom-dropdown.is-open .blossom-dropdown-trigger {
+  transform: scale(1.01);
+}
+
+html.blsm-motion-on .blossom-dropdown-chevron {
+  transition: transform 0.28s var(--blsm-ease-spring) !important;
+}
+
+html.blsm-motion-on .blossom-dropdown-menu--portal {
+  transition:
+    opacity 0.2s ease,
+    transform 0.24s var(--blsm-ease-spring) !important;
+}
+
+html.blsm-motion-on .blossom-dropdown-menu--portal.is-open {
+  animation: blsm-scale-in 0.22s var(--blsm-ease-out) both;
+}
+
+html.blsm-motion-on .blossom-dropdown-option {
+  transition:
+    background 0.12s ease,
+    transform 0.14s var(--blsm-ease-out),
+    color 0.12s ease !important;
+}
+
+html.blsm-motion-on .blossom-dropdown-option:hover {
+  transform: translateX(5px) !important;
+}
+
+/* ——— Calibration hub ——— */
+html.blsm-motion-on #blsm-cal-hub .blsm-cal-section-head {
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+html.blsm-motion-on #blsm-cal-hub .blsm-cal-section-head:hover {
+  transform: translateX(3px);
+}
+
+/* Cal section morph: blossom-morph.css */
+
+html.blsm-motion-on #blsm-cal-hub .blsm-cal-chevron {
+  transition: transform 0.3s var(--blsm-ease-spring) !important;
+}
+
+html.blsm-motion-on .blsm-cal-mark-row,
+html.blsm-motion-on .blsm-cal-step-row,
+html.blsm-motion-on .blsm-mouse-cal-row {
+  transition:
+    transform 0.2s var(--blsm-ease-out),
+    background 0.16s ease,
+    border-color 0.16s ease;
+}
+
+html.blsm-motion-on .blsm-cal-mark-row:hover,
+html.blsm-motion-on .blsm-cal-step-row:hover,
+html.blsm-motion-on .blsm-mouse-cal-row:hover {
+  transform: translateX(4px);
+}
+
+html.blsm-motion-on .blsm-cal-tab,
+html.blsm-motion-on .blsm-mouse-cal-tab,
+html.blsm-motion-on .blsm-md-tab {
+  transition:
+    transform 0.2s var(--blsm-ease-spring),
+    background 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease !important;
+}
+
+html.blsm-motion-on .blsm-cal-tab.is-active,
+html.blsm-motion-on .blsm-mouse-cal-tab.is-active,
+html.blsm-motion-on .blsm-md-tab.is-active {
+  transform: scale(1.04);
+}
+
+/* ——— Native calibration accordions ——— */
+html.blsm-motion-on .blsm-native-cal.card {
+  transition: transform 0.22s var(--blsm-ease-out), border-color 0.2s ease;
+}
+
+html.blsm-motion-on .blsm-native-cal.card:hover {
+  transform: translateX(3px);
+}
+
+html.blsm-motion-on .blsm-native-cal.is-expanded .coord-input-group {
+  animation: blsm-row-in 0.32s var(--blsm-ease-out) both;
+  animation-delay: calc(var(--blsm-i, 0) * 24ms);
+}
+
+/* ——— Toggles, inputs, pills ——— */
+html.blsm-motion-on .toggle-slider {
+  transition: background 0.22s ease, transform 0.22s var(--blsm-ease-spring) !important;
+}
+
+html.blsm-motion-on .toggle-slider::before {
+  transition: transform 0.22s var(--blsm-ease-spring) !important;
+}
+
+html.blsm-motion-on .form-input:focus {
+  transition: border-color 0.15s ease, box-shadow 0.2s ease, transform 0.15s ease !important;
+  transform: scale(1.01);
+}
+
+html.blsm-motion-on .blsm-pill {
+  transition: transform 0.2s var(--blsm-ease-spring), box-shadow 0.2s ease, background 0.18s ease;
+}
+
+html.blsm-motion-on .blsm-pill:hover {
+  transform: scale(1.08);
+}
+
+html.blsm-motion-on #blsm-top {
+  transition:
+    opacity 0.25s ease,
+    transform 0.28s var(--blsm-ease-spring) !important;
+}
+
+html.blsm-motion-on #blsm-top.is-visible {
+  animation: blsm-scale-in 0.3s var(--blsm-ease-out);
+}
+
+html.blsm-motion-on .status-badge {
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+html.blsm-motion-on .header-bar .btn-start:hover {
+  transform: translateY(-1px) !important;
+}
+
+/* ——— Title bar ——— */
+html.blsm-motion-on .titlebar-btn {
+  transition:
+    background 0.16s ease,
+    color 0.16s ease,
+    transform 0.18s var(--blsm-ease-spring) !important;
+}
+
+html.blsm-motion-on .titlebar-btn:hover {
+  transform: scale(1.06);
+}
+
+/* ——— Sidebar nav ——— */
+html.blsm-motion-on .sidebar-item {
+  transition:
+    background 0.2s var(--blsm-ease-out),
+    color 0.2s ease,
+    transform 0.22s var(--blsm-ease-out) !important;
+}
+
+html.blsm-motion-on .sidebar-item:hover {
+  transform: translateX(4px) !important;
+}
+
+html.blsm-motion-on .sidebar-item.active {
+  animation: blsm-slide-in 0.38s var(--blsm-ease-out);
+}
+
+/* ——— Floating side dock ——— */
+@keyframes blsm-dock-in {
+  from {
+    opacity: 0;
+    transform: translateY(-50%) translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+}
+
+@keyframes blsm-pill-in {
+  from {
+    opacity: 0;
+    transform: scale(0.75) translateX(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateX(0);
+  }
+}
+
+@keyframes blsm-panel-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+html.blsm-motion-on #blsm-dock.blsm-dock-mount {
+  opacity: 0;
+  transform: translateY(-50%) translateX(20px);
+  animation: blsm-dock-in 0.52s var(--blsm-ease-out) 0.08s both;
+}
+
+html.blsm-motion-on #blsm-dock.blsm-dock-mount .blsm-pill[data-pill="stats"],
+html.blsm-motion-on #blsm-dock.blsm-dock-mount .blsm-pill[data-pill="settings"] {
+  opacity: 0;
+  transform: scale(0.75) translateX(10px);
+}
+
+html.blsm-motion-on #blsm-dock .blsm-pill[data-pill="stats"] {
+  animation: blsm-pill-in 0.44s var(--blsm-ease-spring) 0.18s both;
+}
+
+html.blsm-motion-on #blsm-dock .blsm-pill[data-pill="settings"] {
+  animation: blsm-pill-in 0.44s var(--blsm-ease-spring) 0.28s both;
+}
+
+html.blsm-motion-on #blsm-panel.is-open {
+  animation: blsm-panel-in 0.4s var(--blsm-ease-spring);
+}
+
+html.blsm-motion-on .blsm-pill .ic .dot.on {
+  animation: blsm-glow-pulse 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.blsm-motion-on .page-content:not(.blsm-page-enter) > .page-header,
+  html.blsm-motion-on .main-content:not(.blsm-page-enter) > .page-header,
+  html.blsm-motion-on .page-content:not(.blsm-page-enter) > .card,
+  html.blsm-motion-on .page-content:not(.blsm-page-enter) > .changelog-item,
+  html.blsm-motion-on .page-content:not(.blsm-page-enter) > #blsm-cal-hub,
+  html.blsm-motion-on .page-content:not(.blsm-page-enter) > .blsm-mouse-cal-card,
+  html.blsm-motion-on .main-content:not(.blsm-page-enter) > .card,
+  html.blsm-motion-on .main-content:not(.blsm-page-enter) > .changelog-item,
+  html.blsm-motion-on .main-content:not(.blsm-page-enter) > #blsm-cal-hub,
+  html.blsm-motion-on .main-content:not(.blsm-page-enter) > .blsm-mouse-cal-card,
+  html.blsm-motion-on #blsm-dock.blsm-dock-mount,
+  html.blsm-motion-on #blsm-dock.blsm-dock-mount .blsm-pill {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  html.blsm-motion-on *,
+  .blsm-page-enter > *,
+  .blsm-mouse-cal-native-row {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

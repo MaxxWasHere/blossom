@@ -1,0 +1,199 @@
+/* Custom desktop title bar + window shell (frameless pywebview) */
+
+:root {
+  --blsm-titlebar-h: 32px;
+  --blsm-caption-w: 46px;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+#root {
+  display: flex;
+  min-height: 0;
+}
+
+.window-frame {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  border: 1px solid var(--border, #1f1f2e);
+  background: var(--bg-root, #09090b);
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+html:not(.blsm-window-maximized) .window-frame {
+  border-radius: 10px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 16px 48px rgba(0, 0, 0, 0.55);
+}
+
+html.blsm-window-maximized .window-frame {
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
+/* Override bundled React titlebar styles (centered BLOSSOM + full-bar drag) */
+.blsm-titlebar.titlebar,
+.titlebar.blsm-titlebar,
+.titlebar.coteab-injected-titlebar {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  height: var(--blsm-titlebar-h);
+  min-height: var(--blsm-titlebar-h);
+  padding: 0;
+  margin: 0;
+  background: var(--bg-sidebar, #0f0f14) !important;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+  user-select: none;
+  -webkit-app-region: no-drag !important;
+  app-region: no-drag !important;
+  justify-content: flex-start !important;
+  z-index: 10100;
+}
+
+/* Hide legacy in-app titlebar if React ever renders one inside .app-layout */
+.app-layout > .titlebar:not(.blsm-titlebar) {
+  display: none !important;
+}
+
+.blsm-titlebar::before,
+.blsm-titlebar::after,
+.titlebar::before,
+.titlebar::after {
+  display: none !important;
+}
+
+.titlebar-drag-region {
+  position: absolute;
+  inset: 0;
+  right: calc(var(--blsm-caption-w) * 3);
+  z-index: 0;
+  -webkit-app-region: drag;
+  app-region: drag;
+}
+
+.titlebar-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.titlebar-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.blsm-titlebar .titlebar-title {
+  position: relative !important;
+  left: auto !important;
+  transform: none !important;
+  text-transform: none !important;
+  color: var(--text-secondary, #a1a1aa);
+  font-family: "Segoe UI", Inter, system-ui, sans-serif !important;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
+.titlebar-spacer {
+  flex: 1;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.titlebar-controls {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-shrink: 0;
+  height: 100%;
+  margin-left: auto;
+}
+
+.titlebar-btn {
+  width: var(--blsm-caption-w);
+  height: 100%;
+  min-width: var(--blsm-caption-w);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary, #e4e4e7);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.titlebar-btn svg,
+.titlebar-btn .titlebar-glyph {
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.titlebar-btn.minimize:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.titlebar-btn.close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+.titlebar-btn:active {
+  opacity: 0.92;
+}
+
+.titlebar-btn.minimize:active {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.titlebar-btn.close:active {
+  background: #9f2218;
+  color: #fff;
+}
+
+.titlebar-btn.resize,
+.titlebar-btn.maximize,
+[data-blsm-resize-btn],
+.titlebar-controls .titlebar-btn:not(.minimize):not(.close) {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.app-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  background: var(--bg-main);
+}

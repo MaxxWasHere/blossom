@@ -1,0 +1,158 @@
+[data-blossom-page="Credits"][data-blossom-credits-active="1"] > .card {
+  display: none !important;
+}
+
+.blossom-credits-root {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 720px;
+  margin: 0 auto 24px;
+}
+
+.blossom-credits-card {
+  position: relative;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  padding: 18px 20px;
+}
+
+.blossom-credits-card .corner-bracket {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-color: var(--corner-color, var(--accent));
+  border-style: solid;
+  pointer-events: none;
+}
+
+.blossom-credits-card .corner-bracket.tl {
+  top: 0;
+  left: 0;
+  border-width: 2px 0 0 2px;
+}
+
+.blossom-credits-card .corner-bracket.tr {
+  top: 0;
+  right: 0;
+  border-width: 2px 2px 0 0;
+}
+
+.blossom-credits-card .corner-bracket.bl {
+  bottom: 0;
+  left: 0;
+  border-width: 0 0 2px 2px;
+}
+
+.blossom-credits-card .corner-bracket.br {
+  bottom: 0;
+  right: 0;
+  border-width: 0 2px 2px 0;
+}
+
+.blossom-credits-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.blossom-credits-hero img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.blossom-credits-hero h3 {
+  margin: 0 0 6px;
+  color: var(--accent-text);
+  font-size: 1.35rem;
+}
+
+.blossom-credits-hero p {
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.blossom-credits-person {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.blossom-credits-person img {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.blossom-credits-person strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+.blossom-credits-person .role {
+  color: var(--accent-text);
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.blossom-credits-person p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.blossom-credits-person a {
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+.blossom-credits-person a:hover {
+  text-decoration: underline;
+}
+
+.blossom-credits-section-title {
+  margin: 0 0 12px;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.blossom-credits-list {
+  margin: 0;
+  padding-left: 1.15rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  font-size: 13px;
+}
+
+.blossom-credits-list li {
+  margin-bottom: 6px;
+}
+
+.blossom-credits-list li:last-child {
+  margin-bottom: 0;
+}
+
+.blossom-credits-muted {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.blossom-credits-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}

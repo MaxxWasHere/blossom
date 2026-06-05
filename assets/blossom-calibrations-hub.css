@@ -1,0 +1,476 @@
+/* Macro calibrations hub — extends blossom-material.css */
+
+#blsm-cal-hub {
+  --blsm-cal-ease: var(--md-ease, cubic-bezier(0.2, 0, 0, 1));
+  margin-bottom: 8px;
+}
+
+#blsm-cal-hub .blsm-cal-hub-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+}
+
+#blsm-cal-hub .blsm-cal-hub-top h3 {
+  margin: 0;
+  font: 700 15px/1.2 Sarpanch, system-ui, sans-serif;
+}
+
+#blsm-cal-hub .blsm-cal-hub-top p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-muted, #9ca3af);
+  line-height: 1.4;
+}
+
+#blsm-cal-hub .blsm-cal-hub-hint:empty {
+  display: none;
+}
+
+#blsm-cal-hub .blsm-cal-hub-hint .info-banner.blsm-cal-hint-in-hub {
+  margin: 0 !important;
+  padding: 8px 12px 10px !important;
+  border: none !important;
+  border-bottom: 1px solid var(--border, #1f1f2e) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-secondary, #a1a1aa);
+}
+
+#blsm-cal-hub .blsm-cal-hub-hint .info-banner.blsm-cal-hint-in-hub a {
+  color: var(--accent-text, #f5c6d4);
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section {
+  width: 100%;
+  margin: 0;
+  border: none;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+  border-radius: 0;
+  background: transparent;
+  border-left: 3px solid var(--blsm-cal-tone, var(--md-outline));
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section:last-child {
+  border-bottom: none;
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="amber"] {
+  --blsm-cal-tone: #d97706;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="cyan"] {
+  --blsm-cal-tone: #0891b2;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="green"] {
+  --blsm-cal-tone: #16a34a;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="lime"] {
+  --blsm-cal-tone: #22c55e;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="rose"] {
+  --blsm-cal-tone: #e11d48;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="violet"] {
+  --blsm-cal-tone: #7c3aed;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="indigo"] {
+  --blsm-cal-tone: #4f46e5;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="sky"] {
+  --blsm-cal-tone: #0284c7;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="yellow"] {
+  --blsm-cal-tone: #ca8a04;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="purple"] {
+  --blsm-cal-tone: #9333ea;
+}
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section[data-tone="teal"] {
+  --blsm-cal-tone: #0d9488;
+}
+
+#blsm-cal-hub .blsm-cal-preset-slot {
+  border-top: 1px solid var(--border, #1f1f2e);
+}
+
+#blsm-cal-hub .blsm-cal-preset-card {
+  width: 100%;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  border-left: 3px solid #6366f1 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+#blsm-cal-hub .blsm-cal-preset-card::before {
+  display: none !important;
+}
+
+#blsm-cal-hub .blsm-cal-preset-card .card-header {
+  padding: 10px 12px 8px !important;
+  border-bottom: none;
+  cursor: default;
+}
+
+#blsm-cal-hub .blsm-cal-preset-card > div:not(.card-header) {
+  padding: 0 12px 12px !important;
+}
+
+html.blsm-page-macro-calibrations .page-content > .info-banner:not(.blsm-cal-hint-in-hub),
+.page-content[data-blossom-page="Macro Calibrations"] > .info-banner:not(.blsm-cal-hint-in-hub) {
+  display: none !important;
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary, #e4e4e7);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.18s var(--blsm-cal-ease);
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-head:hover {
+  background: var(--md-primary-container, rgba(232, 145, 168, 0.14));
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-icon {
+  flex: 0 0 auto;
+  font-size: 15px;
+  line-height: 1;
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-text strong {
+  display: block;
+  font: 600 12px/1.2 Sarpanch, system-ui, sans-serif;
+  color: var(--blsm-cal-tone, var(--text-primary, #e4e4e7));
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-text span {
+  display: none;
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#blsm-cal-hub .blsm-cal-progress {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted, #9ca3af);
+  font-variant-numeric: tabular-nums;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-chevron {
+  width: 14px;
+  height: 14px;
+  opacity: 0.45;
+  transition: transform 0.3s var(--blsm-cal-ease);
+}
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section.is-open .blsm-cal-chevron {
+  transform: rotate(180deg);
+}
+
+/* Section expand morph: blossom-morph.css (.blsm-morph-body / .blsm-morph-panel) */
+
+:is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-scroll {
+  max-height: min(46vh, 440px);
+  overflow: auto;
+  content-visibility: visible;
+  scroll-behavior: smooth;
+  padding: 4px 12px 10px;
+}
+
+/* Biome selector: tabs instead of nested accordions */
+#blsm-cal-hub .blsm-cal-tab-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0;
+  margin-bottom: 8px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+}
+
+#blsm-cal-hub .blsm-cal-tab {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 10px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  border-radius: 0;
+  margin-bottom: -1px;
+  background: transparent;
+  color: var(--text-muted, #9ca3af);
+  font: 600 11px/1.2 Sarpanch, system-ui, sans-serif;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    color 0.18s,
+    border-color 0.18s;
+}
+
+#blsm-cal-hub .blsm-cal-tab:hover {
+  color: var(--text-secondary, #a1a1aa);
+  background: var(--bg-card-hover, #1a1a28);
+}
+
+#blsm-cal-hub .blsm-cal-tab.is-active {
+  color: var(--text-primary, #e4e4e7);
+  background: transparent;
+  border-bottom-color: var(--blsm-cal-tone, var(--accent, #e891a8));
+}
+
+/* Tab panel morph: blossom-morph.css (.blsm-morph-tab-panels / .blsm-morph-tab-panel) */
+
+#blsm-cal-hub .blsm-cal-mark-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#blsm-cal-hub .blsm-cal-mark-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+  background: transparent;
+}
+
+#blsm-cal-hub .blsm-cal-mark-row:last-child {
+  border-bottom: none;
+}
+
+#blsm-cal-hub .blsm-cal-mark-row.is-done {
+  border-left: 2px solid var(--success, #22c55e);
+}
+
+#blsm-cal-hub .blsm-cal-mark-label {
+  grid-column: 1;
+  font: 600 11px/1.3 Sarpanch, system-ui, sans-serif;
+  color: var(--text-primary, #e4e4e7);
+}
+
+#blsm-cal-hub .blsm-cal-mark-coords {
+  grid-column: 1;
+  font-size: 10px;
+  color: var(--text-muted, #9ca3af);
+  font-variant-numeric: tabular-nums;
+}
+
+#blsm-cal-hub .blsm-cal-mark-row .btn {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  padding: 5px 10px;
+  font-size: 11px;
+  min-height: 0;
+  align-self: center;
+}
+
+#blsm-cal-hub .blsm-cal-step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#blsm-cal-hub .blsm-cal-step-row {
+  display: grid;
+  grid-template-columns: 20px 1fr auto;
+  gap: 6px 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+  background: transparent;
+}
+
+#blsm-cal-hub .blsm-cal-step-row:last-child {
+  border-bottom: none;
+}
+
+#blsm-cal-hub .blsm-cal-step-row.is-done {
+  border-left: 2px solid var(--success, #22c55e);
+}
+
+#blsm-cal-hub .blsm-cal-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-card, #15151e);
+  color: var(--text-muted, #9ca3af);
+}
+
+#blsm-cal-hub .blsm-cal-step-copy strong {
+  display: block;
+  font-size: 11px;
+  color: var(--text-primary, #e4e4e7);
+}
+
+#blsm-cal-hub .blsm-cal-step-copy span {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted, #9ca3af);
+  margin-top: 1px;
+}
+
+#blsm-cal-hub .blsm-cal-step-row .btn {
+  padding: 5px 10px;
+  font-size: 11px;
+}
+
+#blsm-cal-hub .blsm-cal-layout-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+#blsm-cal-hub .blsm-cal-layout-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 10px;
+  color: var(--text-muted, #9ca3af);
+}
+
+#blsm-cal-hub .blsm-cal-layout-grid .form-input {
+  padding: 5px 6px;
+  font-size: 11px;
+}
+
+#blsm-cal-hub .blsm-cal-preview {
+  border: 1px solid var(--border, #1f1f2e);
+  border-radius: 6px;
+  overflow: auto;
+  max-height: 140px;
+  font-size: 10px;
+}
+
+#blsm-cal-hub .blsm-cal-preview table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#blsm-cal-hub .blsm-cal-preview th,
+#blsm-cal-hub .blsm-cal-preview td {
+  padding: 5px 7px;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+}
+
+#blsm-cal-hub .blsm-cal-currency-extra {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border, #1f1f2e);
+  font-size: 11px;
+}
+
+#blsm-cal-hub .blsm-cal-status {
+  margin: 0;
+  padding: 8px 14px 10px;
+  min-height: 1em;
+  font-size: 11px;
+  color: var(--text-muted, #9ca3af);
+  border-top: 1px solid var(--border, #1f1f2e);
+}
+
+/* Before hub / whitelist classes: hide duplicate React accordions (no flash on tab switch) */
+.page-content[data-blossom-page="Macro Calibrations"] > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
+html.blsm-page-macro-calibrations .page-content > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
+html.blsm-page-macro-calibrations .main-content > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+/* Hide old React calibration accordion (duplicate UI) */
+html.blsm-page-macro-calibrations .blsm-native-cal-list,
+html.blsm-page-macro-calibrations #blsm-native-cal-list,
+html.blsm-page-macro-calibrations .blsm-native-cal,
+html.blsm-page-macro-calibrations .card.blsm-cal-legacy-hidden,
+html.blsm-page-macro-calibrations .blsm-cal-native-hidden,
+html.blsm-page-macro-calibrations .card.blsm-md-accordion:not(#blsm-cal-hub):not(.blsm-cal-preset-card):not(.blsm-mouse-cal-card),
+.page-content[data-blossom-page="Macro Calibrations"] .blsm-native-cal-list,
+.page-content[data-blossom-page="Macro Calibrations"] #blsm-native-cal-list,
+.page-content[data-blossom-page="Macro Calibrations"] .blsm-native-cal,
+.page-content[data-blossom-page="Macro Calibrations"] .card.blsm-cal-legacy-hidden,
+.page-content[data-blossom-page="Macro Calibrations"] .blsm-cal-native-hidden,
+.page-content[data-blossom-page="Macro Calibrations"] .card.blsm-md-accordion:not(#blsm-cal-hub):not(.blsm-cal-preset-card):not(.blsm-mouse-cal-card) {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
+@media (max-width: 720px) {
+  #blsm-cal-hub .blsm-cal-layout-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #blsm-cal-hub .blsm-cal-tab,
+  #blsm-cal-hub .blsm-cal-chevron {
+    transition: none !important;
+    animation: none !important;
+  }
+}

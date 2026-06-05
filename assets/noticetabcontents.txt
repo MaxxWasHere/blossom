@@ -1,0 +1,100 @@
+﻿# Blossom 2.1.0
+
+## New
+- Fishing Mode — full automation from the original Noteab macro: detect bite, reel minigame, walk to the dock, optional sell at the fish shop. Turn it on in the Macro tab, calibrate Fishing and Movements → Collections, then start the macro.
+- Macro Calibrations hub — one grouped page for movement, merchant, potions, fishing, and related calibrations instead of scattered legacy coordinate cards.
+
+## Improved
+- In-app copy and docs use plainer wording — intro, credits, changelog, and README.
+- Project files reorganized into folders — Python app code lives under `src/`, docs under `docs/`; run the app the same way with `py run_local_ui.py` from the repo root.
+- README and docs trimmed for download-and-run setup — stable and beta release links, calibration, and optional webhooks up front.
+- Fishing uses built-in walk paths to the dock and seller. You can optionally drop `fishing.json` or `fishing_sell.json` in your paths folder if you want custom routes (`fishing_playback_multiplier` adjusts replay speed).
+- OpenCV loads only when fishing needs it. The app starts without `opencv-python-headless`; if it is missing, fishing logs an install hint and falls back to NumPy for bar color detection.
+- Auto Merchant follows the original detection flow again: E key presses, dialogue clicks, Mari / Jester / Rin OCR, then buys from that merchant's item list.
+- Top toolbar sits closer to the custom title bar for a tighter header row.
+- Settings and other cards highlight on hover across the full card, not only the purple header strip.
+
+## Fixed
+- Legacy calibration accordions no longer flash before the unified hub appears; duplicate panels stay hidden from first paint.
+- Macro Calibrations page does less redundant DOM watching (removed burst polling and a duplicate page-sync script).
+- Merchant dialogue and E-key timing are more reliable.
+- Webhook ping validation reports clearer errors for bad user or role IDs.
+- Buttons and cards no longer stack or overlap in odd places.
+- General timing and stability fixes across automations.
+
+## Macro
+- Potion Switching stays off until Auto Potion Craft is enabled — the UI and macro both ignore the switcher when craft is off.
+- With Auto Potion Craft on, webhook currency screenshots are disabled and the Currency Screenshot calibration section is hidden.
+- While Fishing Mode runs, merchant, quests, potion craft, obby, BR/SC, and biome selector pause. If Auto Potion Craft is also on, crafting takes priority and fishing will not run until craft is off.
+- Auto Merchant detection is faster: name OCR stops on the first Mari/Jester/Rin match, skips the sleep after the last retry, and uses a clearer interact → dialogue → detect → shop → buy flow.
+- Auto Merchant calibrations now cover all five shop slots, purchase amount, Set Max, dialogue, open/close, and purchase — each with Mark buttons in the Macro Calibrations hub. Buy flow clicks the amount field, then Max (when calibrated), then purchase.
+
+## UI
+- Default Blush theme — soft rose and cherry-blossom accents on a warm dark base replace the old purple Midnight look; new installs start on Blush.
+- Removed window resize controls — no edge drag handles or title bar resize button; drag the title bar to move the window.
+- Removed the title bar maximize button — minimize and close remain; double-clicking the title bar no longer toggles maximize.
+- Removed the old status "pills" strip from the layout.
+- Local CSS and JS links no longer append cache-bust `?v=` query strings on asset URLs.
+- Webhook tab — dedicated Biome Notifier card at the top lists every biome with notify toggles, multiple user/role IDs, and per-rare-biome ping mode (replaces the buried legacy biome table).
+
+## Discord
+- Biome webhooks support multiple user IDs and role IDs per biome; legacy single `id`/`type` entries migrate automatically on save.
+- GLITCHED, DREAMSPACE, and CYBERSPACE — choose @everyone only, specific users/roles only, or both (global default plus per-biome override on the Webhook tab).
+- When Auto Merchant OCR spots Mari, Jester, or Rin, a merchant-found embed is sent right away (before the shop opens). Per-merchant pings use your existing ping toggles and user IDs.
+- After the shop opens, an optional shop screenshot embed is separate from the found alert and from periodic currency screenshots. Set merchant_shop_webhook to false in config to disable shop screenshots only.
+- Beta key bot: `/getkey`, `/resethwid`, `/download`, and `/downloadbeta` register globally (with `REGISTER_GLOBAL=true`) so they work in DMs and in your server. Download commands reply with branded embeds (version, channel, file size, GitHub link button) instead of plain text URLs.
+- Beta key bot owner admin — flat slash commands (`/genkey`, `/revoke`, `/extend`, `/lookup`, `/listkeys`, and others) plus `$` prefix aliases share the same license-server logic; the old `/blossomadmin` command group is removed. Slash admin commands may appear in Discord's picker for everyone but only the owner can run them; `$` prefix commands stay invisible to others. Enable Message Content Intent for `$` commands; set `DISCORD_OWNER_ID` in the bot `.env`.
+
+## Licensing & updates
+- Activation screen on first launch — paste the key from Discord `/getkey`.
+- Keys stay on one device; use `/resethwid` in Discord if you switch machines.
+- Built-in update check — your build only offers installs from its own release track.
+- Stable downloads and updates use the `MaxxWasHere/blossom` GitHub repo (lowercase); beta stays on `blossombeta`.
+
+# Blossom 2.0.0
+
+## Overview
+- Major rebuild of the Noteab / Coteab macro for Sol's RNG: new Blossom UI, rewritten automations, and the same core goals (biomes, merchants, potions, webhooks).
+- Side panels show live session stats and quick start/stop without digging through every tab.
+- First-run setup walks you through theme, webhooks, Roblox settings, and which automations to enable.
+
+## New
+- Auto Merchant — OCR detects Mari, Jester, or Rin on screen, teleports when configured, talks, and buys from your lists.
+- Biome Randomizer — uses your Biome Randomizer items on a schedule you set.
+- Strange Controller — auto-uses Strange Controllers on a schedule.
+- Glitched buffs — when you roll GLITCHED, can auto-pop the buff potion you configured.
+- One scheduler coordinates merchant, quests, and potions so they do not fight each other.
+- Potion crafting — drag boxes over craft buttons in Roblox, Add Everything to fill ingredients, Auto Craft waits for the green craft indicator.
+
+## UI
+- Redesigned interface with a tighter layout, updated cards, and smoother transitions.
+- Move the window by dragging the custom title bar.
+- Theme picker with live preview; your choice is saved for next time.
+- Always-on-top option in Settings.
+
+## Discord
+- Biome hits send colored embeds with thumbnails and per-biome colors.
+- Per-biome ping toggles for other biomes; user and role IDs work as intended.
+- Merchant and status messages include author, footer, and timestamp.
+
+## Session
+- Side panel shows macro status, uptime, and which modules are running.
+
+# About Blossom
+
+## Fork
+- Blossom is an independent fork of Noteab / Coteab — maintained separately with its own UI and features.
+- Source is open under Apache 2.0 (see LICENSE.txt in the repo).
+
+# Licensing (Apache 2.0)
+
+You may use, modify, and share the code if you keep the license and attribution.
+
+## You must
+- Ship the Apache 2.0 license with distributions
+- Note which files you changed
+- Keep existing copyright and NOTICE text
+
+## You cannot
+- Strip the original authors' license or attribution
+- Hide that you modified the project

@@ -1,0 +1,13 @@
+{
+  "id": "edenpath",
+  "filename": "edenpath.json",
+  "label": "edenpath",
+  "task": "eden_movement",
+  "exported_at": "2026-05-27T20:59:56.465570+00:00",
+  "event_count": 367,
+  "screen": null,
+  "clicks_only": null,
+  "keys_only": null,
+  "validation_issues": [],
+  "note": "Send this .json + .manifest.json (or paste manifest) when asking to hard-code a default path."
+}

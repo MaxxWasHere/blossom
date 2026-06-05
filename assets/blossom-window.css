@@ -1,0 +1,19 @@
+/* Host background only (UI shell is inline + revamp) */
+
+html,
+body,
+#root {
+  background: #09090b !important;
+}
+
+/* No window resize or maximize affordances */
+.blsm-window-resize-root,
+.blsm-window-resize,
+[data-blsm-window-resize],
+[data-blsm-resize-btn],
+.titlebar-btn.resize,
+.titlebar-btn.maximize,
+.titlebar-controls .titlebar-btn:not(.minimize):not(.close) {
+  display: none !important;
+  pointer-events: none !important;
+}

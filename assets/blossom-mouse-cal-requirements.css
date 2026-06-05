@@ -1,0 +1,88 @@
+/* Mouse Action Requirements — hub-style subcategory rows (shared section CSS in blossom-calibrations-hub.css) */
+
+.blsm-mouse-cal-card.card::before {
+  display: none;
+}
+
+.blsm-mouse-cal-card > div:not(.card-header) {
+  padding: 0 !important;
+}
+
+.blsm-mouse-cal-card .card-header {
+  cursor: default !important;
+  padding: 10px 12px 8px !important;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+}
+
+.blsm-mouse-cal-card .card-header p {
+  display: block !important;
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--text-muted, #9ca3af);
+}
+
+.blsm-mouse-cal-card .form-hint {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 11px;
+  border-bottom: 1px solid var(--border, #1f1f2e);
+}
+
+.blsm-mouse-cal-legacy-grid,
+.blsm-mouse-cal-native-grid.blsm-mouse-cal-legacy-grid {
+  display: none !important;
+}
+
+#blsm-mouse-cal-root {
+  margin: 0;
+}
+
+.blsm-mouse-cal-card .blsm-cal-section-icon {
+  display: none;
+}
+
+.blsm-mouse-cal-card .blsm-cal-section-scroll {
+  max-height: min(40vh, 360px);
+}
+
+.blsm-mouse-cal-category-meta {
+  margin: 0 0 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted, #9ca3af);
+}
+
+.blsm-mouse-cal-reqs {
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-secondary, #a1a1aa);
+}
+
+.blsm-mouse-cal-req-plain {
+  margin: 0;
+}
+
+.blsm-mouse-cal-req-list {
+  margin: 0;
+  padding-left: 1.1em;
+}
+
+.blsm-mouse-cal-req-list li {
+  margin: 0 0 4px;
+}
+
+.blsm-mouse-cal-reqs--html p {
+  margin: 0 0 6px;
+}
+
+.blsm-mouse-cal-reqs--html p:last-child {
+  margin-bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blsm-mouse-cal-card .blsm-cal-chevron {
+    transition: none !important;
+  }
+}

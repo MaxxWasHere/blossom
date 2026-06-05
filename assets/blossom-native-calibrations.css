@@ -1,0 +1,54 @@
+/* Native calibration accordions — hidden on macro page (hub is source of truth) */
+
+.blsm-page-macro-calibrations .blsm-native-cal-list,
+.blsm-page-macro-calibrations #blsm-native-cal-list,
+.blsm-page-macro-calibrations .blsm-native-cal.card {
+  display: none !important;
+}
+
+.blsm-page-macro-calibrations .blsm-native-cal.card {
+  border-left: 3px solid var(--blsm-native-tone, var(--md-outline)) !important;
+}
+
+.blsm-page-macro-calibrations .blsm-native-cal .card-header h3 {
+  color: var(--blsm-native-tone, var(--md-on-surface)) !important;
+}
+
+.blsm-page-macro-calibrations .blsm-native-cal > div[style*="padding"] > div[style*="grid"] {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+
+.blsm-page-macro-calibrations .blsm-native-cal[data-blsm-cal-id="movements"] {
+  --blsm-native-tone: #d97706;
+}
+.blsm-page-macro-calibrations .blsm-native-cal[data-blsm-cal-id="quest"] {
+  --blsm-native-tone: #ca8a04;
+}
+.blsm-page-macro-calibrations .blsm-native-cal[data-blsm-cal-id="merchant"] {
+  --blsm-native-tone: #e891a8;
+}
+.blsm-page-macro-calibrations .blsm-native-cal[data-blsm-cal-id="buff"] {
+  --blsm-native-tone: #ef4444;
+}
+.blsm-page-macro-calibrations .blsm-native-cal[data-blsm-cal-id="aura"] {
+  --blsm-native-tone: #ec4899;
+}
+.blsm-page-macro-calibrations .blsm-native-cal[data-blsm-cal-id="inventory"] {
+  --blsm-native-tone: #22c55e;
+}
+.blsm-page-macro-calibrations .blsm-native-cal[data-blsm-cal-id="potion"] {
+  --blsm-native-tone: #0ea5e9;
+}
+.blsm-page-macro-calibrations .blsm-native-cal[data-blsm-cal-id="fishing"] {
+  --blsm-native-tone: #06b6d4;
+}
+
+@media (min-width: 900px) {
+  .blsm-page-macro-calibrations .blsm-native-cal > div[style*="padding"] > div[style*="grid"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 4px !important;
+  }
+}

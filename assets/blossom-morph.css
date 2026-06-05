@@ -1,0 +1,126 @@
+/* Global expand / morph — same motion as calibration hub sections */
+
+:root,
+[data-theme] {
+  --blsm-morph-ease: var(--md-ease, cubic-bezier(0.2, 0, 0, 1));
+  --blsm-morph-duration: 0.32s;
+  --blsm-morph-fade-duration: 0.26s;
+}
+
+/* ——— Height morph (grid 0fr → 1fr) ——— */
+.blsm-morph-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--blsm-morph-duration) var(--blsm-morph-ease);
+  overflow: hidden;
+}
+
+:is(.is-open, .is-expanded) > .blsm-morph-body,
+.blsm-md-accordion.is-expanded > .blsm-morph-shell {
+  grid-template-rows: 1fr;
+}
+
+.blsm-morph-collapse {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.blsm-morph-panel {
+  opacity: 0;
+  transform: translateY(-6px) scale(0.992);
+  transform-origin: top center;
+  transition:
+    opacity var(--blsm-morph-fade-duration) var(--blsm-morph-ease),
+    transform var(--blsm-morph-duration) var(--blsm-morph-ease);
+}
+
+:is(.is-open, .is-expanded) > .blsm-morph-body .blsm-morph-panel,
+.blsm-md-accordion.is-expanded > .blsm-morph-shell .blsm-morph-panel {
+  opacity: 1;
+  transform: none;
+}
+
+/* Content swap (tab change, panel replace) */
+.blsm-morph-swap {
+  animation: blsm-morph-swap var(--blsm-morph-fade-duration) var(--blsm-morph-ease);
+}
+
+@keyframes blsm-morph-swap {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ——— Card accordions (React bodies) ——— */
+.blsm-md-accordion > .blsm-morph-shell {
+  display: grid !important;
+  grid-template-rows: 0fr;
+  padding: 0 !important;
+  overflow: hidden;
+  transition: grid-template-rows var(--blsm-morph-duration) var(--blsm-morph-ease);
+}
+
+.blsm-md-accordion.is-expanded > .blsm-morph-shell {
+  grid-template-rows: 1fr;
+  padding: 0 !important;
+}
+
+.blsm-md-accordion > .blsm-morph-shell > .blsm-morph-collapse {
+  padding: 0;
+}
+
+.blsm-md-accordion.is-expanded > .blsm-morph-shell > .blsm-morph-collapse > .blsm-morph-panel {
+  padding: 12px 14px 14px !important;
+}
+
+.blsm-md-accordion > .card-header {
+  transition: background 0.18s var(--blsm-morph-ease);
+}
+
+.blsm-md-accordion.is-expanded > .card-header {
+  border-bottom-color: var(--md-outline, var(--border)) !important;
+}
+
+/* ——— Tab panels (shared) ——— */
+.blsm-morph-tab-panels {
+  position: relative;
+  min-height: 48px;
+}
+
+.blsm-morph-tab-panel {
+  display: none;
+  opacity: 0;
+  transform: translateX(8px) scale(0.99);
+  transition:
+    opacity var(--blsm-morph-fade-duration) var(--blsm-morph-ease),
+    transform var(--blsm-morph-duration) var(--blsm-morph-ease);
+}
+
+.blsm-morph-tab-panel.is-active {
+  display: block;
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blsm-morph-body,
+  .blsm-morph-panel,
+  .blsm-morph-tab-panel,
+  .blsm-md-accordion > .blsm-morph-shell,
+  .blsm-morph-swap {
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  :is(.is-open, .is-expanded) > .blsm-morph-body,
+  .blsm-md-accordion.is-expanded > .blsm-morph-shell {
+    grid-template-rows: 1fr !important;
+  }
+}

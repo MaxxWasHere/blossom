@@ -1,0 +1,22 @@
+{
+  "_note": "Shipped defaults. Saved settings live in Blossom/config.json next to BlossomMacro.exe (or the project folder when running from source).",
+  "macro_theme": "midnight",
+  "session_time": "00:00:00",
+  "biome_pings": {},
+  "webhook_url": [],
+  "selected_theme": "midnight",
+  "strange_controller": true,
+  "biome_randomizer": true,
+  "biome_selector": false,
+  "biome_selector_duration": 30,
+  "biome_selector_button_width": 280,
+  "biome_selector_button_height": 32,
+  "biome_selector_button_count": 8,
+  "biome_selector_button_spacing": 2,
+  "biome_selector_drives": {},
+  "auto_reconnect": false,
+  "auto_claim_daily_quests": true,
+  "enable_potion_switching": true,
+  "enable_potion_crafting": false,
+  "disabled_biomes_br_sc": []
+}

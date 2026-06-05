@@ -1,0 +1,198 @@
+/* Title bar, header toolbar, and filter dropdown layering */
+
+:root {
+  --blossom-z-titlebar: 10100;
+  --blossom-z-header: 90;
+  --blossom-z-header-menu: 10600;
+  --blossom-z-dropdown: 10500;
+}
+
+.coteab-injected-titlebar,
+.titlebar {
+  z-index: var(--blossom-z-titlebar) !important;
+}
+
+/* ——— Header toolbar: left cluster + right tools, no stretched gaps ——— */
+.header-bar {
+  position: relative !important;
+  z-index: var(--blossom-z-header) !important;
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  align-items: center !important;
+  column-gap: 12px !important;
+  row-gap: 4px !important;
+  width: 100%;
+  padding: 5px 12px !important;
+  min-height: 36px;
+  box-sizing: border-box;
+  background: transparent !important;
+  border: none !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border, #241a1e) 65%, transparent) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.header-bar::after {
+  display: none !important;
+}
+
+.header-left {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  min-width: 0;
+}
+
+.header-left .btn-start,
+.header-left .btn-stop {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  white-space: nowrap;
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  box-shadow: none !important;
+}
+
+.header-left .btn-start:hover,
+.header-left .btn-stop:hover {
+  transform: none !important;
+  filter: brightness(1.06);
+}
+
+.header-left .status-badge {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding: 4px 9px !important;
+  font-size: 11px !important;
+}
+
+.header-right {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  margin-left: 0 !important;
+  position: relative;
+  z-index: calc(var(--blossom-z-header) + 1);
+}
+
+/* Filter search — grows in the middle of the right cluster */
+.header-right .blsm-header-filter,
+.header-right > div[style*="position: relative"]:has(input.form-input) {
+  position: relative !important;
+  flex: 1 1 180px !important;
+  min-width: 140px !important;
+  max-width: 320px !important;
+  margin-right: 0 !important;
+}
+
+.header-right .blsm-header-filter input.form-input,
+.header-right > div[style*="position: relative"] input.form-input,
+.header-right input.form-input[type="text"] {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  min-height: 30px !important;
+  padding: 6px 10px 6px 28px !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  box-sizing: border-box !important;
+  border-radius: 8px !important;
+}
+
+.header-right .blsm-header-filter > div[style*="position: absolute"],
+.header-right > div[style*="position: relative"] > div[style*="position: absolute"] {
+  left: 10px !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  font-size: 12px !important;
+  line-height: 1 !important;
+  pointer-events: none !important;
+  z-index: 1;
+}
+
+.header-right .btn-import,
+.header-right .btn-secondary {
+  flex: 0 0 auto !important;
+  white-space: nowrap;
+  padding: 6px 11px !important;
+  font-size: 12px !important;
+}
+
+.header-right .blossom-dropdown {
+  flex: 0 0 auto !important;
+  width: auto !important;
+  min-width: 128px !important;
+  max-width: 168px !important;
+}
+
+.header-right > *:not(.blsm-header-filter):not([style*="position: relative"]) {
+  flex: 0 0 auto;
+}
+
+/* Legacy React pin — removed; use Settings → Always on top */
+.header-bar .pin-btn {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+.header-right .blossom-header-filter-menu,
+.header-right [class*="filter"] + div,
+.header-right > div > div[style*="zIndex"] {
+  z-index: var(--blossom-z-header-menu) !important;
+  border-radius: 10px !important;
+  border: 1px solid var(--border-hover) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5) !important;
+  background: var(--bg-card) !important;
+}
+
+.header-bar .blossom-dropdown.is-open .blossom-dropdown-menu {
+  z-index: var(--blossom-z-header-menu) !important;
+}
+
+.status-badge {
+  border-radius: 999px !important;
+}
+
+.header-bar .btn-start,
+.header-bar .btn-stop {
+  border-radius: 8px !important;
+  min-height: 30px;
+}
+
+/* Sit flush under the custom title bar — no extra top gap */
+.window-frame > .titlebar,
+.window-frame > .coteab-injected-titlebar {
+  flex-shrink: 0;
+}
+
+.window-frame .main-content > .header-bar {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 720px) {
+  .header-bar {
+    grid-template-columns: 1fr !important;
+  }
+
+  .header-right {
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+  }
+
+  .header-right .blsm-header-filter,
+  .header-right > div[style*="position: relative"]:has(input.form-input) {
+    flex: 1 1 100% !important;
+    max-width: none !important;
+  }
+}
