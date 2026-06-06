@@ -1,5 +1,13 @@
 /* Title bar, header toolbar, and filter dropdown layering */
 
+/* Paint guard: the legacy header pin button is replaced by Settings → Always
+   on top. Hide it in render-blocking CSS so it never flashes before the JS
+   chrome pass runs. */
+.header-bar .pin-btn {
+  display: none !important;
+  pointer-events: none !important;
+}
+
 :root {
   --blossom-z-titlebar: 10100;
   --blossom-z-header: 90;

@@ -20,29 +20,103 @@
   <link rel="stylesheet" href="./blossom-native-calibrations.css" />
   <link rel="stylesheet" href="./blossom-mouse-cal-requirements.css" />
   <script>
+    // Pre-paint route guard. Sets the page-route classes that the paint-guard
+    // CSS keys on, synchronously, before the new page paints. Runs ahead of the
+    // React bundle and on every navigation so legacy/bundled UI never flashes
+    // before the Blossom hubs replace it.
     (function () {
+      var docEl = document.documentElement;
       var MACRO = "Macro Calibrations";
-      function syncPage() {
-        var h = document.querySelector(".page-header h2");
-        var t = (h && h.textContent.trim()) || "";
-        document.documentElement.classList.toggle("blsm-page-macro-calibrations", t === MACRO);
-        var m = document.querySelector(".page-content, .main-content");
-        if (m && t) m.setAttribute("data-blossom-page", t);
+      var WEBHOOK = "Webhook";
+
+      function mainEl() {
+        return document.querySelector(".page-content, .main-content");
       }
-      function arm() {
-        syncPage();
-        var header = document.querySelector(".page-header");
-        if (header && !header.dataset.blsmPageSync) {
-          header.dataset.blsmPageSync = "1";
-          new MutationObserver(syncPage).observe(header, {
-            childList: true,
-            subtree: true,
-            characterData: true,
-          });
+      function headerTitle() {
+        var h = document.querySelector(".page-header h2");
+        return (h && h.textContent.trim()) || "";
+      }
+
+      // Tag the legacy React "Biome Configuration" card so the guard CSS hides
+      // it. Done in the same microtask as the mutation (no debounce / rAF), so
+      // it never paints before the Biome Notifier hub takes over.
+      function markLegacyBiomeCard() {
+        var main = mainEl();
+        if (!main) return;
+        var cards = main.querySelectorAll(".card");
+        for (var i = 0; i < cards.length; i++) {
+          var card = cards[i];
+          if (card.id === "blsm-biome-webhooks-hub") continue;
+          var h3 = card.querySelector("h3");
+          if (h3 && h3.textContent.trim() === "Biome Configuration") {
+            card.classList.add("blsm-legacy-biome-config-card");
+          }
         }
       }
+
+      function applyRoute(title) {
+        var onMacro = title === MACRO;
+        var onWebhook = title === WEBHOOK;
+        docEl.classList.toggle("blsm-page-macro-calibrations", onMacro);
+        docEl.classList.toggle("blsm-biome-webhooks-active", onWebhook);
+        var m = mainEl();
+        if (m && title) m.setAttribute("data-blossom-page", title);
+        if (onWebhook) markLegacyBiomeCard();
+      }
+
+      function syncPage() {
+        applyRoute(headerTitle());
+      }
+
+      // Predict the destination from a sidebar click before React re-renders,
+      // so guard classes are present for the first paint of the new page. A
+      // wrong guess is corrected by syncPage() before paint anyway.
+      function predictFromLabel(text) {
+        var t = (text || "").trim().toLowerCase();
+        if (!t) return undefined;
+        if (t.indexOf("calibration") !== -1) return MACRO;
+        if (t.indexOf("webhook") !== -1) return WEBHOOK;
+        return null;
+      }
+
+      document.addEventListener(
+        "pointerdown",
+        function (e) {
+          var t = e.target;
+          var item = t && t.closest ? t.closest(".sidebar-item") : null;
+          if (!item) return;
+          var predicted = predictFromLabel(item.textContent);
+          if (predicted === MACRO) {
+            docEl.classList.add("blsm-page-macro-calibrations");
+            docEl.classList.remove("blsm-biome-webhooks-active");
+          } else if (predicted === WEBHOOK) {
+            docEl.classList.add("blsm-biome-webhooks-active");
+            docEl.classList.remove("blsm-page-macro-calibrations");
+          } else if (predicted === null) {
+            docEl.classList.remove("blsm-page-macro-calibrations");
+            docEl.classList.remove("blsm-biome-webhooks-active");
+          }
+        },
+        true
+      );
+
+      var observer = null;
+      function observe() {
+        if (observer) return;
+        var root = document.getElementById("root") || mainEl() || document.body;
+        if (!root) return;
+        observer = new MutationObserver(syncPage);
+        observer.observe(root, { childList: true, subtree: true, characterData: true });
+      }
+
+      function arm() {
+        syncPage();
+        observe();
+      }
+
       if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", arm);
       else arm();
+      window.addEventListener("pywebviewready", arm);
     })();
   </script>
   <link rel="stylesheet" href="./blossom-update.css" />
@@ -51,6 +125,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Sarpanch:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
+    /* Paint guard: keep legacy/bundled duplicates hidden until the Blossom
+       hubs replace them. Keyed on the route classes the head script sets
+       synchronously, so nothing legacy paints first. Mirrors the external
+       guard CSS as a load-order-proof fallback. */
+    html.blsm-page-macro-calibrations .page-content > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
+    html.blsm-page-macro-calibrations .main-content > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
+    .page-content[data-blossom-page="Macro Calibrations"] > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card) {
+      display: none !important;
+    }
+
+    html.blsm-biome-webhooks-active .blsm-legacy-biome-config-card {
+      display: none !important;
+    }
+
+    .blsm-mouse-cal-legacy-grid {
+      display: none !important;
+    }
+
     html,
     body {
       margin: 0;
