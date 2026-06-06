@@ -13,7 +13,7 @@ from urllib.request import Request, urlopen
 
 # Latest version numbers (bump when shipping each channel).
 STABLE_VERSION = "1.5.1"
-BETA_VERSION = "1.6.0-beta.1"
+BETA_VERSION = "2.1.0-beta.2"
 
 try:
     import blossom_build_info as _build_info

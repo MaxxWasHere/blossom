@@ -21,7 +21,7 @@ BUILD_INFO = ROOT / "src" / "blossom_build_info.py"
 PYI_DIST = ROOT / "dist"
 
 DEFAULT_STABLE_VERSION = "2.0.0"
-DEFAULT_BETA_VERSION = "2.1.0-beta.1"
+DEFAULT_BETA_VERSION = "2.1.0-beta.2"
 # How long a beta build stays usable when no explicit expiry date is given.
 DEFAULT_BETA_EXPIRY_DAYS = 45
 
