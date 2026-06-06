@@ -38,8 +38,11 @@
 
   const setPageAttr = () => {
     const title = pageHeaderTitle();
+    // Empty title = mid-render transition; keep the current guard classes so
+    // legacy calibration cards can't flash between React commits.
+    if (!title) return;
     const main = document.querySelector(".page-content, .main-content");
-    if (main && title) main.setAttribute("data-blossom-page", title);
+    if (main) main.setAttribute("data-blossom-page", title);
     document.documentElement.classList.toggle("blsm-page-macro-calibrations", title === MACRO_CAL_PAGE);
     const onWebhook = title === WEBHOOK_PAGE;
     document.documentElement.classList.toggle("blsm-biome-webhooks-active", onWebhook);

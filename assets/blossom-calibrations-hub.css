@@ -133,7 +133,9 @@
 }
 
 html.blsm-page-macro-calibrations .page-content > .info-banner:not(.blsm-cal-hint-in-hub),
-.page-content[data-blossom-page="Macro Calibrations"] > .info-banner:not(.blsm-cal-hint-in-hub) {
+html.blsm-page-macro-calibrations .page-content > .fade-in > .info-banner:not(.blsm-cal-hint-in-hub),
+.page-content[data-blossom-page="Macro Calibrations"] > .info-banner:not(.blsm-cal-hint-in-hub),
+.page-content[data-blossom-page="Macro Calibrations"] > .fade-in > .info-banner:not(.blsm-cal-hint-in-hub) {
   display: none !important;
 }
 
@@ -426,10 +428,16 @@ html.blsm-page-macro-calibrations .page-content > .info-banner:not(.blsm-cal-hin
   border-top: 1px solid var(--border, #1f1f2e);
 }
 
-/* Before hub / whitelist classes: hide duplicate React accordions (no flash on tab switch) */
+/* Before hub / whitelist classes: hide duplicate React accordions (no flash on
+   tab switch OR cold load). The bundled page renders cards inside a `.fade-in`
+   wrapper (.page-content > .fade-in > .card), so the guard has to reach through
+   it — the old `> .card` direct-child selector never matched and legacy always
+   painted first. Both nestings are listed so the guard holds if the wrapper
+   ever changes. */
 .page-content[data-blossom-page="Macro Calibrations"] > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
+.page-content[data-blossom-page="Macro Calibrations"] > .fade-in > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
 html.blsm-page-macro-calibrations .page-content > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
-html.blsm-page-macro-calibrations .main-content > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card) {
+html.blsm-page-macro-calibrations .page-content > .fade-in > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card) {
   display: none !important;
   visibility: hidden !important;
   height: 0 !important;

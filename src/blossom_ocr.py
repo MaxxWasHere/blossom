@@ -28,6 +28,7 @@ from blossom_dirs import dev_repo_root
 
 _tesseract_cmd: str | None = None
 _init_done = False
+_warned_missing = False
 
 
 def _bundle_dir() -> Path:
@@ -79,10 +80,11 @@ def init_tesseract() -> bool:
 
     cmd = _locate_tesseract()
     if not cmd:
-        print(
-            "[ocr] Tesseract not found — merchant OCR auto-buy disabled. "
-            "Bundle assets/tesseract/tesseract.exe or install Tesseract-OCR."
-        )
+        # Stay quiet here: init runs from passive readiness/status checks at
+        # startup (biome selector, calibration status), and printing the "auto-buy
+        # disabled" warning then surfaces as a scary notice before the user has
+        # asked for anything OCR-related. The warning is emitted only when OCR is
+        # actually attempted — see warn_if_unavailable() / ocr_region().
         return False
 
     try:
@@ -108,9 +110,28 @@ def tesseract_available() -> bool:
     return init_tesseract()
 
 
+def warn_if_unavailable() -> bool:
+    """Warn (once) that OCR is unavailable, only when a feature actually needs it.
+
+    Returns True when Tesseract is ready. Call this from the point a merchant-OCR
+    or biome-selector OCR action is genuinely about to run — not from passive
+    startup status checks — so the warning never pops on initial load.
+    """
+    global _warned_missing
+    if init_tesseract():
+        return True
+    if not _warned_missing:
+        _warned_missing = True
+        print(
+            "[ocr] Tesseract not found — merchant OCR auto-buy disabled. "
+            "Bundle assets/tesseract/tesseract.exe or install Tesseract-OCR."
+        )
+    return False
+
+
 def ocr_region(region: tuple[int, int, int, int], *, psm: int = 6) -> str:
     """Return OCR text for a screen region (left, top, width, height). '' on failure."""
-    if not init_tesseract():
+    if not warn_if_unavailable():
         return ""
     try:
         import pyautogui

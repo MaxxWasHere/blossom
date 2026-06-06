@@ -55,12 +55,16 @@
       }
 
       function applyRoute(title) {
+        // An empty title means React is mid-render (the header is momentarily
+        // detached between commits). Leave the current guard classes in place
+        // so legacy cards can't flash through during the swap.
+        if (!title) return;
         var onMacro = title === MACRO;
         var onWebhook = title === WEBHOOK;
         docEl.classList.toggle("blsm-page-macro-calibrations", onMacro);
         docEl.classList.toggle("blsm-biome-webhooks-active", onWebhook);
         var m = mainEl();
-        if (m && title) m.setAttribute("data-blossom-page", title);
+        if (m) m.setAttribute("data-blossom-page", title);
         if (onWebhook) markLegacyBiomeCard();
       }
 
@@ -100,22 +104,28 @@
         true
       );
 
-      var observer = null;
-      function observe() {
-        if (observer) return;
-        var root = document.getElementById("root") || mainEl() || document.body;
-        if (!root) return;
-        observer = new MutationObserver(syncPage);
-        observer.observe(root, { childList: true, subtree: true, characterData: true });
-      }
-
+      // Arm synchronously, at parse time, BEFORE the React module further down
+      // this same <head> mounts. We watch the whole documentElement subtree so
+      // React's very first commit (cold load, no sidebar click) is caught. A
+      // MutationObserver callback is a microtask that always runs before the
+      // browser paints, so the guard route classes are set in the same frame
+      // the page is inserted — the legacy-ordered layout never gets a paint.
+      // This is route-independent: cold load, sidebar click, and programmatic
+      // navigation all funnel through the same observer.
+      var observer = new MutationObserver(syncPage);
       function arm() {
         syncPage();
-        observe();
+        try {
+          observer.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+          });
+        } catch (e) {}
       }
 
+      arm();
       if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", arm);
-      else arm();
       window.addEventListener("pywebviewready", arm);
     })();
   </script>
@@ -130,8 +140,18 @@
        synchronously, so nothing legacy paints first. Mirrors the external
        guard CSS as a load-order-proof fallback. */
     html.blsm-page-macro-calibrations .page-content > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
-    html.blsm-page-macro-calibrations .main-content > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
-    .page-content[data-blossom-page="Macro Calibrations"] > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card) {
+    html.blsm-page-macro-calibrations .page-content > .fade-in > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
+    .page-content[data-blossom-page="Macro Calibrations"] > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card),
+    .page-content[data-blossom-page="Macro Calibrations"] > .fade-in > .card:not(#blsm-cal-hub):not(.blsm-mouse-cal-card):not(.blsm-cal-preset-card) {
+      display: none !important;
+    }
+
+    /* Same paint guard for the legacy info banner, which also sits inside the
+       .fade-in wrapper before the Blossom hub relocates it. */
+    html.blsm-page-macro-calibrations .page-content > .info-banner:not(.blsm-cal-hint-in-hub),
+    html.blsm-page-macro-calibrations .page-content > .fade-in > .info-banner:not(.blsm-cal-hint-in-hub),
+    .page-content[data-blossom-page="Macro Calibrations"] > .info-banner:not(.blsm-cal-hint-in-hub),
+    .page-content[data-blossom-page="Macro Calibrations"] > .fade-in > .info-banner:not(.blsm-cal-hint-in-hub) {
       display: none !important;
     }
 

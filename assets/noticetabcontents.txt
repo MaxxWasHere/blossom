@@ -16,6 +16,8 @@
 - Settings and other cards highlight on hover across the full card, not only the purple header strip.
 
 ## Fixed
+- Calibrations no longer flash the old layout on load. The page guard now matches the real card layout and is armed before the page first paints, so the unified Macro calibrations hub is the only version you ever see — on a cold start as well as when switching tabs.
+- The "merchant OCR / Tesseract not found" notice no longer pops on startup. It only appears if a feature that actually needs OCR runs without it, instead of on every launch.
 - Legacy calibration accordions no longer flash before the unified hub appears; duplicate panels stay hidden from first paint.
 - The old Biome Configuration card on the Webhook tab no longer flashes before the Biome Notifier hub loads — it is hidden from first paint instead of after the page finishes loading.
 - Switching tabs no longer briefly shows the old bundled layout before the Blossom version replaces it; the page is now tagged the instant you click a sidebar item, so duplicate calibration, mouse-requirement, and webhook panels (and the old header pin button) stay hidden from the very first frame.
