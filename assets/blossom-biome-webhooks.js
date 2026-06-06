@@ -308,10 +308,13 @@
           <tbody></tbody>
         </table>
       </div>
-      <p class="blsm-bwh-hint">
-        GLITCHED, DREAMSPACE, and CYBERSPACE use the rare ping mode column.
-        Other biomes only ping the user and role IDs you list ( @everyone is not used ).
-      </p>
+      <div class="blsm-bwh-footnote">
+        <span class="blsm-bwh-footnote-tag">Rare ping mode</span>
+        <p>
+          GLITCHED, DREAMSPACE, and CYBERSPACE can ping @everyone — choose how in the Rare ping mode column.
+          Every other biome only pings the user and role IDs you enter; @everyone is never used for them.
+        </p>
+      </div>
     `;
 
     const header = main.querySelector(".page-header");

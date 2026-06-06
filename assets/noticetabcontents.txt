@@ -41,6 +41,7 @@
 - Removed the old status "pills" strip from the layout.
 - Local CSS and JS links no longer append cache-bust `?v=` query strings on asset URLs.
 - Webhook tab — dedicated Biome Notifier card at the top lists every biome with notify toggles, multiple user/role IDs, and per-rare-biome ping mode (replaces the buried legacy biome table).
+- Biome Notifier — the rare-biome explanation now sits in its own footnote below the table instead of crowding the rows, so it no longer overlaps biomes like SAND STORM or HELL on shorter windows.
 
 ## Discord
 - Biome webhooks support multiple user IDs and role IDs per biome; legacy single `id`/`type` entries migrate automatically on save.
