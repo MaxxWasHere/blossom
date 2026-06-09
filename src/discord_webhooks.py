@@ -329,6 +329,7 @@ def send_merchant_webhook(
 
 # Only these biomes get the louder "rare" presentation and optional @everyone.
 RARE_BIOMES = frozenset({"GLITCHED", "DREAMSPACE", "CYBERSPACE"})
+REMOVED_BIOMES = frozenset({"AURORA", "EGGLAND"})
 RARE_MENTION_MODES = frozenset({"everyone", "users", "both"})
 DEFAULT_RARE_MENTION_MODE = "both"
 
@@ -428,6 +429,11 @@ def migrate_biome_webhook_config(config: dict[str, Any]) -> dict[str, Any]:
     )
     config["rare_biome_mention_mode"] = global_rare
 
+    notifier = config.get("biome_notifier")
+    if isinstance(notifier, dict):
+        for removed in REMOVED_BIOMES:
+            notifier.pop(removed, None)
+
     pings = config.get("biome_pings")
     if not isinstance(pings, dict):
         pings = {}
@@ -435,9 +441,12 @@ def migrate_biome_webhook_config(config: dict[str, Any]) -> dict[str, Any]:
     for biome, entry in pings.items():
         if not str(biome).strip():
             continue
-        normalized[str(biome).strip().upper()] = normalize_biome_ping_entry(
+        upper = str(biome).strip().upper()
+        if upper in REMOVED_BIOMES:
+            continue
+        normalized[upper] = normalize_biome_ping_entry(
             entry,
-            biome_name=str(biome),
+            biome_name=upper,
             global_rare_mode=global_rare,
         )
     config["biome_pings"] = normalized
@@ -711,16 +720,24 @@ def send_aura_webhook(
     username: str | None = None,
     ps_link: str | None = None,
     ping: Any = None,
+    rarity: int | None = None,
+    screenshot_path: str | None = None,
     timeout: float = 15.0,
 ) -> int:
-    """Equipped-aura change notification. Returns count sent."""
+    """Equipped-aura alert (original rarity rules, Blossom embed style). Returns count sent."""
     urls = normalize_webhook_urls(urls)
     if not urls:
         return 0
 
     name = str(aura_name).strip()
     unix = int(datetime.now(timezone.utc).timestamp())
+    description = f"Equipped <t:{unix}:R>"
+    if rarity and rarity >= 100_000:
+        description += "\n_Rare aura — hop in before they switch!_"
+
     fields: list[dict[str, Any]] = []
+    if rarity:
+        fields.append({"name": "Rarity", "value": f"1 in {rarity:,}", "inline": True})
     if username:
         fields.append({"name": "Player", "value": str(username), "inline": True})
     if ps_link:
@@ -728,7 +745,7 @@ def send_aura_webhook(
 
     embed: dict[str, Any] = {
         "title": f"✨ {name}",
-        "description": f"New aura equipped <t:{unix}:R>",
+        "description": description,
         "color": 0xB37FEB,
         "timestamp": _now_iso(),
         "author": {"name": "Blossom · Aura Notifier", "icon_url": BLOSSOM_FOOTER_ICON},
@@ -737,10 +754,62 @@ def send_aura_webhook(
     if fields:
         embed["fields"] = fields
 
+    has_image = bool(screenshot_path) and os.path.isfile(str(screenshot_path))
+    if has_image:
+        embed["image"] = {"url": f"attachment://{os.path.basename(str(screenshot_path))}"}
+
+    payload: dict[str, Any] = {"embeds": [embed]}
+    mention = build_ping_mention(ping)
+    if mention:
+        payload["content"] = mention
+        allowed: dict[str, Any] = {"parse": [], "users": [], "roles": []}
+        if isinstance(ping, dict):
+            pid = str(ping.get("id") or "").strip()
+            kind = str(ping.get("type") or "userid").strip().lower()
+            if pid.isdigit():
+                if kind in ("role", "roleid", "role_id"):
+                    allowed["roles"] = [pid]
+                else:
+                    allowed["users"] = [pid]
+        payload["allowed_mentions"] = allowed
+
+    return _dispatch(
+        urls,
+        payload,
+        screenshot_path=str(screenshot_path) if has_image else None,
+        timeout=timeout,
+        label="aura",
+    )
+
+
+def send_eden_webhook(
+    urls: list[str],
+    *,
+    ping: Any = None,
+    screenshot_path: str | None = None,
+    timeout: float = 15.0,
+) -> int:
+    """Eden-spawn detection alert (port of the original Noteab eden OCR ping)."""
+    urls = normalize_webhook_urls(urls)
+    if not urls:
+        return 0
+
+    unix = int(datetime.now(timezone.utc).timestamp())
+    embed: dict[str, Any] = {
+        "title": "Eden has appeared!",
+        "description": f"Devourer of the Void, **Eden** has appeared <t:{unix}:R>.",
+        "color": 0x9B59B6,
+        "timestamp": _now_iso(),
+        "author": {"name": "Blossom · Eden Notifier", "icon_url": BLOSSOM_FOOTER_ICON},
+        "footer": {"text": "Blossom Macro"},
+    }
+    if screenshot_path and os.path.isfile(str(screenshot_path)):
+        embed["image"] = {"url": f"attachment://{os.path.basename(str(screenshot_path))}"}
+
     payload: dict[str, Any] = {"embeds": [embed]}
     mention = build_ping_mention(ping)
     if mention:
         payload["content"] = mention
         payload["allowed_mentions"] = {"parse": ["everyone", "roles", "users"]}
 
-    return _dispatch(urls, payload, screenshot_path=None, timeout=timeout, label="aura")
+    return _dispatch(urls, payload, screenshot_path=screenshot_path, timeout=timeout, label="eden")

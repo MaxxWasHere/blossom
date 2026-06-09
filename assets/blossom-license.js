@@ -6,12 +6,6 @@
   let lastStatus = null;
   let polledOnce = false;
 
-  const corners = `
-    <div class="corner-bracket tl"></div>
-    <div class="corner-bracket tr"></div>
-    <div class="corner-bracket bl"></div>
-    <div class="corner-bracket br"></div>`;
-
   const removeOverlay = () => document.getElementById(OVERLAY_ID)?.remove();
 
   const headingFor = (status) => {
@@ -59,7 +53,6 @@
 
     overlay.innerHTML = `
       <div class="blossom-license-card">
-        ${corners}
         <div class="blsm-license-logo">Blossom</div>
         <h3>${headingFor(status)}</h3>
         <p class="blsm-license-msg">${msg}</p>

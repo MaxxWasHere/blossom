@@ -26,7 +26,8 @@
   };
 
   const SHORTCUTS = [
-    { label: "Macro Calibrations", tab: "Calibrations", primary: true },
+    { label: "Appearance", tab: "Appearance", primary: true },
+    { label: "Macro Calibrations", tab: "Calibrations" },
     { label: "Potion Crafting", tab: "Potion craft" },
     { label: "Auras", tab: "Auras" },
     { label: "Automated Actions", tab: "Automated" },
@@ -44,8 +45,6 @@
     panel.style.marginBottom = "16px";
     panel.style.position = "relative";
     panel.innerHTML = `
-      <div class="corner-bracket tl"></div><div class="corner-bracket tr"></div>
-      <div class="corner-bracket bl"></div><div class="corner-bracket br"></div>
       <div class="card-header">
         <div class="card-icon">⚡</div>
         <div><h3>Quick navigation</h3><p>Jump to common pages</p></div>
@@ -77,8 +76,6 @@
     panel.style.marginBottom = "16px";
     panel.style.position = "relative";
     panel.innerHTML = `
-      <div class="corner-bracket tl"></div><div class="corner-bracket tr"></div>
-      <div class="corner-bracket bl"></div><div class="corner-bracket br"></div>
       <div class="card-header">
         <div class="card-icon">🪟</div>
         <div><h3>Window</h3><p>Keep Blossom above other apps</p></div>

@@ -14,17 +14,32 @@ _CV2_MISSING_LOGGED = False
 
 
 def _cv2_module():
-    """Lazy OpenCV import; None if opencv-python-headless is not installed."""
+    """OpenCV module if available, else None (NumPy fallback is used).
+
+    OpenCV is an externalized optional dependency: it is no longer bundled in the
+    exe but downloaded + hash-verified into %LOCALAPPDATA%\\Blossom\\runtime on
+    first use (see blossom_runtime_deps.ensure_opencv). The first call here can
+    trigger that download; it runs on the fishing worker thread, not the UI
+    thread. Any failure (offline, unverified, ABI mismatch) returns None and the
+    pure-NumPy bar-colour detection path is used instead.
+    """
     global _CV2, _CV2_CHECKED
     if _CV2_CHECKED:
         return _CV2
     _CV2_CHECKED = True
     try:
-        import cv2 as cv2_mod
+        from blossom_runtime_deps import ensure_opencv
 
-        _CV2 = cv2_mod
-    except ImportError:
-        _CV2 = None
+        _CV2 = ensure_opencv()
+    except Exception:
+        # Fall back to a plain import (dev/source with cv2 installed) and never
+        # let a loader problem break fishing.
+        try:
+            import cv2 as cv2_mod
+
+            _CV2 = cv2_mod
+        except ImportError:
+            _CV2 = None
     return _CV2
 
 
@@ -34,8 +49,8 @@ def _log_opencv_missing(log_prefix: str = "[Fishing]") -> None:
         return
     _CV2_MISSING_LOGGED = True
     print(
-        f"{log_prefix} OpenCV (cv2) not installed; using NumPy for bar color detection. "
-        "Install with: pip install opencv-python-headless"
+        f"{log_prefix} OpenCV (cv2) unavailable; using NumPy for bar color detection "
+        "(slightly slower, fully functional)."
     )
 
 try:

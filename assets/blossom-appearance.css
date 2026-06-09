@@ -1,0 +1,301 @@
+/* Blossom appearance — Settings card, tokens, motion */
+
+:root,
+[data-theme] {
+  --border-color: var(--border);
+  --card-bg: var(--bg-card);
+  --bg-secondary: var(--bg-card);
+}
+
+html.blsm-reduce-motion *,
+html.blsm-reduce-motion *::before,
+html.blsm-reduce-motion *::after,
+.blsm-reduce-motion *,
+.blsm-reduce-motion *::before,
+.blsm-reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* ——— Appearance card shell ——— */
+.blsm-appearance-card {
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.blsm-appearance-card .blsm-appearance-header {
+  border-bottom: 1px solid var(--border);
+}
+
+.blsm-appearance-body {
+  padding: 4px 20px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.blsm-app-section {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.blsm-app-section-last {
+  border-bottom: none;
+  padding-bottom: 8px;
+}
+
+.blsm-app-section-head {
+  margin-bottom: 12px;
+}
+
+.blsm-app-section-head h4 {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+.blsm-app-section-head p {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.blsm-app-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.blsm-app-field-inline {
+  flex: 1;
+  min-width: 0;
+}
+
+.blsm-app-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.blsm-app-hint {
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.blsm-app-code {
+  font-size: 10px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+
+/* ——— Theme picker ——— */
+.blsm-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(108px, 1fr));
+  gap: 8px;
+}
+
+.blsm-theme-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-input);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.blsm-theme-card:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+}
+
+.blsm-theme-card.is-selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+  background: var(--bg-card);
+}
+
+.blsm-theme-swatch {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}
+
+.blsm-theme-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* ——— Custom UI row ——— */
+.blsm-custom-ui-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.blsm-custom-ui-field {
+  flex: 1;
+  min-width: 200px;
+  margin-bottom: 0;
+}
+
+.blsm-custom-ui-select {
+  max-width: 100%;
+}
+
+.blsm-custom-ui-refresh {
+  font-size: 12px;
+  padding: 7px 14px;
+  height: 34px;
+  flex-shrink: 0;
+}
+
+.blsm-custom-ui-status {
+  color: var(--warning, #f59e0b);
+}
+
+.blsm-custom-ui-path {
+  word-break: break-all;
+}
+
+/* ——— Accent row ——— */
+.blsm-accent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.blsm-accent-swatch {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 999px;
+  border: 2px solid var(--border);
+  background: var(--blsm-swatch, var(--accent));
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.blsm-accent-swatch:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-hover);
+}
+
+.blsm-accent-swatch.is-selected {
+  border-color: var(--text-primary);
+  box-shadow: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--blsm-swatch, var(--accent));
+}
+
+.blsm-accent-swatch.blsm-accent-default {
+  background: linear-gradient(135deg, #e891a8 0%, #a78bfa 50%, #38bdf8 100%);
+}
+
+.blsm-accent-custom-wrap input[type="color"] {
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-input);
+  cursor: pointer;
+}
+
+/* ——— Segmented controls ——— */
+.blsm-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-input);
+}
+
+.blsm-seg-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.blsm-seg-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.blsm-seg-btn.is-selected {
+  background: var(--accent);
+  color: var(--accent-text, #fff);
+  font-weight: 600;
+}
+
+/* ——— Window custom row ——— */
+.blsm-window-custom-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+  margin-top: 4px;
+}
+
+.blsm-window-custom-row .blsm-window-dim {
+  width: 96px;
+}
+
+.blsm-window-custom-row .blsm-window-apply {
+  font-size: 12px;
+  padding: 7px 14px;
+  height: 34px;
+}
+
+/* ——— Toggles ——— */
+.blsm-app-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.blsm-app-toggle input {
+  cursor: pointer;
+}
+
+.blsm-reduce-motion .blsm-accent-swatch,
+.blsm-reduce-motion .blsm-seg-btn {
+  transition: none !important;
+}
+
+html.blsm-reduce-motion .blsm-accent-swatch:hover {
+  transform: none;
+}

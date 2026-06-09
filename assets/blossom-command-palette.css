@@ -1,0 +1,144 @@
+/* Blossom command palette — themed with the app's CSS variables. */
+
+#blsm-cmdk[hidden] {
+  display: none;
+}
+
+#blsm-cmdk {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 14vh;
+  font-family: inherit;
+}
+
+#blsm-cmdk .blsm-cmdk-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+}
+
+#blsm-cmdk .blsm-cmdk-panel {
+  position: relative;
+  width: min(560px, 92vw);
+  max-height: 64vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-card, #161014);
+  border: 1px solid var(--border, #241a1e);
+  border-radius: var(--radius-lg, 10px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  animation: blsm-cmdk-in 0.13s ease both;
+}
+
+@keyframes blsm-cmdk-in {
+  from { opacity: 0; transform: translateY(-8px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+
+#blsm-cmdk .blsm-cmdk-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border, #241a1e);
+}
+
+#blsm-cmdk .blsm-cmdk-search-ico {
+  display: inline-flex;
+  font-size: 17px;
+  color: var(--text-muted, #6e6468);
+}
+
+#blsm-cmdk .blsm-cmdk-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary, #ece8ea);
+  font-size: 15px;
+  font-family: inherit;
+}
+
+#blsm-cmdk .blsm-cmdk-input::placeholder {
+  color: var(--text-muted, #6e6468);
+}
+
+#blsm-cmdk .blsm-cmdk-esc {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--text-muted, #6e6468);
+  border: 1px solid var(--border, #241a1e);
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+
+#blsm-cmdk .blsm-cmdk-list {
+  overflow-y: auto;
+  padding: 6px;
+}
+
+#blsm-cmdk .blsm-cmdk-item {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 9px 11px;
+  border-radius: var(--radius-md, 6px);
+  cursor: pointer;
+  color: var(--text-secondary, #a8a0a4);
+}
+
+#blsm-cmdk .blsm-cmdk-item.is-active {
+  background: var(--accent-glow, rgba(232, 145, 168, 0.15));
+  color: var(--accent-text, #f5c6d4);
+}
+
+#blsm-cmdk .blsm-cmdk-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  font-size: 16px;
+  opacity: 0.85;
+}
+
+#blsm-cmdk .blsm-cmdk-ico .blsm-vec {
+  width: 18px;
+  height: 18px;
+}
+
+#blsm-cmdk .blsm-cmdk-label {
+  flex: 1;
+  font-size: 13.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#blsm-cmdk .blsm-cmdk-kind {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted, #6e6468);
+  flex-shrink: 0;
+}
+
+#blsm-cmdk .blsm-cmdk-empty {
+  padding: 22px;
+  text-align: center;
+  color: var(--text-muted, #6e6468);
+  font-size: 13px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #blsm-cmdk .blsm-cmdk-panel {
+    animation: none;
+  }
+}

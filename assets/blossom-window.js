@@ -1,64 +1,80 @@
 (function () {
   const CAPTION_SELECTORS = ".titlebar-btn.minimize, .titlebar-btn.close";
+  const RESIZE_EDGES = [
+    "top",
+    "right",
+    "bottom",
+    "left",
+    "top-left",
+    "top-right",
+    "bottom-left",
+    "bottom-right",
+  ];
+
+  const api = () => window.pywebview?.api;
 
   const syncMaximized = (maxed) => {
     if (typeof maxed !== "boolean") return;
     document.documentElement.classList.toggle("blsm-window-maximized", maxed);
   };
 
-  const isResizeCaptionButton = (btn) => {
-    if (!btn || !btn.classList) return false;
-    if (btn.classList.contains("resize")) return true;
-    if (btn.dataset.blsmResizeBtn === "true") return true;
-    const label = `${btn.getAttribute("aria-label") || ""} ${btn.getAttribute("title") || ""}`.toLowerCase();
-    return /\bresize\b/.test(label) && !/\brestore\b/.test(label);
-  };
-
-  const removeResizeUi = () => {
-    document
-      .querySelectorAll(
-        ".blsm-window-resize-root, .blsm-window-resize, [data-blsm-window-resize], [data-blsm-resize-btn]"
-      )
-      .forEach((el) => el.remove());
-
-    document.querySelectorAll(".titlebar, .coteab-injected-titlebar, .blsm-titlebar").forEach((titlebar) => {
-      titlebar.querySelectorAll(".titlebar-btn").forEach((btn) => {
-        if (isResizeCaptionButton(btn)) btn.remove();
-        if (btn.classList.contains("maximize")) btn.remove();
-      });
-
-      const controls = titlebar.querySelector(".titlebar-controls");
-      if (controls) {
-        controls.querySelectorAll(".titlebar-btn").forEach((btn) => {
-          const allowed = btn.classList.contains("minimize") || btn.classList.contains("close");
-          if (!allowed) btn.remove();
-        });
-      }
-
-      const dragRegion = titlebar.querySelector(".titlebar-drag-region");
-      if (dragRegion) {
-        const cap = titlebar.querySelectorAll(CAPTION_SELECTORS).length;
-        if (cap > 0) {
-          const w = getComputedStyle(titlebar.querySelector(".titlebar-btn") || titlebar).width;
-          const px = parseFloat(w);
-          dragRegion.style.right = Number.isFinite(px) ? `${cap * px}px` : `${cap * 40}px`;
-        }
-      }
+  const stripMaximizeButtons = () => {
+    document.querySelectorAll(".titlebar-btn.maximize, [data-blsm-resize-btn]").forEach((el) => {
+      el.remove();
     });
   };
 
+  const ensureResizeHandles = () => {
+    const frame = document.querySelector(".window-frame");
+    if (!frame || frame.dataset.blsmResizeReady === "1") return;
+
+    let root = frame.querySelector(".blsm-window-resize-root");
+    if (!root) {
+      root = document.createElement("div");
+      root.className = "blsm-window-resize-root";
+      root.setAttribute("aria-hidden", "true");
+      RESIZE_EDGES.forEach((edge) => {
+        const handle = document.createElement("div");
+        handle.className = "blsm-window-resize";
+        handle.dataset.blsmWindowResize = edge;
+        handle.title = "Resize window";
+        handle.addEventListener("pointerdown", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const bridge = api();
+          if (bridge?.start_window_resize) {
+            void bridge.start_window_resize(edge);
+          }
+        });
+        root.appendChild(handle);
+      });
+      frame.appendChild(root);
+    }
+
+    frame.dataset.blsmResizeReady = "1";
+  };
+
+  const run = () => {
+    stripMaximizeButtons();
+    ensureResizeHandles();
+  };
+
+  let observed = false;
   const boot = () => {
-    removeResizeUi();
+    run();
+    if (observed) return;
     if (window.Blossom?.observeMain) {
-      window.Blossom.observeMain(removeResizeUi, 400);
+      observed = true;
+      window.Blossom.observeMain(run, 400);
     } else {
       const root = document.querySelector(".window-frame") || document.documentElement;
-      const obs = new MutationObserver(removeResizeUi);
+      const obs = new MutationObserver(run);
       obs.observe(root, { childList: true, subtree: true });
+      observed = true;
     }
   };
 
-  window.BlossomWindow = { syncMaximized, removeResizeUi };
+  window.BlossomWindow = { syncMaximized, ensureResizeHandles, run };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", boot);

@@ -1,19 +1,99 @@
-/* Host background only (UI shell is inline + revamp) */
+/* Window edge resize handles (frameless pywebview) */
 
 html,
 body,
 #root {
-  background: #09090b !important;
+  background: var(--bg-root, #09090b) !important;
 }
 
-/* No window resize or maximize affordances */
-.blsm-window-resize-root,
-.blsm-window-resize,
-[data-blsm-window-resize],
-[data-blsm-resize-btn],
-.titlebar-btn.resize,
-.titlebar-btn.maximize,
-.titlebar-controls .titlebar-btn:not(.minimize):not(.close) {
+.blsm-window-resize-root {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1200;
+}
+
+.window-frame {
+  position: relative;
+}
+
+.blsm-window-resize {
+  position: absolute;
+  pointer-events: auto;
+  z-index: 1201;
+  background: transparent;
+}
+
+.blsm-window-resize[data-blsm-window-resize="top"] {
+  top: 0;
+  left: 8px;
+  right: 8px;
+  height: 5px;
+  cursor: ns-resize;
+}
+
+.blsm-window-resize[data-blsm-window-resize="bottom"] {
+  bottom: 0;
+  left: 8px;
+  right: 8px;
+  height: 5px;
+  cursor: ns-resize;
+}
+
+.blsm-window-resize[data-blsm-window-resize="left"] {
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 5px;
+  cursor: ew-resize;
+}
+
+.blsm-window-resize[data-blsm-window-resize="right"] {
+  right: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 5px;
+  cursor: ew-resize;
+}
+
+.blsm-window-resize[data-blsm-window-resize="top-left"] {
+  top: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+
+.blsm-window-resize[data-blsm-window-resize="top-right"] {
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}
+
+.blsm-window-resize[data-blsm-window-resize="bottom-left"] {
+  bottom: 0;
+  left: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nesw-resize;
+}
+
+.blsm-window-resize[data-blsm-window-resize="bottom-right"] {
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  cursor: nwse-resize;
+}
+
+/* Hide maximize only; keep minimize/close */
+.titlebar-btn.maximize {
   display: none !important;
   pointer-events: none !important;
+}
+
+html.blsm-window-maximized .blsm-window-resize-root {
+  display: none;
 }

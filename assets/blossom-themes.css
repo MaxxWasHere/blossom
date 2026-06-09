@@ -1,0 +1,200 @@
+/* Blossom — minimal base when a full custom CSS theme is active */
+
+body[data-theme="custom"],
+:root[data-theme="custom"] {
+  --bg-root: #111111;
+  --bg-sidebar: #141414;
+  --bg-main: #121212;
+  --bg-card: #1a1a1a;
+  --bg-card-hover: #222222;
+  --bg-input: #161616;
+  --bg-input-focus: #1e1e1e;
+  --accent: #888888;
+  --accent-dim: #666666;
+  --accent-glow: rgba(136, 136, 136, 0.1);
+  --accent-text: #eeeeee;
+  --border-accent: rgba(136, 136, 136, 0.25);
+  --shadow-glow: none;
+  --success: #22c55e;
+  --success-dim: #16a34a;
+  --danger: #ef4444;
+  --danger-dim: #dc2626;
+  --warning: #f59e0b;
+  --text-primary: #eeeeee;
+  --text-secondary: #aaaaaa;
+  --text-muted: #777777;
+  --border: #2a2a2a;
+  --border-hover: #383838;
+  --border-color: var(--border);
+  --card-bg: var(--bg-card);
+  --bg-secondary: var(--bg-card);
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --shadow-card: none;
+  --transition: 0.15s ease;
+  color: var(--text-primary);
+  background: var(--bg-root);
+  font-family: Sarpanch, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+/* Built-in themes — used when Custom UI = None */
+
+body[data-theme="pink"],
+:root[data-theme="pink"] {
+  --bg-root: #0a0809;
+  --bg-sidebar: #100c0e;
+  --bg-main: #0d090b;
+  --bg-card: #161014;
+  --bg-card-hover: #1c1519;
+  --bg-input: #120e10;
+  --bg-input-focus: #1a1418;
+  --accent: #e891a8;
+  --accent-dim: #c46d88;
+  --accent-glow: rgba(232, 145, 168, 0.15);
+  --accent-text: #f5c6d4;
+  --border-accent: rgba(232, 145, 168, 0.3);
+  --shadow-glow: 0 0 20px rgba(232, 145, 168, 0.08);
+  --text-primary: #ece8ea;
+  --text-secondary: #a8a0a4;
+  --text-muted: #6e6468;
+  --border: #241a1e;
+  --border-hover: #32242a;
+  color: var(--text-primary);
+  background: var(--bg-root);
+}
+
+body[data-theme="dark"],
+:root[data-theme="dark"] {
+  --bg-root: #0c0c0f;
+  --bg-sidebar: #111114;
+  --bg-main: #0e0e11;
+  --bg-card: #18181b;
+  --bg-card-hover: #1f1f23;
+  --bg-input: #141417;
+  --bg-input-focus: #1c1c21;
+  --accent: #a1a1aa;
+  --accent-dim: #71717a;
+  --accent-glow: rgba(161, 161, 170, 0.12);
+  --accent-text: #fafafa;
+  --border-accent: rgba(161, 161, 170, 0.28);
+  --shadow-glow: 0 0 20px rgba(0, 0, 0, 0.2);
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border: #27272a;
+  --border-hover: #3f3f46;
+  color: var(--text-primary);
+  background: var(--bg-root);
+}
+
+body[data-theme="light"],
+:root[data-theme="light"] {
+  --bg-root: #f4f4f5;
+  --bg-sidebar: #ececef;
+  --bg-main: #fafafa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f4f4f5;
+  --bg-input: #ffffff;
+  --bg-input-focus: #f4f4f5;
+  --accent: #db2777;
+  --accent-dim: #be185d;
+  --accent-glow: rgba(219, 39, 119, 0.12);
+  --accent-text: #ffffff;
+  --border-accent: rgba(219, 39, 119, 0.25);
+  --shadow-glow: 0 0 20px rgba(219, 39, 119, 0.06);
+  --text-primary: #18181b;
+  --text-secondary: #52525b;
+  --text-muted: #71717a;
+  --border: #e4e4e7;
+  --border-hover: #d4d4d8;
+  color: var(--text-primary);
+  background: var(--bg-root);
+}
+
+body[data-theme="system"],
+:root[data-theme="system"] {
+  --bg-root: #0c0c0f;
+  --bg-sidebar: #111114;
+  --bg-main: #0e0e11;
+  --bg-card: #18181b;
+  --bg-card-hover: #1f1f23;
+  --bg-input: #141417;
+  --bg-input-focus: #1c1c21;
+  --accent: #e891a8;
+  --accent-dim: #c46d88;
+  --accent-glow: rgba(232, 145, 168, 0.15);
+  --accent-text: #f5c6d4;
+  --border-accent: rgba(232, 145, 168, 0.3);
+  --shadow-glow: 0 0 20px rgba(232, 145, 168, 0.08);
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
+  --border: #27272a;
+  --border-hover: #3f3f46;
+  color: var(--text-primary);
+  background: var(--bg-root);
+}
+
+@media (prefers-color-scheme: light) {
+  body[data-theme="system"],
+  :root[data-theme="system"] {
+    --bg-root: #f4f4f5;
+    --bg-sidebar: #ececef;
+    --bg-main: #fafafa;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f4f4f5;
+    --bg-input: #ffffff;
+    --bg-input-focus: #f4f4f5;
+    --accent: #db2777;
+    --accent-dim: #be185d;
+    --accent-glow: rgba(219, 39, 119, 0.12);
+    --accent-text: #ffffff;
+    --border-accent: rgba(219, 39, 119, 0.25);
+    --shadow-glow: 0 0 20px rgba(219, 39, 119, 0.06);
+    --text-primary: #18181b;
+    --text-secondary: #52525b;
+    --text-muted: #71717a;
+    --border: #e4e4e7;
+    --border-hover: #d4d4d8;
+  }
+}
+
+body[data-theme="midnight"],
+body[data-theme="blush"] {
+  --bg-root: #0a0809;
+  --bg-sidebar: #100c0e;
+  --bg-main: #0d090b;
+  --bg-card: #161014;
+  --bg-card-hover: #1c1519;
+  --bg-input: #120e10;
+  --accent: #e891a8;
+  --accent-dim: #c46d88;
+  --accent-glow: rgba(232, 145, 168, 0.15);
+  --accent-text: #f5c6d4;
+  --border-accent: rgba(232, 145, 168, 0.3);
+  --shadow-glow: 0 0 20px rgba(232, 145, 168, 0.08);
+  --text-primary: #ece8ea;
+  --text-secondary: #a8a0a4;
+  --text-muted: #6e6468;
+  --border: #241a1e;
+  --border-hover: #32242a;
+}
+
+html.blsm-custom-ui-active .blsm-theme-grid,
+html.blsm-custom-ui-active .blsm-accent-section {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
+html.blsm-custom-ui-active .blsm-theme-fallback-note {
+  display: block;
+}
+
+.blsm-theme-fallback-note {
+  display: none;
+  margin: 0 0 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+}

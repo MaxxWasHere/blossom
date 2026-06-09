@@ -1,0 +1,69 @@
+/* Blossom vector icons — sizing, theming, alignment. Icons follow currentColor. */
+
+.blsm-vec {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+  vertical-align: -0.14em;
+  flex-shrink: 0;
+  color: currentColor;
+  overflow: visible;
+}
+
+/* Stroked (line) icons are the default. */
+.blsm-vec path,
+.blsm-vec circle,
+.blsm-vec rect,
+.blsm-vec line,
+.blsm-vec polyline,
+.blsm-vec polygon,
+.blsm-vec ellipse {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Solid icons fill instead. */
+.blsm-vec.is-solid path,
+.blsm-vec.is-solid circle,
+.blsm-vec.is-solid rect,
+.blsm-vec.is-solid polygon {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* Inner shapes a few icons mark as filled regardless of style. */
+.blsm-vec [fill="currentColor"] {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* Sidebar nav icons render inside an 18px .icon box. */
+.sidebar-item .icon .blsm-vec {
+  width: 18px;
+  height: 18px;
+  vertical-align: middle;
+}
+
+/* Card header icon tiles. */
+.card-icon .blsm-vec {
+  width: 20px;
+  height: 20px;
+  vertical-align: middle;
+}
+
+/* Toolbar/header buttons. */
+.pin-btn .blsm-vec {
+  width: 15px;
+  height: 15px;
+}
+
+.btn .blsm-vec,
+button.btn .blsm-vec {
+  width: 15px;
+  height: 15px;
+  margin-right: 2px;
+}

@@ -6,6 +6,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 import time
 import webbrowser
@@ -13,6 +14,7 @@ from contextlib import contextmanager
 from copy import deepcopy
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+import threading
 from threading import Event, Lock, Thread
 
 try:
@@ -42,12 +44,14 @@ from potion_craft_rules import (
 )
 from discord_webhooks import (
     DEFAULT_RARE_MENTION_MODE,
+    REMOVED_BIOMES,
     migrate_biome_webhook_config,
     normalize_webhook_urls,
     send_aura_webhook,
     send_biome_webhook,
     send_currency_webhook,
     send_discord_webhook,
+    send_eden_webhook,
     send_status_webhook,
 )
 from blossom_updater import (
@@ -57,6 +61,7 @@ from blossom_updater import (
     apply_exe_update,
     build_channel,
     check_newer_than_local,
+    check_update_status,
     display_version,
     fetch_latest_release,
     is_frozen_build,
@@ -70,6 +75,7 @@ from macro_hotkeys import (
     normalize_hotkey,
     resolve_hotkey_setting,
 )
+from blossom_auras import should_ping_aura
 from blossom_dirs import (
     APP_CONFIG_PATH,
     APP_DATA_DIR,
@@ -78,6 +84,12 @@ from blossom_dirs import (
     dev_repo_root,
     ensure_app_data_dirs,
     migrate_all_user_data,
+)
+from blossom_runtime_deps import abi_key, cv2_status, ensure_opencv
+from blossom_custom_ui import (
+    ensure_sample_custom_ui_file,
+    list_custom_ui_themes,
+    read_custom_ui_css,
 )
 from blossom_prepath import (
     camera_align_down_px_from_config,
@@ -107,6 +119,11 @@ from blossom_biome_selector import (
     calibration_status,
     normalize_drive_toggles,
     run_biome_selector,
+)
+from blossom_eden import (
+    auto_eden_enabled,
+    auto_eden_ready,
+    run_auto_eden_loop,
 )
 from blossom_brsc import (
     BR_ITEM_NAME,
@@ -157,6 +174,7 @@ if not APP_ICON_PATH.is_file():
     APP_ICON_PATH = ROOT / "icon.ico"
 LOCAL_CONFIG_PATH = INSTALL_ROOT / "config.json"
 BIOMES_PATH = ROOT / "assets" / "biomes_data.json"
+AURAS_PATH = ROOT / "assets" / "auras.json"
 OBBY_PATHS_DIRS = (OBBY_PATHS_DIR, INSTALL_ROOT / "paths", ROOT / "paths")
 POTION_CRAFT_SLOWDOWN = 1.0
 POTION_CRAFT_STEP_GAP_SEC = 0.0
@@ -166,6 +184,16 @@ POTION_LOOP_SLOWDOWN = 1.2
 POTION_SWITCH_GAP_SEC = 0.0
 QUEST_AFTER_MERCHANT_SETTLE_SEC = 0.4
 UI_BETWEEN_TASKS_SETTLE_SEC = 0.75
+# How long start/stop waits for the previous macro worker thread to finish a
+# tick and exit before giving up. The loop ticks every 0.15s, so this is ample
+# even when a UI action just started; keeps restart from leaking a live thread.
+MACRO_THREAD_JOIN_TIMEOUT_SEC = 5.0
+
+# Update check tuning. The check only runs at launch and then on a long timer,
+# so these add no steady-state cost.
+UPDATE_CHECK_ATTEMPTS = 3
+UPDATE_CHECK_BACKOFF_SEC = (2.0, 8.0)  # waits between attempts 1->2, 2->3
+UPDATE_RECHECK_SECONDS = 6 * 60 * 60  # re-check every 6 hours while app stays open
 
 _SERVER_BASE: str | None = None
 CALIBRATION_KEY_RE = re.compile(r"^[A-Za-z0-9_:-]{1,80}$")
@@ -217,6 +245,30 @@ def apply_windows_window_icon(window, icon_path: Path) -> None:
 
 
 WIN32_MIN_WINDOW = (860, 540)
+DEFAULT_WINDOW_WIDTH = 980
+DEFAULT_WINDOW_HEIGHT = 640
+MAX_WINDOW_WIDTH = 2560
+MAX_WINDOW_HEIGHT = 1600
+
+
+def _clamp_window_size(width, height) -> tuple[int, int]:
+    min_w, min_h = WIN32_MIN_WINDOW
+    try:
+        w = int(round(float(width)))
+        h = int(round(float(height)))
+    except (TypeError, ValueError):
+        w, h = DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT
+    w = max(min_w, min(MAX_WINDOW_WIDTH, w))
+    h = max(min_h, min(MAX_WINDOW_HEIGHT, h))
+    return w, h
+
+
+def _resolve_initial_window_size(config: dict) -> tuple[int, int]:
+    w = config.get("ui_window_width")
+    h = config.get("ui_window_height")
+    if w is not None and h is not None:
+        return _clamp_window_size(w, h)
+    return DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT
 
 
 def _window_hwnd(window) -> int | None:
@@ -446,7 +498,7 @@ def ui_url(*, window: str | None = None, mode: str | None = None, page: str | No
 MODULE_FLAGS: list[tuple[str, str]] = [
     ("Biome Randomizer (BR)", "biome_randomizer"),
     ("Strange Controller (SC)", "strange_controller"),
-    ("Biome Selector (WIP)", "biome_selector"),
+    ("Biome Selector (Broken / WIP)", "biome_selector"),
     ("OCR Failsafe", "enable_ocr_failsafe"),
     ("Auto Reconnect", "auto_reconnect"),
     ("Auto Claim Daily Quests", "auto_claim_daily_quests"),
@@ -518,6 +570,9 @@ class LocalUiApi:
     def __init__(self) -> None:
         self._config_path = resolve_config_path()
         self._config = self._load_config()
+        # mtime of the config file at the last successful load; lets the hot
+        # macro loop skip re-reading/parsing JSON when nothing has changed.
+        self._config_mtime = self._config_file_mtime()
         self._sync_potion_switching_with_craft(persist=True)
         self._macro_stop = Event()
         self._recorder = MacroRecorder()
@@ -526,6 +581,9 @@ class LocalUiApi:
         self._macro_running = False
         self._macro_started_at: float | None = None
         self._macro_thread: Thread | None = None
+        # Serializes macro start/stop so a quick stop->start can't run the
+        # teardown/join and the fresh-start setup at the same time.
+        self._macro_lifecycle_lock = Lock()
         self._buff_pop_requested = Event()
         self._biome_watcher: BiomeWatcher | None = None
         # App-lifetime stop so the biome/aura watcher always listens, even when
@@ -545,22 +603,38 @@ class LocalUiApi:
         )
         self._update_cache: dict[str, str] | None = None
         self._update_check_running = False
+        # "ok" | "checking" | "offline"; last outcome of the update check so a
+        # manual check or the UI can show a quiet, non-intrusive status.
+        self._update_last_status = "ok"
+        self._update_recheck_stop = Event()
+        self._update_recheck_thread: Thread | None = None
         self._potion_rotation_index = 0
         self._always_on_top_applied: bool | None = None
         self._always_on_top_lock = Lock()
         self._resize_lock = Lock()
+        self._window_size_save_timer: threading.Timer | None = None
+        self._window_size_save_lock = Lock()
         self._macro_session_gate = MacroSessionGate(settle_sec=UI_BETWEEN_TASKS_SETTLE_SEC)
         self._fishing_stop_event = Event()
         self._fishing_thread: Thread | None = None
         self._fishing_lock = Lock()
         self._fishing_busy = False
+        self._eden_stop_event = Event()
+        self._eden_thread: Thread | None = None
+        self._eden_lock = Lock()
         self._fishing_runtime_state: dict = {
             "fish_caught_count": 0,
             "fish_caught_since_merchant": 0,
             "fish_caught_since_merchant_ocr": 0,
             "fish_caught_since_br_sc": 0,
         }
+        # Serializes the explicit in-app OpenCV ("fishing vision") installer so a
+        # second click can't kick off a concurrent download/extract.
+        self._opencv_install_lock = Lock()
+        self._opencv_installing = False
+        self._opencv_install_thread: Thread | None = None
         ensure_app_data_dirs()
+        ensure_sample_custom_ui_file()
         migrate_all_user_data(INSTALL_ROOT)
         if self._potion_crafting_enabled():
             self._remove_currency_screenshot_file()
@@ -575,11 +649,26 @@ class LocalUiApi:
         migrate_biome_webhook_config(config)
         return config
 
+    def _config_file_mtime(self) -> float | None:
+        try:
+            return self._config_path.stat().st_mtime
+        except OSError:
+            return None
+
     def _reload_config_from_disk(self) -> None:
-        """Pick up UI toggles saved after the app started."""
-        if self._config_path.is_file():
-            self._config = load_json(self._config_path, self._config)
-            migrate_biome_webhook_config(self._config)
+        """Pick up UI toggles saved after the app started.
+
+        The macro loop and fishing worker call this several times a second, so
+        skip the JSON read/parse entirely when the config file is unchanged
+        since the last load (UI saves rewrite the file, bumping its mtime)."""
+        mtime = self._config_file_mtime()
+        if mtime is None:
+            return
+        if mtime == self._config_mtime and self._config:
+            return
+        self._config = load_json(self._config_path, self._config)
+        migrate_biome_webhook_config(self._config)
+        self._config_mtime = mtime
 
     def _potion_crafting_enabled(self) -> bool:
         return config_enabled(self._config, "enable_potion_crafting")
@@ -878,6 +967,63 @@ class LocalUiApi:
             f"if (window.onUpdateStatus) window.onUpdateStatus({json.dumps(status)});"
         )
 
+    def _notify_download_progress(
+        self, percent: float, downloaded: int, total: int
+    ) -> None:
+        """Push live download progress to the update overlay.
+
+        percent is -1 when the total size is unknown (no Content-Length), which
+        the frontend renders as an indeterminate bar.
+        """
+        self._evaluate_js(
+            "if (window.BlossomUpdate?.onDownloadProgress) "
+            f"window.BlossomUpdate.onDownloadProgress({percent}, {downloaded}, {total});"
+        )
+
+    def _make_download_progress_cb(self):
+        """Throttled (~10/sec) progress callback for apply_exe_update.
+
+        Runs on the dedicated update thread, so the brief evaluate_js call here
+        never touches the macro threads. Start (0) and final (100/complete)
+        frames are always sent; intermediate frames are rate-limited.
+        """
+        last_emit = [0.0]
+
+        def callback(downloaded: int, total: int) -> None:
+            total_i = int(total or 0)
+            downloaded_i = int(downloaded or 0)
+            if total_i > 0:
+                percent = round(downloaded_i / total_i * 100, 1)
+                final = downloaded_i >= total_i
+            else:
+                percent = -1
+                final = False
+            now = time.monotonic()
+            if not final and downloaded_i > 0 and (now - last_emit[0]) < 0.1:
+                return
+            last_emit[0] = now
+            self._notify_download_progress(percent, downloaded_i, total_i)
+
+        return callback
+
+    def _reveal_in_explorer(self, path: str) -> None:
+        """Open Explorer with the staged installer selected (manual reinstall)."""
+        target = str(path or "").strip()
+        if not target or not Path(target).exists():
+            return
+        try:
+            subprocess.Popen(["explorer", "/select,", target])
+        except Exception as error:
+            print(f"[update] could not open file location: {error}")
+
+    def _notify_update_check_state(self, state: str) -> None:
+        """Quiet, non-modal hint about the check itself (ok/checking/offline)."""
+        self._update_last_status = state
+        self._evaluate_js(
+            "if (window.onUpdateCheckState) "
+            f"window.onUpdateCheckState({json.dumps(state)});"
+        )
+
     def _updates_disabled(self) -> bool:
         return bool(self._config.get("dont_ask_for_update"))
 
@@ -887,15 +1033,54 @@ class LocalUiApi:
         if self._update_check_running:
             return
         self._update_check_running = True
+        self._notify_update_check_state("checking")
         try:
-            release = check_newer_than_local()
-            if release:
-                self._update_cache = release
-                self._notify_update_available(release["version"], release["url"])
-        except Exception as error:
-            print(f"[update] check failed: {error}")
+            last_error: str | None = None
+            for attempt in range(UPDATE_CHECK_ATTEMPTS):
+                try:
+                    result = check_update_status()
+                except Exception as error:  # defensive: never crash the thread
+                    result = {"ok": False, "error": str(error)}
+                if result.get("ok"):
+                    release = result.get("release")
+                    if release:
+                        self._update_cache = release
+                        self._notify_update_available(release["version"], release["url"])
+                    self._notify_update_check_state("ok")
+                    return
+                last_error = result.get("error")
+                if attempt < UPDATE_CHECK_ATTEMPTS - 1:
+                    delay_idx = min(attempt, len(UPDATE_CHECK_BACKOFF_SEC) - 1)
+                    self._update_recheck_stop.wait(UPDATE_CHECK_BACKOFF_SEC[delay_idx])
+            # All attempts failed to reach GitHub: surface quietly, don't nag.
+            print(f"[update] check unreachable after retries: {last_error}")
+            self._notify_update_check_state("offline")
         finally:
             self._update_check_running = False
+
+    def _update_recheck_loop(self) -> None:
+        """Single daemon thread: sleep a long interval, then re-run the check.
+
+        Sleeping costs effectively nothing. Keeps rechecking for the life of the
+        app (only stopping when updates are disabled) so a release published
+        while the app is open still surfaces the popup. _run_update_check
+        re-notifies on each find; the frontend suppresses an already-dismissed
+        version and shows newly published ones. No tight polling: the interval
+        is long (UPDATE_RECHECK_SECONDS).
+        """
+        while not self._update_recheck_stop.wait(UPDATE_RECHECK_SECONDS):
+            if self._updates_disabled():
+                return
+            self._run_update_check()
+
+    def _start_update_rechecker(self) -> None:
+        if self._update_recheck_thread and self._update_recheck_thread.is_alive():
+            return
+        if self._updates_disabled():
+            return
+        thread = Thread(target=self._update_recheck_loop, daemon=True)
+        self._update_recheck_thread = thread
+        thread.start()
 
     def get_macro_version(self):
         return display_version()
@@ -970,17 +1155,23 @@ class LocalUiApi:
     def get_update_available(self):
         if self._updates_disabled():
             return None
-        if self._update_cache:
-            return dict(self._update_cache)
-        release = check_newer_than_local()
+        # Always keep the long-interval rechecker alive so a release published
+        # while the app is open still surfaces later.
+        self._start_update_rechecker()
+        release = self._update_cache or check_newer_than_local()
         if release:
             self._update_cache = release
+            # Drive the popup directly. The React startup path calls this and
+            # returns early without going through check_for_updates, so without
+            # this notify the redesigned popup would never appear on startup.
+            self._notify_update_available(release["version"], release["url"])
             return dict(release)
         return None
 
     def check_for_updates(self):
         if self._updates_disabled():
             return {"available": False, "skipped": True}
+        self._start_update_rechecker()
         if self._update_cache:
             self._notify_update_available(
                 self._update_cache["version"],
@@ -989,6 +1180,14 @@ class LocalUiApi:
             return {"available": True, **self._update_cache}
         Thread(target=self._run_update_check, daemon=True).start()
         return {"available": False, "checking": True}
+
+    def get_update_check_state(self):
+        """Quiet status for the UI / manual check: ok, checking, or offline."""
+        return {
+            "state": self._update_last_status,
+            "available": bool(self._update_cache),
+            "checking": self._update_check_running,
+        }
 
     def apply_update(self, url: str, version: str | None = None) -> dict:
         if not is_frozen_build():
@@ -1012,16 +1211,20 @@ class LocalUiApi:
             return {"ok": False, "error": "No download URL"}
 
         self._notify_update_status("downloading")
+        self._notify_download_progress(-1, 0, 0)
 
         def work() -> None:
             try:
                 cached = self._update_cache or fetch_latest_release()
                 asset_name = (cached or {}).get("asset_name")
+                reinstall_required = bool((cached or {}).get("reinstall_required"))
                 result = apply_exe_update(
                     INSTALL_ROOT,
                     download_url,
                     frozen=getattr(sys, "frozen", False),
                     target_exe_name=asset_name,
+                    progress_cb=self._make_download_progress_cb(),
+                    reinstall_required=reinstall_required,
                 )
                 if not result.get("ok"):
                     if result.get("dev_mode"):
@@ -1032,6 +1235,11 @@ class LocalUiApi:
                     print(f"[update] {result.get('error', 'failed')}")
                     return
                 version_label = str(version or "").strip() or APP_VERSION
+                if result.get("reinstall"):
+                    staged_path = str(result.get("path") or "")
+                    self._reveal_in_explorer(staged_path)
+                    self._notify_update_status(f"manual|{version_label}|{staged_path}")
+                    return
                 self._notify_update_status(f"done|{version_label}")
                 time.sleep(0.35)
                 self.close_window()
@@ -1041,6 +1249,176 @@ class LocalUiApi:
 
         Thread(target=work, daemon=True).start()
         return {"ok": True, "started": True}
+
+    # ----------------------------------------------------------------- #
+    # OpenCV ("fishing vision") runtime — explicit in-app installer
+    # ----------------------------------------------------------------- #
+    def _notify_install_state(self, state: str, message: str = "") -> None:
+        self._evaluate_js(
+            "if (window.BlossomRuntime?.onInstallState) "
+            f"window.BlossomRuntime.onInstallState({json.dumps(state)}, {json.dumps(message)});"
+        )
+
+    def _notify_install_progress(
+        self, percent: float, downloaded: int, total: int
+    ) -> None:
+        """Push live install download progress to the runtime installer card.
+
+        percent is -1 when the total size is unknown (no Content-Length), which
+        the frontend renders as an indeterminate bar.
+        """
+        self._evaluate_js(
+            "if (window.BlossomRuntime?.onInstallProgress) "
+            f"window.BlossomRuntime.onInstallProgress({percent}, {downloaded}, {total});"
+        )
+
+    def _make_install_progress_cb(self):
+        """Throttled (~10/sec) progress callback for the OpenCV install.
+
+        Runs on the dedicated install thread, so the brief evaluate_js call here
+        never touches the macro threads. Final frame is always sent; intermediate
+        frames are rate-limited.
+        """
+        last_emit = [0.0]
+
+        def callback(downloaded: int, total: int) -> None:
+            total_i = int(total or 0)
+            downloaded_i = int(downloaded or 0)
+            if total_i > 0:
+                percent = round(downloaded_i / total_i * 100, 1)
+                final = downloaded_i >= total_i
+            else:
+                percent = -1
+                final = False
+            now = time.monotonic()
+            if not final and downloaded_i > 0 and (now - last_emit[0]) < 0.1:
+                return
+            last_emit[0] = now
+            self._notify_install_progress(percent, downloaded_i, total_i)
+
+        return callback
+
+    def get_opencv_status(self) -> dict:
+        """Status of the optional OpenCV runtime, without forcing a download.
+
+        While an install is in flight this returns ``state="installing"`` so the
+        UI stays consistent if it re-checks; otherwise it reflects the on-disk
+        verified cache (installed / not_installed / unavailable).
+        """
+        with self._opencv_install_lock:
+            installing = self._opencv_installing
+        if installing:
+            return {"state": "installing", "abi": abi_key()}
+        try:
+            return cv2_status()
+        except Exception as error:  # defensive: never crash the bridge
+            return {"state": "error", "abi": abi_key(), "message": str(error)}
+
+    def install_opencv(self) -> dict:
+        """Explicitly download + verify + load the OpenCV runtime on a daemon.
+
+        Idempotent and concurrency-guarded: a second call while a install is
+        running is a no-op. Progress and final state are pushed to the UI via
+        ``window.BlossomRuntime.onInstallProgress`` / ``onInstallState``. On
+        failure (e.g. asset not uploaded yet, offline, hash mismatch) the macro
+        keeps working through its built-in NumPy fallback.
+        """
+        with self._opencv_install_lock:
+            if self._opencv_installing:
+                return {"ok": True, "started": False, "already_running": True}
+            current = cv2_status()
+            if current.get("state") == "unavailable":
+                # Nothing verified to install for this build/ABI yet.
+                self._notify_install_state(
+                    "unavailable",
+                    current.get("message")
+                    or "No verified vision component is published for this build yet.",
+                )
+                return {"ok": False, "state": "unavailable", **current}
+            self._opencv_installing = True
+
+        self._notify_install_state("installing", "Preparing download…")
+        self._notify_install_progress(-1, 0, 0)
+
+        def work() -> None:
+            try:
+                module = ensure_opencv(
+                    progress_cb=self._make_install_progress_cb(), force=True
+                )
+                if module is not None:
+                    status = cv2_status()
+                    version = status.get("version")
+                    msg = (
+                        f"Installed (OpenCV {version})."
+                        if version
+                        else "Installed."
+                    )
+                    self._notify_install_progress(100, 0, 0)
+                    self._notify_install_state("installed", msg)
+                    return
+                # ensure_opencv returned None: figure out why for a clear message.
+                status = cv2_status()
+                if status.get("state") == "unavailable":
+                    self._notify_install_state(
+                        "unavailable",
+                        status.get("message")
+                        or "Component not available yet; using built-in fallback.",
+                    )
+                else:
+                    self._notify_install_state(
+                        "error",
+                        "Could not download or verify the component yet. "
+                        "Fishing still works using the built-in fallback.",
+                    )
+            except Exception as error:  # noqa: BLE001 - report, never crash thread
+                print(f"[runtime] opencv install failed: {error}")
+                self._notify_install_state(
+                    "error",
+                    "Install failed. Fishing still works using the built-in fallback.",
+                )
+            finally:
+                with self._opencv_install_lock:
+                    self._opencv_installing = False
+
+        thread = Thread(target=work, daemon=True)
+        self._opencv_install_thread = thread
+        thread.start()
+        return {"ok": True, "started": True}
+
+    def boot_install_runtime_deps(self) -> None:
+        """Check for required optional runtime deps on boot and install them.
+
+        The Discord bot no longer brokers these dependencies — the app owns the
+        whole flow now. On startup we check the verified on-disk cache and, if a
+        component is missing but a verified build exists for this Python/arch, we
+        fetch it on a daemon thread so it is ready before the user needs it
+        (e.g. fishing vision). Everything degrades to the built-in fallback, so a
+        failed or offline check never blocks launch.
+        """
+
+        def _check_and_install() -> None:
+            try:
+                status = cv2_status()
+            except Exception as error:  # noqa: BLE001 - boot must never crash
+                print(f"[runtime] boot dependency check failed: {error}")
+                return
+            state = status.get("state")
+            if state == "installed":
+                print("[runtime] boot dependency check: OpenCV already present.")
+                return
+            if state == "unavailable":
+                # No verified build pinned for this ABI; fishing uses the fallback.
+                print(
+                    "[runtime] boot dependency check: no verified vision "
+                    f"component for this build ({status.get('abi')}); using fallback."
+                )
+                return
+            print("[runtime] boot dependency check: installing OpenCV runtime…")
+            self.install_opencv()
+
+        Thread(
+            target=_check_and_install, name="BlossomBootDeps", daemon=True
+        ).start()
 
     def check_winocr_status(self):
         try:
@@ -1410,7 +1788,13 @@ class LocalUiApi:
         with self._fishing_lock:
             self._fishing_stop_event.set()
             thread = self._fishing_thread
-            if thread and thread.is_alive():
+            # Never join from within the fishing thread itself (the worker can
+            # trigger an emergency stop via its F2 callback) — that would raise.
+            if (
+                thread
+                and thread.is_alive()
+                and thread is not threading.current_thread()
+            ):
                 thread.join(timeout=1.5)
             if not thread or not thread.is_alive():
                 self._fishing_thread = None
@@ -1421,6 +1805,84 @@ class LocalUiApi:
             self._start_fishing_worker()
         else:
             self._stop_fishing_worker()
+
+    # ── Auto Eden (port of the original Noteab eden OCR loop) ────────────
+    def _auto_eden_enabled(self) -> bool:
+        return auto_eden_enabled(self._config, config_enabled=config_enabled)
+
+    def _eden_config_provider(self) -> dict:
+        self._reload_config_from_disk()
+        return dict(self._config)
+
+    def _eden_can_run(self) -> bool:
+        if not self._macro_running or self._macro_stop.is_set():
+            return False
+        # Don't fight other interactive tasks for the screen / cursor.
+        if self._replayer.is_running or getattr(self, "_fishing_busy", False):
+            return False
+        if self._potion_crafting_enabled():
+            return False
+        if self._macro_session_gate.owner() is not None:
+            return False
+        return True
+
+    def _send_eden_alert(self, screenshot_path: str | None) -> None:
+        """Send the Discord 'Eden has appeared' ping (faithful to the original)."""
+        urls = self._webhook_urls()
+        if not urls:
+            print("[AutoEden] Eden detected but no webhook configured.")
+            return
+        ping = self._config.get("eden_user_id") if self._config.get("ping_eden") else None
+
+        def _send() -> None:
+            try:
+                send_eden_webhook(urls, ping=ping, screenshot_path=screenshot_path)
+            except Exception as error:  # noqa: BLE001
+                print(f"[AutoEden] webhook send failed: {error}")
+
+        Thread(target=_send, name="BlossomEdenWebhook", daemon=True).start()
+
+    def _start_eden_worker(self) -> None:
+        with self._eden_lock:
+            if self._eden_thread and self._eden_thread.is_alive():
+                return
+            self._eden_stop_event.clear()
+
+            def _run_eden() -> None:
+                try:
+                    run_auto_eden_loop(
+                        stop_event=self._eden_stop_event,
+                        can_run_cb=self._eden_can_run,
+                        config_provider=self._eden_config_provider,
+                        config_enabled=config_enabled,
+                        focus_roblox_cb=self._hotkeys.focus_roblox,
+                        send_eden_alert_cb=self._send_eden_alert,
+                        log_prefix="[AutoEden]",
+                    )
+                except Exception as error:  # noqa: BLE001
+                    print(f"[AutoEden] worker failed: {error}")
+
+            self._eden_thread = Thread(target=_run_eden, daemon=True)
+            self._eden_thread.start()
+
+    def _stop_eden_worker(self) -> None:
+        with self._eden_lock:
+            self._eden_stop_event.set()
+            thread = self._eden_thread
+            if (
+                thread
+                and thread.is_alive()
+                and thread is not threading.current_thread()
+            ):
+                thread.join(timeout=1.5)
+            if not thread or not thread.is_alive():
+                self._eden_thread = None
+
+    def _sync_eden_worker(self) -> None:
+        if self._auto_eden_enabled() and self._macro_running:
+            self._start_eden_worker()
+        else:
+            self._stop_eden_worker()
 
     def _hotkey_main_stop(self) -> None:
         _, stop_key = self._macro_hotkey_pair()
@@ -2060,6 +2522,8 @@ class LocalUiApi:
     def _handle_biome(self, name: str) -> None:
         """Called by BiomeWatcher on every biome change (off the macro threads)."""
         upper = str(name).strip().upper()
+        if upper in REMOVED_BIOMES:
+            return
 
         # Preserve GLITCHED -> auto-pop buffs behaviour.
         if upper == GLITCHED_BIOME and self._buffs_enabled():
@@ -2100,25 +2564,36 @@ class LocalUiApi:
 
         Thread(target=_send, name="BlossomBiomeWebhook", daemon=True).start()
 
-    def _aura_notifier_enabled(self) -> bool:
-        flag = self._config.get("aura_notifier")
-        enabled = True if flag is None else bool(flag)
-        return enabled and bool(self._webhook_urls())
+    def _aura_detection_enabled(self) -> bool:
+        return config_enabled(self._config, "enable_aura_detection") and bool(self._webhook_urls())
 
     def _handle_aura(self, name: str) -> None:
         """Called by BiomeWatcher whenever the equipped aura changes."""
-        if not self._aura_notifier_enabled():
+        if not self._aura_detection_enabled():
             return
         urls = self._webhook_urls()
         if not urls:
             return
+
+        ok, rarity = should_ping_aura(
+            name,
+            aura_table_path=AURAS_PATH,
+            ping_minimum=self._config.get("ping_minimum"),
+            force_ping_auras=self._config.get("force_ping_auras"),
+        )
+        if not ok:
+            print(f"[aura] {name} — below ping threshold, skipping")
+            return
+
         username = self._config.get("roblox_username") or None
         ps_link = self._config.get("private_server_link") or None
-        raw_ping = str(self._config.get("force_ping_auras", "") or "").strip()
-        ping = {"id": raw_ping, "type": "userid"} if raw_ping.isdigit() else None
-        print(f"[aura] {name} — sending webhook")
+        raw_uid = str(self._config.get("aura_user_id") or "").strip()
+        ping = {"id": raw_uid, "type": "userid"} if raw_uid.isdigit() else None
+        want_shot = config_enabled(self._config, "aura_detection_screenshot")
+        print(f"[aura] {name} — sending webhook (rarity={rarity or '?'})")
 
         def _send() -> None:
+            screenshot_path = self._capture_aura_screenshot() if want_shot else None
             try:
                 send_aura_webhook(
                     urls,
@@ -2126,6 +2601,8 @@ class LocalUiApi:
                     username=str(username).strip() if username else None,
                     ps_link=str(ps_link).strip() if ps_link else None,
                     ping=ping,
+                    rarity=rarity,
+                    screenshot_path=screenshot_path,
                 )
             except Exception as error:
                 print(f"[webhook] aura send failed: {error}")
@@ -2420,6 +2897,11 @@ class LocalUiApi:
             if missing:
                 print(f"[FishingMode] missing calibrations: {', '.join(missing)}")
             self._sync_fishing_worker()
+        if self._auto_eden_enabled():
+            ready, eden_missing = auto_eden_ready(self._config)
+            if not ready:
+                print(f"[AutoEden] missing calibrations: {', '.join(eden_missing)}")
+            self._sync_eden_worker()
         self._start_biome_watcher()
         next_obby_at = 0.0
         next_potion_at = 0.0
@@ -2475,6 +2957,7 @@ class LocalUiApi:
             while not self._macro_stop.wait(0.15):
                 self._reload_config_from_disk()
                 self._sync_fishing_worker()
+                self._sync_eden_worker()
                 if self._is_fishing_mode_enabled():
                     continue
                 now = time.monotonic()
@@ -2575,32 +3058,72 @@ class LocalUiApi:
                     next_biome_selector_at = timer_updates["next_biome_selector_at"]
         finally:
             self._stop_fishing_worker()
+            self._stop_eden_worker()
             self._stop_biome_watcher()
             self._macro_running = False
             print("[main macro] worker stopped")
 
+    def _teardown_macro_threads(self) -> None:
+        """Signal stop and join the macro + fishing worker threads.
+
+        Idempotent and safe to call when nothing is running. After this returns,
+        the previous macro loop thread has fully exited (run its finally block),
+        so a fresh start can clear the stop event without reviving a stale loop.
+        """
+        self._macro_stop.set()
+        self._replayer.cancel()
+        self._stop_fishing_worker()
+        self._stop_eden_worker()
+        thread = self._macro_thread
+        if (
+            thread is not None
+            and thread.is_alive()
+            and thread is not threading.current_thread()
+        ):
+            thread.join(timeout=MACRO_THREAD_JOIN_TIMEOUT_SEC)
+            if thread.is_alive():
+                print("[main macro] warning: previous worker did not exit in time")
+        if thread is None or not thread.is_alive():
+            self._macro_thread = None
+
     def _start_local_macro(self) -> None:
-        if self._macro_running:
-            print("[main macro] already running")
-            return
+        with self._macro_lifecycle_lock:
+            if self._macro_running:
+                print("[main macro] already running")
+                return
 
-        if blossom_license.licensing_required() and not blossom_license.is_licensed():
-            print("[main macro] blocked: build not activated")
-            status = blossom_license.get_status(refresh=False)
-            self._push_license_status(status)
-            return
+            if blossom_license.licensing_required() and not blossom_license.is_licensed():
+                print("[main macro] blocked: build not activated")
+                status = blossom_license.get_status(refresh=False)
+                self._push_license_status(status)
+                return
 
-        self._macro_stop.clear()
-        self._macro_running = True
-        self._macro_started_at = time.time()
-        self._macro_thread = Thread(target=self._macro_loop, daemon=True)
-        self._macro_thread.start()
-        print("[main macro] started")
-        self._send_status_notif("started")
+            # Fully tear down any previous run before starting fresh. A quick
+            # stop->start (hotkey or UI) can otherwise leave the old loop thread
+            # alive; clearing _macro_stop below would then revive it, running two
+            # loops and letting the old thread's finally clobber the new run's
+            # state (fishing worker, _macro_running). Joining here prevents that.
+            self._teardown_macro_threads()
+
+            # Reset all per-run state so every start begins from a clean slate.
+            self._macro_stop.clear()
+            self._fishing_stop_event.clear()
+            self._eden_stop_event.clear()
+            self._buff_pop_requested.clear()
+            self._macro_session_gate.force_release()
+            self._fishing_busy = False
+            self._macro_running = True
+            self._macro_started_at = time.time()
+            self._macro_thread = Thread(target=self._macro_loop, daemon=True)
+            self._macro_thread.start()
+            print("[main macro] started")
+            self._send_status_notif("started")
 
     def _stop_local_macro(self) -> None:
         print("[main macro] stopping")
-        self._emergency_stop()
+        with self._macro_lifecycle_lock:
+            self._emergency_stop()
+            self._teardown_macro_threads()
 
     def init_hotkeys(self) -> None:
         self._hotkeys.register()
@@ -2750,6 +3273,7 @@ class LocalUiApi:
             "merchant_slot_3_pos",
             "merchant_slot_4_pos",
             "merchant_slot_5_pos",
+            "purchase_amount_button",
             "merchant_set_max_button",
             "purchase_button",
             "merchant_close_button",
@@ -2900,7 +3424,7 @@ class LocalUiApi:
             f"currency_region={'set' if region else 'NOT set'}, "
             f"currency_interval_min={self._currency_interval_seconds() // 60}, "
             f"biome_notifier_on={on_biomes or 'none'}, "
-            f"aura_notifier={self._aura_notifier_enabled()}, "
+            f"aura_detection={self._aura_detection_enabled()}, "
             f"watcher={'on' if self._biome_watcher is not None else 'off'}"
         )
 
@@ -2960,6 +3484,19 @@ class LocalUiApi:
         except (TypeError, ValueError):
             minutes = 15.0
         return max(60, int(minutes * 60))
+
+    def _capture_aura_screenshot(self) -> str | None:
+        try:
+            import pyautogui
+
+            shots_dir = os.path.join(os.getcwd(), "images")
+            os.makedirs(shots_dir, exist_ok=True)
+            path = os.path.join(shots_dir, "aura_screenshot.png")
+            pyautogui.screenshot().save(path)
+            return path
+        except Exception as error:
+            print(f"[aura] screenshot failed: {error}")
+            return None
 
     def _capture_region_screenshot(
         self, region: tuple[int, int, int, int], filename: str
@@ -3056,6 +3593,71 @@ class LocalUiApi:
         """Legacy React pin API — no-op path disabled in UI; delegates safely."""
         return self._apply_always_on_top(bool(enabled))
 
+    def get_window_size(self):
+        try:
+            w = int(getattr(self._window, "width", 0) or 0)
+            h = int(getattr(self._window, "height", 0) or 0)
+            if w > 0 and h > 0:
+                return {"width": w, "height": h}
+        except Exception:
+            pass
+        w, h = _resolve_initial_window_size(self._config)
+        return {"width": w, "height": h}
+
+    def set_window_size(self, width, height, save=True):
+        w, h = _clamp_window_size(width, height)
+        try:
+            self._window.resize(w, h)
+        except Exception as error:
+            return {"ok": False, "error": str(error)}
+        self._config["ui_window_width"] = w
+        self._config["ui_window_height"] = h
+        if save:
+            try:
+                self._config_path.parent.mkdir(parents=True, exist_ok=True)
+                self._config_path.write_text(
+                    json.dumps(self._config, indent=2),
+                    encoding="utf-8",
+                )
+            except OSError as error:
+                return {"ok": False, "error": str(error)}
+        return {"ok": True, "width": w, "height": h}
+
+    def _schedule_persist_window_size(self, width: int, height: int) -> None:
+        w, h = _clamp_window_size(width, height)
+        self._config["ui_window_width"] = w
+        self._config["ui_window_height"] = h
+
+        def _flush() -> None:
+            try:
+                on_disk = load_json(self._config_path, {})
+                if not isinstance(on_disk, dict):
+                    on_disk = {}
+                on_disk["ui_window_width"] = w
+                on_disk["ui_window_height"] = h
+                self._config["ui_window_width"] = w
+                self._config["ui_window_height"] = h
+                self._config_path.parent.mkdir(parents=True, exist_ok=True)
+                self._config_path.write_text(
+                    json.dumps(on_disk, indent=2),
+                    encoding="utf-8",
+                )
+            except OSError:
+                pass
+
+        with self._window_size_save_lock:
+            if self._window_size_save_timer is not None:
+                self._window_size_save_timer.cancel()
+            self._window_size_save_timer = threading.Timer(0.45, _flush)
+            self._window_size_save_timer.daemon = True
+            self._window_size_save_timer.start()
+
+    def list_custom_ui_themes(self):
+        return {"themes": list_custom_ui_themes()}
+
+    def read_custom_ui_css(self, filename: str):
+        return read_custom_ui_css(filename)
+
     def set_biome_detection(self, enabled):
         enabled = bool(enabled)
         self._config["enable_biome_detection"] = enabled
@@ -3085,6 +3687,7 @@ class LocalUiApi:
     def close_window(self):
         self.stop_listeners()
         self.stop_license_guard()
+        self._update_recheck_stop.set()
         self._stop_local_macro()
         self._window.destroy()
 
@@ -3167,12 +3770,13 @@ def main() -> int:
         print("No config in AppData yet — using config.json beside the app until you save settings.")
 
     api = LocalUiApi()
+    init_w, init_h = _resolve_initial_window_size(api._config)
     window = webview.create_window(
         "Blossom",
         url=ui_url(),
-        width=980,
-        height=640,
-        min_size=(860, 540),
+        width=init_w,
+        height=init_h,
+        min_size=WIN32_MIN_WINDOW,
         resizable=True,
         frameless=True,
         easy_drag=False,
@@ -3187,9 +3791,12 @@ def main() -> int:
 
         def _on_window_resized(_width, _height) -> None:
             try:
+                api._schedule_persist_window_size(_width, _height)
                 window.evaluate_js(
                     "window.BlossomTitlebar&&window.BlossomTitlebar.syncChromeState&&"
                     "window.BlossomTitlebar.syncChromeState();"
+                    "window.BlossomAppearance&&window.BlossomAppearance.refreshWindowFields&&"
+                    "window.BlossomAppearance.refreshWindowFields();"
                 )
             except Exception:
                 pass
@@ -3214,6 +3821,7 @@ def main() -> int:
         api.start_listeners()
         api.start_license_guard()
         api.check_for_updates()
+        api.boot_install_runtime_deps()
 
     webview.start(debug=False, func=on_ready)
     api._stop_local_macro()

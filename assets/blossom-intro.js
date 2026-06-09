@@ -8,6 +8,9 @@
 
   const api = () => window.pywebview?.api;
 
+  // Inline vector icon (falls back to the original emoji if icons aren't loaded).
+  const ICO = (name, fallback) => window.BlossomIcons?.svg(name) || fallback || "";
+
   const firstString = (raw) => {
     if (Array.isArray(raw)) return raw.find((x) => typeof x === "string" && x.trim()) || "";
     if (typeof raw === "string") return raw;
@@ -213,20 +216,22 @@
   let go = () => {};
 
   const THEMES = [
-    ["midnight", "Blush", "#e891a8"],
-    ["lavender", "Lavender", "#a78bfa"],
-    ["cyberpunk", "Cyberpunk", "#ec4899"],
-    ["ocean", "Ocean", "#0ea5e9"],
-    ["arctic", "Arctic", "#38bdf8"],
-    ["neon", "Neon", "#22d3ee"],
-    ["forest", "Forest", "#22c55e"],
-    ["solar", "Solar", "#f59e0b"],
-    ["sunset", "Sunset", "#fb7185"],
+    ["system", "Match system", "linear-gradient(135deg,#18181b 50%,#fafafa 50%)"],
+    ["pink", "Pink", "#e891a8"],
+    ["dark", "Dark", "#3f3f46"],
+    ["light", "Light", "#fafafa"],
   ];
+
+  const normalizeIntroTheme = (raw) => {
+    const k = String(raw || "system").toLowerCase();
+    if (k === "system" || k === "pink" || k === "dark" || k === "light") return k;
+    const legacy = { midnight: "pink", blush: "pink", solar: "pink", ocean: "dark", arctic: "light" };
+    return legacy[k] || "system";
+  };
 
   const render = (config) => {
     const wh = firstString(config.webhook_url);
-    const curTheme = config.selected_theme || "midnight";
+    const curTheme = normalizeIntroTheme(config.ui_theme || config.selected_theme);
     const themeBtns = THEMES.map(
       ([id, label, sw]) =>
         `<button type="button" class="blsm-theme ${id === curTheme ? "is-sel" : ""}" data-theme-val="${id}" style="--sw:${sw}"><span class="sw"></span>${label}</button>`
@@ -253,30 +258,30 @@
 
           <section class="blsm-slide" data-slide="1">
             <div class="blsm-slide-head blsm-stagger">
-              <div class="ring blsm-icon">🌸</div>
+              <div class="ring blsm-icon">${ICO("flower", "🌸")}</div>
               <div><h2 style="margin:0">What Blossom does</h2><div class="sub">The main tabs and what they run.</div></div>
             </div>
             <div class="blsm-features blsm-stagger">
-              <div class="blsm-feature"><span class="fi">🛒</span><div><b>Auto Merchant</b><span>Teleports, talks & buys from Mari / Jester automatically.</span></div></div>
-              <div class="blsm-feature"><span class="fi">📜</span><div><b>Daily Quests</b><span>Claims daily quest rewards for you.</span></div></div>
-              <div class="blsm-feature"><span class="fi">🎲</span><div><b>Biome Tools</b><span>Randomizers, Strange Controllers & glitched buffs.</span></div></div>
-              <div class="blsm-feature"><span class="fi">⚗️</span><div><b>Potions</b><span>Auto-craft and switch potions while you AFK.</span></div></div>
-              <div class="blsm-feature"><span class="fi">🔔</span><div><b>Webhooks</b><span>Discord pings for rare biomes & merchant sightings.</span></div></div>
-              <div class="blsm-feature"><span class="fi">⌨️</span><div><b>Hotkeys</b><span>Start / stop instantly with your own keybinds.</span></div></div>
+              <div class="blsm-feature"><span class="fi">${ICO("cart", "🛒")}</span><div><b>Auto Merchant</b><span>Teleports, talks & buys from Mari / Jester automatically.</span></div></div>
+              <div class="blsm-feature"><span class="fi">${ICO("scroll", "📜")}</span><div><b>Daily Quests</b><span>Claims daily quest rewards for you.</span></div></div>
+              <div class="blsm-feature"><span class="fi">${ICO("dice", "🎲")}</span><div><b>Biome Tools</b><span>Randomizers, Strange Controllers & glitched buffs.</span></div></div>
+              <div class="blsm-feature"><span class="fi">${ICO("flask", "⚗️")}</span><div><b>Potions</b><span>Auto-craft and switch potions while you AFK.</span></div></div>
+              <div class="blsm-feature"><span class="fi">${ICO("bell", "🔔")}</span><div><b>Webhooks</b><span>Discord pings for rare biomes & merchant sightings.</span></div></div>
+              <div class="blsm-feature"><span class="fi">${ICO("keyboard", "⌨️")}</span><div><b>Hotkeys</b><span>Start / stop instantly with your own keybinds.</span></div></div>
             </div>
           </section>
 
           <section class="blsm-slide" data-slide="2">
             <div class="blsm-slide-head blsm-stagger">
-              <div class="ring blsm-icon">🎨</div>
-              <div><h2 style="margin:0">Pick a theme</h2><div class="sub">Click to preview live — change it anytime in the header.</div></div>
+              <div class="ring blsm-icon">${ICO("palette", "🎨")}</div>
+              <div><h2 style="margin:0">Pick a theme</h2><div class="sub">Click to preview — change anytime under Appearance.</div></div>
             </div>
             <div class="blsm-themes blsm-stagger">${themeBtns}</div>
           </section>
 
           <section class="blsm-slide" data-slide="3">
             <div class="blsm-slide-head blsm-stagger">
-              <div class="ring blsm-icon">🔔</div>
+              <div class="ring blsm-icon">${ICO("bell", "🔔")}</div>
               <div><h2 style="margin:0">Discord notifications</h2><div class="sub">Get pinged for merchant sightings & rare biomes.</div></div>
             </div>
             <div class="blsm-field blsm-stagger">
@@ -291,7 +296,7 @@
 
           <section class="blsm-slide" data-slide="4">
             <div class="blsm-slide-head blsm-stagger">
-              <div class="ring blsm-icon">🎮</div>
+              <div class="ring blsm-icon">${ICO("gamepad", "🎮")}</div>
               <div><h2 style="margin:0">Your Roblox</h2><div class="sub">Optional — used to label notifications and rejoin links.</div></div>
             </div>
             <div class="blsm-field blsm-stagger">
@@ -307,37 +312,37 @@
 
           <section class="blsm-slide" data-slide="5">
             <div class="blsm-slide-head blsm-stagger">
-              <div class="ring blsm-icon">✨</div>
+              <div class="ring blsm-icon">${ICO("sparkle", "✨")}</div>
               <div><h2 style="margin:0">Automations</h2><div class="sub">Toggle what runs. Change anytime in the sidebar.</div></div>
             </div>
             <div class="blsm-auto blsm-stagger">
               <div class="blsm-row ${config.merchant_teleporter ? "on" : ""}" data-key="merchant_teleporter">
-                <span class="emoji">🛒</span><div class="txt"><b>Auto Merchant</b><span>Teleport, talk & buy from Mari / Jester.</span></div><div class="blsm-switch"></div>
+                <span class="emoji">${ICO("cart", "🛒")}</span><div class="txt"><b>Auto Merchant</b><span>Teleport, talk & buy from Mari / Jester.</span></div><div class="blsm-switch"></div>
               </div>
               <div class="blsm-row ${config.auto_claim_daily_quests ? "on" : ""}" data-key="auto_claim_daily_quests">
-                <span class="emoji">📜</span><div class="txt"><b>Daily Quests</b><span>Auto-claim daily quest rewards.</span></div><div class="blsm-switch"></div>
+                <span class="emoji">${ICO("scroll", "📜")}</span><div class="txt"><b>Daily Quests</b><span>Auto-claim daily quest rewards.</span></div><div class="blsm-switch"></div>
               </div>
               <div class="blsm-row ${config.biome_randomizer ? "on" : ""}" data-key="biome_randomizer">
-                <span class="emoji">🎲</span><div class="txt"><b>Biome Randomizer</b><span>Use Biome Randomizers on a timer.</span></div><div class="blsm-switch"></div>
+                <span class="emoji">${ICO("dice", "🎲")}</span><div class="txt"><b>Biome Randomizer</b><span>Use Biome Randomizers on a timer.</span></div><div class="blsm-switch"></div>
               </div>
               <div class="blsm-row ${config.biome_selector ? "on" : ""}" data-key="biome_selector">
-                <span class="emoji">🧭</span><div class="txt"><b>Biome Selector</b><span>OCR drive list, confirm each enabled row.</span></div><div class="blsm-switch"></div>
+                <span class="emoji">${ICO("compass", "🧭")}</span><div class="txt"><b>Biome Selector <span style="color:#ff6b6b;">(Broken / W.I.P.)</span></b><span>Unfinished — leave off for now.</span></div><div class="blsm-switch"></div>
               </div>
               <div class="blsm-row ${config.strange_controller ? "on" : ""}" data-key="strange_controller">
-                <span class="emoji">🕹️</span><div class="txt"><b>Strange Controller</b><span>Auto-use Strange Controllers.</span></div><div class="blsm-switch"></div>
+                <span class="emoji">${ICO("gamepad", "🕹️")}</span><div class="txt"><b>Strange Controller</b><span>Auto-use Strange Controllers.</span></div><div class="blsm-switch"></div>
               </div>
               <div class="blsm-row ${config.enable_potion_crafting ? "on" : ""}" data-key="enable_potion_crafting">
-                <span class="emoji">⚗️</span><div class="txt"><b>Potion Crafting</b><span>Auto-craft potions from your recipe files.</span></div><div class="blsm-switch"></div>
+                <span class="emoji">${ICO("flask", "⚗️")}</span><div class="txt"><b>Potion Crafting</b><span>Auto-craft potions from your recipe files.</span></div><div class="blsm-switch"></div>
               </div>
               <div class="blsm-row ${config.enable_auto_obby ? "on" : ""}" data-key="enable_auto_obby">
-                <span class="emoji">🏃</span><div class="txt"><b>Auto Obby</b><span>Run a recorded obby path on a timer.</span></div><div class="blsm-switch"></div>
+                <span class="emoji">${ICO("run", "🏃")}</span><div class="txt"><b>Auto Obby</b><span>Run a recorded obby path on a timer.</span></div><div class="blsm-switch"></div>
               </div>
             </div>
           </section>
 
           <section class="blsm-slide" data-slide="6">
             <div class="blsm-slide-head blsm-stagger">
-              <div class="ring blsm-icon">💡</div>
+              <div class="ring blsm-icon">${ICO("bulb", "💡")}</div>
               <div><h2 style="margin:0">Tips & shortcuts</h2><div class="sub">Read these once before you AFK.</div></div>
             </div>
             <div class="blsm-tips blsm-stagger">
@@ -389,7 +394,8 @@
     const patch = {
       roblox_username: overlay.querySelector("#blsm-user")?.value.trim() || "",
       private_server_link: overlay.querySelector("#blsm-ps")?.value.trim() || "",
-      selected_theme: overlay.dataset.theme || "midnight",
+      ui_theme: normalizeIntroTheme(overlay.dataset.theme || "system"),
+      selected_theme: normalizeIntroTheme(overlay.dataset.theme || "system"),
     };
     overlay.querySelectorAll(".blsm-row").forEach((row) => {
       patch[row.getAttribute("data-key")] = row.classList.contains("on");
@@ -400,7 +406,7 @@
   const updateSummary = (overlay) => {
     const { webhook, patch } = collect(overlay);
     const yn = (b) => (b ? "On" : "Off");
-    const themeLabel = (THEMES.find((t) => t[0] === patch.selected_theme) || [])[1] || patch.selected_theme;
+    const themeLabel = (THEMES.find((t) => t[0] === normalizeIntroTheme(patch.ui_theme)) || [])[1] || patch.ui_theme;
     const rows = [
       ["Theme", themeLabel],
       ["Webhook", webhook ? "Connected" : "Skipped"],

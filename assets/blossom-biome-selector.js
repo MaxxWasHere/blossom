@@ -102,20 +102,22 @@
     panel.style.marginTop = "16px";
     panel.style.position = "relative";
     panel.innerHTML = `
-      <div class="corner-bracket tl"></div><div class="corner-bracket tr"></div>
-      <div class="corner-bracket bl"></div><div class="corner-bracket br"></div>
       <div class="card-header">
         <div class="card-icon">🧭</div>
         <div>
-          <h3>Biome Selector</h3>
+          <h3>Biome Selector <span style="color:#ff6b6b;font-weight:700;">(Broken / W.I.P.)</span></h3>
           <p>Use item → OCR drive list → click enabled rows → Confirm</p>
         </div>
       </div>
       <div style="padding:16px 20px 20px;display:flex;flex-direction:column;gap:14px;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
-            <input type="checkbox" class="blsm-bs-enable" ${enabled ? "checked" : ""} />
-            <span style="font-weight:600;">Enable automation</span>
+        <div style="border:1px solid rgba(255,107,107,0.45);background:rgba(255,107,107,0.12);border-radius:8px;padding:10px 12px;font-size:13px;line-height:1.4;">
+          <strong style="color:#ff6b6b;">Broken / Work in progress.</strong>
+          This automation is unfinished and unreliable right now. Leave it off — it may misclick or fail until it is fixed.
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;opacity:0.6;">
+          <label style="display:flex;align-items:center;gap:10px;cursor:not-allowed;" title="Biome Selector is broken / W.I.P. and temporarily disabled.">
+            <input type="checkbox" class="blsm-bs-enable" ${enabled ? "checked" : ""} disabled />
+            <span style="font-weight:600;">Enable automation (disabled — W.I.P.)</span>
           </label>
           <span class="form-hint blsm-bs-ready-badge" style="margin:0;font-weight:600;">…</span>
         </div>

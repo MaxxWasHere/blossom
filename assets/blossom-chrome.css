@@ -55,6 +55,18 @@
   min-width: 0;
 }
 
+.header-bar .btn-start .blsm-vec,
+.header-bar .btn-stop .blsm-vec {
+  width: 0.95em;
+  height: 0.95em;
+  vertical-align: -0.12em;
+}
+
+.header-bar .btn-start .blossom-macro-btn-label,
+.header-bar .btn-stop .blossom-macro-btn-label {
+  margin-left: 0.4em;
+}
+
 .header-left .btn-start,
 .header-left .btn-stop {
   flex: 0 0 auto !important;

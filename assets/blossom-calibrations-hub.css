@@ -113,7 +113,7 @@
   padding: 0 !important;
   border: none !important;
   border-radius: 0 !important;
-  border-left: 3px solid #6366f1 !important;
+  border-left: 3px solid var(--accent, #6366f1) !important;
   box-shadow: none !important;
   background: transparent !important;
 }

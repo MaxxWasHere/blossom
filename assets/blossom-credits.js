@@ -2,15 +2,8 @@
   const PANEL_ID = "blossom-credits-panel";
   const CREDITS_PAGE = "Credits";
 
-  const corners = `
-    <div class="corner-bracket tl"></div>
-    <div class="corner-bracket tr"></div>
-    <div class="corner-bracket bl"></div>
-    <div class="corner-bracket br"></div>`;
-
   const personCard = ({ img, alt, name, role, body, links }) => `
     <div class="blossom-credits-card">
-      ${corners}
       <div class="blossom-credits-person">
         ${img ? `<img src="${img}" alt="${alt || name}" onerror="this.onerror=null;this.src='./blossom_avatar.png'" />` : ""}
         <div>
@@ -29,7 +22,6 @@
     panel.innerHTML = `
       <p class="blossom-credits-section-title">Blossom</p>
       <div class="blossom-credits-card">
-        ${corners}
         <div class="blossom-credits-hero">
           <img src="./blossom.png" alt="Blossom" />
           <div>
@@ -62,7 +54,6 @@
 
       <p class="blossom-credits-section-title">What Blossom adds</p>
       <div class="blossom-credits-card">
-        ${corners}
         <ul class="blossom-credits-list">
           <li>Sakura branding and sidebar layout</li>
           <li>Potion crafting, rotation, Start / Stop hotkeys</li>
@@ -95,7 +86,6 @@
           </p>`,
         })}
         <div class="blossom-credits-card">
-          ${corners}
           <div class="blossom-credits-person">
             <div>
               <strong>NotWindyZ</strong>
@@ -114,7 +104,6 @@
 
       <p class="blossom-credits-section-title">License & thanks</p>
       <div class="blossom-credits-card">
-        ${corners}
         <p class="blossom-credits-muted" style="margin-bottom:10px">
           Blossom builds on Noteab / Coteab under the
           <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noreferrer">Apache License 2.0</a>.

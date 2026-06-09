@@ -1,62 +1,105 @@
-﻿# Blossom 2.1.0
+# Blossom 2.1.0
 
 ## New
-- Fishing Mode — full automation from the original Noteab macro: detect bite, reel minigame, walk to the dock, optional sell at the fish shop. Turn it on in the Macro tab, calibrate Fishing and Movements → Collections, then start the macro.
-- Macro Calibrations hub — one grouped page for movement, merchant, potions, fishing, and related calibrations instead of scattered legacy coordinate cards.
+- Added Fishing Mode. Detects bite, plays reel minigame, walks to dock, optional sell. Enable it in the Macro tab and calibrate Fishing and Movements first.
+- Added a Macro Calibrations hub. One page for movement, merchant, potions, and fishing calibrations instead of separate cards.
 
 ## Improved
-- In-app copy and docs use plainer wording — intro, credits, changelog, and README.
-- Credits screen and docs spell out the lineage — Blossom is a fork of the Coteab macro (by Vapure), which itself came from the original Noteab biome macro.
-- Project files reorganized into folders — Python app code lives under `src/`, docs under `docs/`; run the app the same way with `py run_local_ui.py` from the repo root.
-- README and docs trimmed for download-and-run setup — stable and beta release links, calibration, and optional webhooks up front.
-- Fishing uses built-in walk paths to the dock and seller. You can optionally drop `fishing.json` or `fishing_sell.json` in your paths folder if you want custom routes (`fishing_playback_multiplier` adjusts replay speed).
-- OpenCV loads only when fishing needs it. The app starts without `opencv-python-headless`; if it is missing, fishing logs an install hint and falls back to NumPy for bar color detection.
-- Auto Merchant follows the original detection flow again: E key presses, dialogue clicks, Mari / Jester / Rin OCR, then buys from that merchant's item list.
-- Top toolbar sits closer to the custom title bar for a tighter header row.
-- Settings and other cards highlight on hover across the full card, not only the purple header strip.
+- Reworded in-app copy and docs: intro, credits, changelog, and README.
+- Credits and docs note the lineage. Blossom is a fork of Coteab (by Vapure), which came from the original Noteab biome macro.
+- Reorganized project files. Python code lives under `src/`, docs under `docs/`. Run the app with `py run_local_ui.py` from the repo root.
+- Trimmed README and docs for download-and-run setup. Release links, calibration, and webhooks are up front.
+- Smaller download and lighter install. The vision component used by fishing is no longer packed into the exe. It downloads once on first use of Fishing Mode and is cached in your local app data, which cuts the installer size by about 47 MB.
+- Fishing uses built-in walk paths to the dock and seller. Drop `fishing.json` or `fishing_sell.json` in your paths folder for custom routes. `fishing_playback_multiplier` sets replay speed.
+- The fishing vision component is verified by checksum before it is used, and any tampered or partial cached copy is re-downloaded. If it cannot be fetched, fishing falls back to NumPy and still works, just slightly slower.
+- Auto Merchant uses the original detection flow again: E key presses, dialogue clicks, Mari/Jester/Rin OCR, then buys from the item list.
+- Moved the top toolbar closer to the title bar.
+- Cards now highlight on hover across the whole card, not just the header strip.
+- Lighter idle cost. The macro now reuses its loaded settings and only re-reads the config file from disk when you actually change a setting, instead of re-parsing it several times a second while running.
+- Biome and aura detection now reuses the current Roblox log file and only rescans the logs folder every few seconds instead of every second, lowering background CPU and disk use while the app sits open.
+- Built-in update banner hiding now runs through the shared page watcher instead of its own always-on DOM observer, so the UI does less per-change work.
 
 ## Fixed
-- Calibrations no longer flash the old layout on load. The page guard now matches the real card layout and is armed before the page first paints, so the unified Macro calibrations hub is the only version you ever see — on a cold start as well as when switching tabs.
-- The "merchant OCR / Tesseract not found" notice no longer pops on startup. It only appears if a feature that actually needs OCR runs without it, instead of on every launch.
-- Legacy calibration accordions no longer flash before the unified hub appears; duplicate panels stay hidden from first paint.
-- The old Biome Configuration card on the Webhook tab no longer flashes before the Biome Notifier hub loads — it is hidden from first paint instead of after the page finishes loading.
-- Switching tabs no longer briefly shows the old bundled layout before the Blossom version replaces it; the page is now tagged the instant you click a sidebar item, so duplicate calibration, mouse-requirement, and webhook panels (and the old header pin button) stay hidden from the very first frame.
-- Macro Calibrations page does less redundant DOM watching (removed burst polling and a duplicate page-sync script).
+- Aura Detection webhooks work again on the Auras tab: rarity threshold, force-ping list, and Discord user ID match the original Noteab behavior, using Blossom embed styling.
+- Aurora and Eggland removed from the Biome Notifier list.
+- The Start / Stop header button no longer flickers. Hotkey labels and icons update without fighting the icon replacer.
+- The potion name field on Potion Crafting no longer bounces or loses focus while you type. The add panel stays put instead of being re-inserted every frame.
+- The packaged app no longer crashes on launch with a "Failed to execute script 'run_local_ui'" / "No such file or directory" error. The exe now starts straight into the Blossom window.
+- Calibrations no longer flash the old layout on load. The hub is the only version shown, on cold start and when switching tabs.
+- The "merchant OCR / Tesseract not found" notice no longer shows on startup. It only appears when a feature that needs OCR runs without it.
+- Legacy calibration accordions no longer flash before the hub appears. Duplicate panels stay hidden from first paint.
+- The old Biome Configuration card on the Webhook tab no longer flashes before the Biome Notifier hub loads.
+- Switching tabs no longer shows the old layout first. The page is tagged on click, so duplicate panels and the old pin button stay hidden.
+- Macro Calibrations page does less DOM watching. Removed burst polling and a duplicate page-sync script.
 - Merchant dialogue and E-key timing are more reliable.
-- Webhook ping validation reports clearer errors for bad user or role IDs.
-- Buttons and cards no longer stack or overlap in odd places.
-- General timing and stability fixes across automations.
+- Webhook ping validation gives clearer errors for bad user or role IDs.
+- Buttons and cards no longer overlap.
+- Sidebar grouping and window control cleanup no longer stack duplicate DOM observers when the UI reloads.
+- Some card and input borders referenced an undefined color variable and fell back to the text color. They now use the theme border color, so borders look consistent across tabs.
+- Timing and stability fixes across automations.
+- Stopping then starting the macro again now works every time. Stop fully tears down the worker and fishing threads, and start waits for the old run to exit before clearing state, so a quick restart no longer leaves two loops running or kills the new run's fishing worker.
+- Settings and extras sidebar link now opens the real settings page so the Appearance card mounts and stays wired up.
+- Appearance accent, interface scale, and reduce motion controls apply their changes again, persist to config, and restore on the next launch.
+- Theme and accent now apply across the whole UI. The root window background, calibration hub borders, material card icons and active tabs, and the minimize titlebar button were keeping fixed dark or pink colors and ignoring the selected theme. They now use theme tokens, so switching theme or accent recolors every surface, including the Light theme.
 
 ## Macro
-- Potion Switching stays off until Auto Potion Craft is enabled — the UI and macro both ignore the switcher when craft is off.
+- Potion Switching stays off until Auto Potion Craft is on. The UI and macro both ignore the switcher when craft is off.
 - With Auto Potion Craft on, webhook currency screenshots are disabled and the Currency Screenshot calibration section is hidden.
-- While Fishing Mode runs, merchant, quests, potion craft, obby, BR/SC, and biome selector pause. If Auto Potion Craft is also on, crafting takes priority and fishing will not run until craft is off.
-- Auto Merchant detection is faster: name OCR stops on the first Mari/Jester/Rin match, skips the sleep after the last retry, and uses a clearer interact → dialogue → detect → shop → buy flow.
-- Auto Merchant calibrations now cover all five shop slots, purchase amount, Set Max, dialogue, open/close, and purchase — each with Mark buttons in the Macro Calibrations hub. Buy flow clicks the amount field, then Max (when calibrated), then purchase.
+- While Fishing Mode runs, merchant, quests, potion craft, obby, BR/SC, and biome selector pause. If Auto Potion Craft is also on, crafting takes priority and fishing waits until craft is off.
+- The first time Fishing Mode runs it may download the vision component before starting. This happens once, then it is cached. Without it, fishing uses the NumPy fallback.
+- Auto Merchant detection is faster. Name OCR stops on the first Mari/Jester/Rin match and skips the sleep after the last retry.
+- Auto Merchant calibrations now cover all five shop slots, purchase amount, Set Max, dialogue, open/close, and purchase, each with Mark buttons in the hub. Buy flow clicks the amount field, then Max if calibrated, then purchase.
+- Auto Merchant Set Max is a single shared calibration again. The hub has one Set max Mark button used by every non-Rin merchant, and the buy flow clicks it for Mari and Jester. Rin has no Max button and skips Max entirely. Any older per-merchant Mari/Jester Max calibrations still work as a fallback.
+- The macro runs one UI action per tick on an interval timer with a fixed priority order (buffs, merchant, SC, BR, biome selector, potion, quests, obby), so enabled actions take turns instead of colliding or starving each other. Idle ticks skip work because the config is only re-read when it changes on disk.
+- Starting the macro resets all per-run state and brings up every enabled action from a clean slate. Merchant, quests, potion craft, and obby each run once at start, fishing and the biome watcher come up, and the rest begin on their own timers.
+- Added an in-app installer for the fishing vision component on the Settings and extras page. It shows whether the component is installed, installs it on demand with a progress bar and percent, and verifies the download by checksum before use. If the component is not published yet or the download fails, it says so and fishing keeps working with the built-in fallback. Restart the app after updating so the new installer loads.
+- The app now checks for the optional vision component on boot and installs it in the background if it is missing, so fishing is ready without a manual install. The checksum verification and built-in fallback are unchanged, and a failed or offline check never blocks launch.
+- Added Auto Eden detection, ported from the original Noteab macro. When enabled, it watches the in-game chat for the "Eden has appeared" announcement using OCR (with the same spoof guard against players faking the line and a 40 minute cooldown), then pings your Discord webhook with a chat screenshot. It uses your existing chat OCR calibrations.
 
 ## UI
-- Default Blush theme — soft rose and cherry-blossom accents on a warm dark base replace the old purple Midnight look; new installs start on Blush.
-- Removed window resize controls — no edge drag handles or title bar resize button; drag the title bar to move the window.
-- Removed the title bar maximize button — minimize and close remain; double-clicking the title bar no longer toggles maximize.
-- Removed the old status "pills" strip from the layout.
-- Local CSS and JS links no longer append cache-bust `?v=` query strings on asset URLs.
-- Webhook tab — dedicated Biome Notifier card at the top lists every biome with notify toggles, multiple user/role IDs, and per-rare-biome ping mode (replaces the buried legacy biome table).
-- Biome Notifier — the rare-biome explanation now sits in its own footnote below the table instead of crowding the rows, so it no longer overlaps biomes like SAND STORM or HELL on shorter windows.
+- Command palette: press Ctrl+K (or Cmd+K) to search every page and quick action (start/stop macro, import config, pin window, open Appearance). Arrow keys move, Enter runs, Esc closes. The toolbar search box now opens it too.
+- Emoji across the app are now vector icons (sidebar nav, card headers, intro, toolbar). Icons are bundled locally and follow the active theme color, so nothing loads from the internet.
+- Reworded some unclear helper text (Roblox username, mouse-action calibration, fishing) to be shorter and plainer.
+- Full custom theme mode: selecting a CSS file in Appearance replaces the whole look (minimal neutral base only). Built-in Pink/Dark/Light apply only when Custom = None; `ui_theme` stays saved as fallback. Expanded `custom-ui.example.css` template documents all UI tokens and surfaces.
+- Custom UI: drop CSS files in `%LOCALAPPDATA%\\Blossom\\themes\\` (CSS only, no HTML or JS). Sanitized loader; APIs return filenames and CSS text only, never config or license data.
+- Removed decorative corner brackets from cards and panels across the app.
+- Three themes in Appearance: Pink (rose on dark), Dark (neutral), and Light, plus Match system which follows Windows light/dark via `prefers-color-scheme`. Choice saves as `ui_theme` in config. The old Macro Theme toolbar picker is gone; custom CSS themes now live in the Appearance tab.
+- Dedicated Appearance tab in the sidebar (App section, near Settings). Theme, accent, scale, window size, and reduce motion live there.
+- Window size is customizable. Edge drag handles resize the native pywebview window; Appearance offers Small, Medium, Large, and Custom presets plus width/height fields. Size persists in config and restores on launch.
+- Appearance tab sections: Theme, Colors, Layout, Window, and Motion, with labeled presets so window size and interface scale are easy to tell apart.
+- Optional accent color override still layers on top of the active theme.
+- Appearance choices apply from local cache on startup before the first paint, then reconcile with saved config when the app bridge is ready.
+- Removed the title bar maximize button. Minimize and close remain. Double-clicking the title bar no longer maximizes.
+- Removed the old status pills strip.
+- Local CSS and JS links no longer add cache-bust `?v=` query strings.
+- Webhook tab now has a Biome Notifier card at the top. It lists every biome with notify toggles, multiple user/role IDs, and per-rare-biome ping mode.
+- Biome Notifier rare-biome note now sits in a footnote below the table. It no longer overlaps biomes like SAND STORM or HELL on shorter windows.
+- Update download now shows a progress screen with a filling bar, percent, and downloaded/total size. If the server does not report a size it shows an animated bar, then an Installing state before the restart. A failed download shows a message with Retry and Close instead of hanging.
+- Update available now shows as a corner popup with Update, Dismiss, and a corner close button. Update starts the download progress screen. Dismiss or close hides it for now without turning updates off, and it reappears for a newer version or on the next launch. Startup and the periodic 6 hour release scan both drive this popup.
+- Biome Selector is marked Broken / W.I.P. and its toggle is disabled. The card shows a warning that the automation is unfinished and unreliable, the setup intro labels it the same way, and the active modules list reads "Biome Selector (Broken / WIP)". Leave it off until it is fixed.
 
 ## Discord
-- Biome webhooks support multiple user IDs and role IDs per biome; legacy single `id`/`type` entries migrate automatically on save.
-- GLITCHED, DREAMSPACE, and CYBERSPACE — choose @everyone only, specific users/roles only, or both (global default plus per-biome override on the Webhook tab).
-- When Auto Merchant OCR spots Mari, Jester, or Rin, a merchant-found embed is sent right away (before the shop opens). Per-merchant pings use your existing ping toggles and user IDs.
-- After the shop opens, an optional shop screenshot embed is separate from the found alert and from periodic currency screenshots. Set merchant_shop_webhook to false in config to disable shop screenshots only.
-- Beta key bot: `/getkey`, `/resethwid`, `/download`, and `/downloadbeta` register globally (with `REGISTER_GLOBAL=true`) so they work in DMs and in your server. Download commands reply with branded embeds (version, channel, file size, GitHub link button) instead of plain text URLs.
-- Beta key bot owner admin — flat slash commands (`/genkey`, `/revoke`, `/extend`, `/lookup`, `/listkeys`, and others) plus `$` prefix aliases share the same license-server logic; the old `/blossomadmin` command group is removed. Slash admin commands may appear in Discord's picker for everyone but only the owner can run them; `$` prefix commands stay invisible to others. Enable Message Content Intent for `$` commands; set `DISCORD_OWNER_ID` in the bot `.env`.
+- Biome webhooks support multiple user IDs and role IDs per biome. Legacy single `id`/`type` entries migrate on save.
+- GLITCHED, DREAMSPACE, and CYBERSPACE can ping @everyone only, specific users/roles only, or both. Set a global default or a per-biome override on the Webhook tab.
+- When Auto Merchant OCR finds Mari, Jester, or Rin, a merchant-found embed is sent before the shop opens. Per-merchant pings use your existing toggles and user IDs.
+- After the shop opens, an optional shop screenshot embed is separate from the found alert and currency screenshots. Set merchant_shop_webhook to false to disable shop screenshots only.
+- Beta key bot: `/getkey`, `/resethwid`, `/download`, and `/downloadbeta` register globally with `REGISTER_GLOBAL=true`, so they work in DMs and your server. Download commands reply with embeds showing version, channel, file size, and a GitHub link.
+- Beta key bot: `/download` and `/downloadbeta` list the three newest versions with a download link, file size, and publish date. Pass the `version` option to grab an older build.
+- Beta key bot owner admin uses flat slash commands (`/genkey`, `/revoke`, `/extend`, `/lookup`, `/listkeys`, and others) plus `$` prefix aliases. The old `/blossomadmin` group is removed. Only the owner can run them. Enable Message Content Intent for `$` commands and set `DISCORD_OWNER_ID` in the bot `.env`.
+- Beta key bot no longer brokers runtime dependencies. The `/download` and `/downloadbeta` lists hide the internal `runtime-deps` housekeeping release, so only real app versions show up. The app installs the optional vision component itself on boot.
+- Beta 2.1.0-beta.4.1 — download commands list the three newest builds; use the `version` option for older releases.
 
 ## Licensing & updates
-- Activation screen on first launch — paste the key from Discord `/getkey`.
-- Keys stay on one device; use `/resethwid` in Discord if you switch machines.
-- Built-in update check — your build only offers installs from its own release track.
-- Beta builds show a beta version label in the sidebar, so it is clear when you are running a beta rather than a stable release.
-- Stable downloads and updates use the `MaxxWasHere/blossom` GitHub repo (lowercase); beta stays on `blossombeta`.
+- Activation screen on first launch. Paste the key from Discord `/getkey`.
+- Keys stay on one device. Use `/resethwid` in Discord if you switch machines.
+- Built-in update check. Your build only offers installs from its own release track.
+- Normal updates still swap the exe in place and restart. A release can be marked reinstall-required by adding a `[reinstall]` token or a `reinstall: true` line to its GitHub release notes. Those builds still download with the progress bar, then open the file location and ask you to run the installer instead of swapping automatically.
+- Update check now reads the version from the release exe name instead of the release title, so an update is still offered when the GitHub release was published without a clean version string in its title.
+- Update check retries a few times with a short backoff, re-checks every 6 hours while the app stays open, and quietly reports when it cannot reach GitHub instead of failing silently.
+- Beta builds show a beta version label in the sidebar.
+- Stable downloads use the `MaxxWasHere/blossom` GitHub repo. Beta stays on `blossombeta`.
+- Timed keys now start counting from your first activation, not from when the key was generated, so an unused key never loses time before you claim it.
+- Keys that are never activated are removed automatically after a grace period, so stale unclaimed keys no longer pile up.
 
 # Blossom 2.0.0
 

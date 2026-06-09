@@ -321,8 +321,6 @@
     }
 
     return `
-      <div class="corner-bracket tl"></div><div class="corner-bracket tr"></div>
-      <div class="corner-bracket bl"></div><div class="corner-bracket br"></div>
       <div class="card-header">
         <div class="card-icon">⌨</div>
         <div><h3>Start / Stop hotkeys</h3><p>Global keys to start and stop the macro</p></div>

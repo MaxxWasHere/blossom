@@ -34,15 +34,20 @@
     nav.dataset.blossomGrouped = "1";
   };
 
+  let navObserver = null;
   const boot = () => {
     wrapNavGroups();
     const nav = document.querySelector(".sidebar-nav");
     if (!nav) return;
-    new MutationObserver(() => {
+    // Disconnect any prior observer before re-binding (boot re-runs on
+    // pywebviewready) so observers can't accumulate on stale nav nodes.
+    if (navObserver) navObserver.disconnect();
+    navObserver = new MutationObserver(() => {
       if (nav.dataset.blossomGrouped !== "1" && nav.querySelector(".sidebar-section-label")) {
         wrapNavGroups();
       }
-    }).observe(nav, { childList: true });
+    });
+    navObserver.observe(nav, { childList: true });
   };
 
   if (document.readyState === "loading") {

@@ -162,7 +162,7 @@ html.blsm-window-maximized .window-frame {
 }
 
 .titlebar-btn.minimize:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in srgb, var(--text-primary, #fff) 12%, transparent);
 }
 
 .titlebar-btn.close:hover {
@@ -175,7 +175,7 @@ html.blsm-window-maximized .window-frame {
 }
 
 .titlebar-btn.minimize:active {
-  background: rgba(255, 255, 255, 0.14);
+  background: color-mix(in srgb, var(--text-primary, #fff) 20%, transparent);
 }
 
 .titlebar-btn.close:active {

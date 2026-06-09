@@ -12,7 +12,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 # Latest version numbers (bump when shipping each channel).
-STABLE_VERSION = "1.5.1"
+STABLE_VERSION = "2.1.0"
 BETA_VERSION = "2.1.0-beta.2"
 
 try:
@@ -169,6 +169,29 @@ def _version_from_asset_name(name: str) -> tuple[int, ...]:
     return parse_version(match.group(1))
 
 
+def _version_label_from_asset_name(name: str) -> str:
+    """Version string embedded in a Blossom-<version>.exe asset name, if any."""
+    match = _VERSIONED_EXE_RE.match(str(name or ""))
+    if not match:
+        return ""
+    return match.group(1).strip()
+
+
+def _release_version(release: dict[str, Any], asset: dict[str, str] | None) -> str:
+    """Prefer the version baked into the asset filename over the release title.
+
+    Release titles/tags on GitHub are hand-entered and often not clean version
+    strings (e.g. "Blossom Beta"), which parse_version reduces to (0,) so nothing
+    ever looks newer. The asset name is produced by the build (Blossom-<ver>.exe)
+    and is the reliable source of truth.
+    """
+    if asset:
+        asset_version = _version_label_from_asset_name(asset.get("name", ""))
+        if asset_version and parse_version(asset_version) != (0,):
+            return asset_version
+    return str(release.get("name") or release.get("tag_name") or "").strip()
+
+
 def _pick_release_asset(
     release: dict[str, Any],
     channel: str,
@@ -214,58 +237,93 @@ def _pick_release_asset(
     return None
 
 
-def fetch_latest_stable_release() -> dict[str, str] | None:
-    """Latest non-prerelease GitHub release with a Blossom-*.exe (or legacy BlossomMacro.exe)."""
-    try:
-        data = _github_request(RELEASE_API_LATEST)
-    except (HTTPError, URLError, RuntimeError, json.JSONDecodeError, TimeoutError):
-        return None
+# Marker a publisher can put in a GitHub release body/notes to force a manual
+# reinstall instead of the silent in-place swap. Either a bare [reinstall] token
+# or a "reinstall: true" line (case-insensitive) anywhere in the body works.
+_REINSTALL_TOKEN_RE = re.compile(r"\[\s*reinstall\s*\]", re.IGNORECASE)
+_REINSTALL_LINE_RE = re.compile(
+    r"^\s*reinstall\s*[:=]\s*(true|yes|1|required)\s*$",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+
+def parse_reinstall_required(body: str | None) -> bool:
+    """True when a release body asks for a manual reinstall (see markers above)."""
+    text = str(body or "")
+    if not text:
+        return False
+    if _REINSTALL_TOKEN_RE.search(text):
+        return True
+    return bool(_REINSTALL_LINE_RE.search(text))
+
+
+# Exceptions that mean "could not reach GitHub" (network/HTTP/rate-limit) as
+# opposed to "reached GitHub, nothing newer". Used so the startup check can
+# retry transient failures without retrying a successful no-update result.
+NETWORK_ERRORS = (HTTPError, URLError, RuntimeError, json.JSONDecodeError, TimeoutError, OSError)
+
+
+def _fetch_latest_stable_release_raw() -> dict[str, Any] | None:
+    data = _github_request(RELEASE_API_LATEST)
     if not isinstance(data, dict):
         return None
-    version = str(data.get("name") or data.get("tag_name") or "").strip()
     asset = _pick_release_asset(data, "stable", prefer_version=STABLE_VERSION)
+    version = _release_version(data, asset)
     if version and asset:
         return {
             "version": version,
             "url": asset["url"],
             "asset_name": asset["name"],
             "channel": "stable",
+            "reinstall_required": parse_reinstall_required(data.get("body")),
         }
     return None
 
 
-def fetch_latest_beta_release() -> dict[str, str] | None:
-    """Latest beta release on blossombeta with Blossom-*beta*.exe."""
-    try:
-        releases = _github_request(RELEASES_API_BETA)
-    except (HTTPError, URLError, RuntimeError, json.JSONDecodeError, TimeoutError):
-        return None
+def _fetch_latest_beta_release_raw() -> dict[str, Any] | None:
+    releases = _github_request(RELEASES_API_BETA)
     if not isinstance(releases, list):
         return None
-
     for release in releases:
         if not isinstance(release, dict):
             continue
-        version = str(release.get("name") or release.get("tag_name") or "").strip()
         asset = _pick_release_asset(release, "beta", prefer_version=BETA_VERSION)
+        version = _release_version(release, asset)
         if version and asset:
             return {
                 "version": version,
                 "url": asset["url"],
                 "asset_name": asset["name"],
                 "channel": "beta",
+                "reinstall_required": parse_reinstall_required(release.get("body")),
             }
     return None
 
 
-def fetch_latest_release(channel: str | None = None) -> dict[str, str] | None:
+def fetch_latest_stable_release() -> dict[str, Any] | None:
+    """Latest non-prerelease GitHub release with a Blossom-*.exe (or legacy BlossomMacro.exe)."""
+    try:
+        return _fetch_latest_stable_release_raw()
+    except NETWORK_ERRORS:
+        return None
+
+
+def fetch_latest_beta_release() -> dict[str, Any] | None:
+    """Latest beta release on blossombeta with Blossom-*beta*.exe."""
+    try:
+        return _fetch_latest_beta_release_raw()
+    except NETWORK_ERRORS:
+        return None
+
+
+def fetch_latest_release(channel: str | None = None) -> dict[str, Any] | None:
     ch = (channel or build_channel()).lower()
     if ch == "beta":
         return fetch_latest_beta_release()
     return fetch_latest_stable_release()
 
 
-def check_newer_than_local(channel: str | None = None) -> dict[str, str] | None:
+def check_newer_than_local(channel: str | None = None) -> dict[str, Any] | None:
     """Latest release for this build's channel if remote version is newer than APP_VERSION."""
     ch = (channel or build_channel()).lower()
     release = fetch_latest_release(ch)
@@ -276,7 +334,60 @@ def check_newer_than_local(channel: str | None = None) -> dict[str, str] | None:
     return None
 
 
-def download_file(url: str, output_path: Path) -> None:
+def check_update_status(channel: str | None = None) -> dict[str, Any]:
+    """Reach GitHub once and report the outcome without swallowing network errors.
+
+    Returns a dict:
+      {"ok": True,  "release": <dict>}  newer release available
+      {"ok": True,  "release": None}    reached GitHub, nothing newer
+      {"ok": False, "release": None, "error": <str>}  could not reach GitHub
+
+    The ok flag lets callers retry only on real failures (timeouts, HTTP 403
+    rate limits, offline) instead of retrying a valid "no update" answer.
+    """
+    ch = (channel or build_channel()).lower()
+    try:
+        if ch == "beta":
+            release = _fetch_latest_beta_release_raw()
+        else:
+            release = _fetch_latest_stable_release_raw()
+    except NETWORK_ERRORS as error:
+        return {"ok": False, "release": None, "error": str(error)}
+    if release and version_gt(release["version"], APP_VERSION):
+        return {"ok": True, "release": release, "error": None}
+    return {"ok": True, "release": None, "error": None}
+
+
+def _content_length(response: Any) -> int:
+    """Total bytes from the Content-Length header, or 0 when unknown."""
+    raw = ""
+    try:
+        raw = response.headers.get("Content-Length", "")
+    except Exception:
+        raw = ""
+    raw = str(raw or "").strip()
+    if raw.isdigit():
+        try:
+            return int(raw)
+        except ValueError:
+            return 0
+    return 0
+
+
+def download_file(
+    url: str,
+    output_path: Path,
+    *,
+    progress_cb: Any | None = None,
+) -> None:
+    """Stream a download to disk, optionally reporting progress.
+
+    progress_cb, if given, is called as progress_cb(downloaded, total) where
+    total is the Content-Length in bytes or 0 when the server does not report a
+    size. It fires once at the start, after each chunk, and once at the end. The
+    callback must never raise or block for long; exceptions are swallowed so a
+    misbehaving UI bridge can't abort the download.
+    """
     request = Request(
         url,
         headers={
@@ -285,14 +396,29 @@ def download_file(url: str, output_path: Path) -> None:
         },
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    def _report(downloaded: int, total: int) -> None:
+        if progress_cb is None:
+            return
+        try:
+            progress_cb(downloaded, total)
+        except Exception:
+            pass
+
     with urlopen(request, timeout=DOWNLOAD_TIMEOUT_SEC) as response, output_path.open(
         "wb"
     ) as output_file:
+        total = _content_length(response)
+        downloaded = 0
+        _report(0, total)
         while True:
             chunk = response.read(DOWNLOAD_CHUNK)
             if not chunk:
                 break
             output_file.write(chunk)
+            downloaded += len(chunk)
+            _report(downloaded, total)
+        _report(downloaded, total or downloaded)
 
 
 def write_update_script(
@@ -370,9 +496,17 @@ def apply_exe_update(
     frozen: bool,
     channel: str | None = None,
     target_exe_name: str | None = None,
+    progress_cb: Any | None = None,
+    reinstall_required: bool = False,
 ) -> dict[str, Any]:
     """
-    Download release exe and schedule swap. Returns {ok, error?, dev_mode?}.
+    Download release exe and either swap in place or stage for manual reinstall.
+
+    Returns {ok, error?, dev_mode?}. When reinstall_required is True the new exe
+    is downloaded to a clearly named file and left in place (no swap/relaunch);
+    the result carries reinstall=True and path so the caller can open the file
+    location and tell the user to run it. progress_cb is forwarded to
+    download_file (downloaded, total) for the download progress UI.
     """
     if not frozen:
         return {
@@ -384,11 +518,33 @@ def apply_exe_update(
             ),
         }
 
+    if reinstall_required:
+        staged_name = target_exe_name or DOWNLOAD_NAME
+        download_path = install_root / staged_name
+        try:
+            if download_path.exists():
+                download_path.unlink()
+            download_file(download_url, download_path, progress_cb=progress_cb)
+        except (HTTPError, URLError, OSError, TimeoutError) as error:
+            return {"ok": False, "error": f"Download failed: {error}"}
+
+        if not download_path.is_file() or download_path.stat().st_size < MIN_DOWNLOAD_BYTES:
+            if download_path.exists():
+                download_path.unlink(missing_ok=True)
+            return {"ok": False, "error": "Downloaded file is missing or too small."}
+
+        return {
+            "ok": True,
+            "reinstall": True,
+            "path": str(download_path),
+            "channel": build_channel(),
+        }
+
     download_path = install_root / DOWNLOAD_NAME
     try:
         if download_path.exists():
             download_path.unlink()
-        download_file(download_url, download_path)
+        download_file(download_url, download_path, progress_cb=progress_cb)
     except (HTTPError, URLError, OSError, TimeoutError) as error:
         return {"ok": False, "error": f"Download failed: {error}"}
 

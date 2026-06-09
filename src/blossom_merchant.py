@@ -98,10 +98,21 @@ _MERCHANT_SHOP_CALIBRATION_SPECS: tuple[tuple[str, str | None], ...] = (
     ("purchase_button", None),
 )
 
+# Merchants that never use a Max button.
+_MERCHANT_NO_MAX = frozenset({"Rin"})
+
+# Single shared Max-amount button used by every non-Rin merchant.
+# `merchant_set_max_button` is the canonical key; the rest are read only as
+# backward-compatibility fallbacks (including the old per-merchant keys, so any
+# existing Mari/Jester Max calibration keeps working after the unify).
 _MERCHANT_MAX_BUTTON_KEYS = (
     "merchant_set_max_button",
     "merchant_max_button",
     "purchase_max_button",
+    "mari_set_max_button",
+    "jester_set_max_button",
+    "mari_max_button",
+    "jester_max_button",
 )
 
 # OCR regions (get_region keys, 4-tuples).
@@ -378,7 +389,15 @@ def _merchant_slot_position(
     return (x + slot_index * MERCHANT_SLOT_X_OFFSET, y)
 
 
-def _resolve_merchant_max_button(get_point: GetPoint) -> CalibrationPoint:
+def _resolve_merchant_max_button(get_point: GetPoint, merchant_name: str = "") -> CalibrationPoint:
+    """Max-amount button for this merchant, or None when it should be skipped.
+
+    Rin never uses a Max button. Every other merchant shares the single
+    `merchant_set_max_button` calibration; the remaining keys (including the old
+    per-merchant Mari/Jester keys) are read only as backward-compat fallbacks.
+    """
+    if merchant_name in _MERCHANT_NO_MAX:
+        return None
     for key in _MERCHANT_MAX_BUTTON_KEYS:
         point = get_point(key)
         if point is not None:
@@ -412,6 +431,7 @@ def _buy_item(
     cancel_event,
     quantity: int,
     click_delay: float,
+    merchant_name: str = "",
 ) -> bool:
     """Buy flow from the original macro: amount field → Max (or typed qty) → triple purchase."""
     purchase_amount = get_point("purchase_amount_button")
@@ -420,7 +440,7 @@ def _buy_item(
         print("[main macro] merchant: missing purchase_button — cannot buy")
         return False
 
-    set_max = _resolve_merchant_max_button(get_point)
+    set_max = _resolve_merchant_max_button(get_point, merchant_name)
     if set_max is not None:
         if purchase_amount is None:
             print("[main macro] merchant: missing purchase_amount_button — cannot use Max buy")
@@ -681,7 +701,13 @@ def _phase_auto_buy(
         if not rebuy and count > 0:
             continue
         print(f"[main macro] merchant: buying {item_name} x{quantity} (rebuy={rebuy})")
-        if _buy_item(get_point=get_point, cancel_event=cancel_event, quantity=quantity, click_delay=click_delay):
+        if _buy_item(
+            get_point=get_point,
+            cancel_event=cancel_event,
+            quantity=quantity,
+            click_delay=click_delay,
+            merchant_name=merchant_name,
+        ):
             purchased[item_name] = count + 1
     return purchased, None
 

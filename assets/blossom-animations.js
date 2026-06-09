@@ -40,15 +40,12 @@
   };
 
   let lastPage = "";
-  let lastItemCount = 0;
 
   const onPageChange = () => {
     const title = pageHeaderTitle?.() || "";
     if (!title || title === lastPage) return;
     lastPage = title;
-    const main = mainEl();
-    runPageEnter(main);
-    lastItemCount = main ? pageItems(main).length : 0;
+    runPageEnter(mainEl());
   };
 
   const tagNativeCalFields = () => {
@@ -63,13 +60,7 @@
     onPageChange();
     tagNativeCalFields();
     const main = mainEl();
-    if (!main) return;
-    const count = pageItems(main).length;
-    if (!count) return;
-    if (count !== lastItemCount || !main.classList.contains("blsm-page-enter")) {
-      lastItemCount = count;
-      runPageEnter(main);
-    }
+    if (main) setStagger(main);
   };
 
   if (observeMain) observeMain(tick, 0);

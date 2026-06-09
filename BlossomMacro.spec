@@ -7,7 +7,10 @@ APP_ICON = os.path.join(SPECPATH, "icon.ico")
 
 datas = [
     ('assets', 'assets'),
-    ('images', 'images'),
+    # NOTE: the 'images/' tree is intentionally NOT bundled. The frozen UI loads
+    # biome/merchant art from remote URLs and writes runtime screenshots to
+    # %CWD%/images at runtime (dirs are created on demand), so bundling those
+    # ~8 MB of source images was dead weight.
     ('paths', 'paths'),
     ('config.json', '.'),
     ('maxstellar.png', '.'),
@@ -36,6 +39,7 @@ hiddenimports = [
     'blossom_macro_session',
     'blossom_license',
     'blossom_biome_selector',
+    'blossom_runtime_deps',
     'pytesseract',
     'pyautogui',
     'PIL',
@@ -51,7 +55,10 @@ datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
-    ['run_local_ui.py'],
+    # Use the real implementation in src/ as the frozen entry point. The root
+    # run_local_ui.py is only a dev shim that execs this file by path, which is
+    # not bundled into the onefile temp dir and crashes the exe on launch.
+    [os.path.join('src', 'run_local_ui.py')],
     pathex=[os.path.join(SPECPATH, 'src')],
     binaries=binaries,
     datas=datas,
@@ -59,10 +66,32 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    # OpenCV (cv2) is an externalized optional dependency: downloaded + hash-
+    # verified into %LOCALAPPDATA%\Blossom\runtime on first use of Fishing Mode
+    # (see src/blossom_runtime_deps.py). Excluding it here keeps the exe lean.
+    # blossom_fishing.py keeps a full NumPy fallback, so the app works even if the
+    # bundle is never downloaded. Also drop build-time-only tooling.
+    # Only excludes verified unused at runtime via `rg` over src/. NOTE: do not
+    # add 'tkinter' (used by calibration_capture.py) or 'setuptools'/'pkg_resources'
+    # (imported at load time by some third-party deps) — excluding those crashes
+    # the app. cv2 is the intended externalized dependency.
+    excludes=[
+        'cv2',
+        'numpy.f2py',
+        'numpy.distutils',
+        'numpy.testing',
+        'pip',
+        'pydoc_data',
+    ],
     noarchive=False,
     optimize=0,
 )
+# Belt-and-suspenders: strip any OpenCV binaries/datas that slipped into the graph.
+def _drop_opencv(entries):
+    return [e for e in entries if 'cv2' not in e[0].lower() and 'opencv' not in e[0].lower()]
+
+a.binaries = _drop_opencv(a.binaries)
+a.datas = _drop_opencv(a.datas)
 pyz = PYZ(a.pure)
 
 exe = EXE(

@@ -17,39 +17,6 @@
   padding: 18px 20px;
 }
 
-.blossom-credits-card .corner-bracket {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-color: var(--corner-color, var(--accent));
-  border-style: solid;
-  pointer-events: none;
-}
-
-.blossom-credits-card .corner-bracket.tl {
-  top: 0;
-  left: 0;
-  border-width: 2px 0 0 2px;
-}
-
-.blossom-credits-card .corner-bracket.tr {
-  top: 0;
-  right: 0;
-  border-width: 2px 2px 0 0;
-}
-
-.blossom-credits-card .corner-bracket.bl {
-  bottom: 0;
-  left: 0;
-  border-width: 0 0 2px 2px;
-}
-
-.blossom-credits-card .corner-bracket.br {
-  bottom: 0;
-  right: 0;
-  border-width: 0 2px 2px 0;
-}
-
 .blossom-credits-hero {
   display: flex;
   align-items: center;

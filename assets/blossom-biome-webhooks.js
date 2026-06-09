@@ -1,6 +1,7 @@
 (function () {
   const HUB_ID = "blsm-biome-webhooks-hub";
   const RARE = new Set(["GLITCHED", "DREAMSPACE", "CYBERSPACE"]);
+  const EXCLUDED = new Set(["AURORA", "EGGLAND"]);
   const ORDER = [
     "GLITCHED",
     "DREAMSPACE",
@@ -13,9 +14,7 @@
     "STARFALL",
     "CORRUPTION",
     "NULL",
-    "AURORA",
     "HEAVEN",
-    "EGGLAND",
     "SINGULARITY",
   ];
 
@@ -31,9 +30,7 @@
     STARFALL: "#011ab7",
     CORRUPTION: "#6d32a8",
     NULL: "#838383",
-    AURORA: "#56d6a0",
     HEAVEN: "#dfaf63",
-    EGGLAND: "#d4fc8d",
     SINGULARITY: "#cf4023",
   };
 
@@ -64,7 +61,7 @@
   const joinIds = (list) => (Array.isArray(list) ? list.join(", ") : "");
 
   const sortBiomes = (names) => {
-    const set = new Set(names.filter((n) => n && n !== "NORMAL"));
+    const set = new Set(names.filter((n) => n && n !== "NORMAL" && !EXCLUDED.has(n)));
     return [...set].sort((a, b) => {
       const ia = ORDER.indexOf(a);
       const ib = ORDER.indexOf(b);
@@ -268,8 +265,6 @@
     hub.id = HUB_ID;
     hub.className = "card";
     hub.innerHTML = `
-      <div class="corner-bracket tl"></div><div class="corner-bracket tr"></div>
-      <div class="corner-bracket bl"></div><div class="corner-bracket br"></div>
       <div class="card-header">
         <div class="card-icon">🌍</div>
         <div>

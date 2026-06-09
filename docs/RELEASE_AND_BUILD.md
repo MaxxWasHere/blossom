@@ -35,9 +35,11 @@ py run_local_ui.py
 
 ```powershell
 py scripts\build_all.py all --stable-version 2.0.0 --beta-version 2.1.0-beta.1 -o dist\2.0.0
-py scripts\build_all.py stable 2.0.0 -o dist\2.0.0
+py scripts\build_all.py stable 2.0.0 -o dist\2.0.0 --push-repo
 py scripts\build_all.py beta 2.1.0-beta.1 -o dist\2.1.0-beta.1
 ```
+
+`--push-repo` (stable only): commits and pushes source to [MaxxWasHere/blossom](https://github.com/MaxxWasHere/blossom) after the exe is built. Use this for every stable release.
 
 Output: `Blossom-{version}.exe`.
 

@@ -85,6 +85,11 @@ class BiomeWatcher:
         self._thread: threading.Thread | None = None
         self._last_position = 0
         self._last_log_file: str | None = None
+        # Resolving the newest log globs+stats the whole Roblox logs dir, so
+        # cache the result and only re-scan periodically (logs rotate rarely).
+        self._cached_log_file: str | None = None
+        self._next_log_scan = 0.0
+        self._log_rescan_sec = 5.0
         self._current_biome: str | None = None
         self._current_aura: str | None = None
         self._last_fired: dict[str, float] = {}
@@ -191,10 +196,21 @@ class BiomeWatcher:
                     self._current_aura = aura
                     self._fire_aura(aura)
 
+    def _resolve_log_file(self) -> str | None:
+        """Cheap log-file resolver: reuse the cached newest log and only re-glob
+        the logs directory every few seconds, or when the cached file is gone."""
+        now = time.monotonic()
+        cached = self._cached_log_file
+        if cached and now < self._next_log_scan and os.path.exists(cached):
+            return cached
+        self._cached_log_file = get_latest_log_file()
+        self._next_log_scan = now + self._log_rescan_sec
+        return self._cached_log_file
+
     def _loop(self) -> None:
         while not self._stop.is_set():
             try:
-                log_file = get_latest_log_file()
+                log_file = self._resolve_log_file()
                 if log_file is None:
                     self._stop.wait(self._poll * 3)
                     continue

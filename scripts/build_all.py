@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parent.parent
 BUILD_INFO = ROOT / "src" / "blossom_build_info.py"
 PYI_DIST = ROOT / "dist"
 
-DEFAULT_STABLE_VERSION = "2.0.0"
+DEFAULT_STABLE_VERSION = "2.1.0"
 DEFAULT_BETA_VERSION = "2.1.0-beta.2"
 # How long a beta build stays usable when no explicit expiry date is given.
 DEFAULT_BETA_EXPIRY_DAYS = 45
@@ -263,6 +263,31 @@ def build_one(
     return dest
 
 
+def push_stable_repo(version: str) -> None:
+    """Commit any pending changes and push to origin (stable source releases)."""
+    import subprocess as sp
+
+    print(f"[build] pushing source to origin (stable {version})…")
+    sp.run(["git", "add", "-A"], cwd=ROOT, check=True)
+    status = sp.run(
+        ["git", "status", "--porcelain"],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    if status.stdout.strip():
+        sp.run(
+            ["git", "commit", "-m", f"Release stable {version}"],
+            cwd=ROOT,
+            check=True,
+        )
+    else:
+        print("[build] no source changes to commit")
+    sp.run(["git", "push", "origin", "HEAD"], cwd=ROOT, check=True)
+    print("[build] pushed to origin")
+
+
 def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Build BlossomMacro exe(s)")
     parser.add_argument("target", nargs="?", choices=("stable", "beta", "all"), default="all")
@@ -285,6 +310,11 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
         "--obfuscate",
         action="store_true",
         help="Obfuscate license modules with PyArmor before building (beta only)",
+    )
+    parser.add_argument(
+        "--push-repo",
+        action="store_true",
+        help="After a stable build, commit and push source to origin (MaxxWasHere/blossom)",
     )
     return parser.parse_args(argv)
 
@@ -325,6 +355,8 @@ def main(argv: list[str] | None = None) -> int:
         watermark=args.watermark,
         obfuscate=args.obfuscate,
     )
+    if args.target == "stable" and args.push_repo:
+        push_stable_repo(args.version)
     print("[build] Done")
     return 0
 

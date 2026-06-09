@@ -11,6 +11,12 @@ APP_DATA_DIR = Path(os.environ.get("LOCALAPPDATA", "")) / "Blossom"
 APP_CONFIG_PATH = APP_DATA_DIR / "config.json"
 POTION_DIR = APP_DATA_DIR / "crafting_files_do_not_open"
 OBBY_PATHS_DIR = APP_DATA_DIR / "paths"
+# Externalized optional runtime dependencies (e.g. OpenCV) are downloaded on
+# demand and cached here instead of bloating the shipped exe. Native code loaded
+# from this dir is hash-verified against a pinned constant before use; see
+# blossom_runtime_deps.py.
+RUNTIME_DEPS_DIR = APP_DATA_DIR / "runtime"
+THEMES_DIR = APP_DATA_DIR / "themes"
 CHAR_ALIGN_FILENAME = "char_align.json"
 CHAR_ALIGN_PATH = OBBY_PATHS_DIR / CHAR_ALIGN_FILENAME
 
@@ -32,6 +38,13 @@ def ensure_app_data_dirs() -> None:
     APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
     POTION_DIR.mkdir(parents=True, exist_ok=True)
     OBBY_PATHS_DIR.mkdir(parents=True, exist_ok=True)
+    THEMES_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def ensure_runtime_deps_dir() -> Path:
+    """Create and return the cache dir for externalized runtime dependencies."""
+    RUNTIME_DEPS_DIR.mkdir(parents=True, exist_ok=True)
+    return RUNTIME_DEPS_DIR
 
 
 def _copy_tree_files(source_dir: Path, dest_dir: Path, pattern: str, label: str) -> None:

@@ -16,6 +16,10 @@ venv/
 env/
 discord-bot/
 
+# --- Node (icon generator only) ---
+node_modules/
+package-lock.json
+
 # --- Build / packaging ---
 build/
 dist/

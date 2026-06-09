@@ -219,6 +219,22 @@
     card.appendChild(panel);
   };
 
+  const placePotionPanel = (panel, pageHeader) => {
+    const parent = pageHeader.parentElement;
+    if (!parent) return;
+    const firstCard = Array.from(parent.children).find(
+      (n) => n.classList?.contains("card") && n.id !== POTION_PANEL_ID
+    );
+    if (!panel.parentElement) {
+      if (firstCard) parent.insertBefore(panel, firstCard);
+      else pageHeader.insertAdjacentElement("afterend", panel);
+      return;
+    }
+    if (firstCard && panel.nextElementSibling !== firstCard) {
+      parent.insertBefore(panel, firstCard);
+    }
+  };
+
   const ensurePotionManager = () => {
     if (!isPotionCraftingPage()) return;
     hideRecorderControls();
@@ -234,8 +250,6 @@
       panel.style.marginBottom = "16px";
       panel.style.position = "relative";
       panel.innerHTML = `
-        <div class="corner-bracket tl"></div><div class="corner-bracket tr"></div>
-        <div class="corner-bracket bl"></div><div class="corner-bracket br"></div>
         <div class="card-header">
           <div class="card-icon">🧪</div>
           <div><h3>Your potions</h3><p>Add names here — they show up in the craft list below</p></div>
@@ -323,20 +337,17 @@
       });
 
       panel._blossomRenderList = renderList;
+      void renderList();
     }
 
-    const parent = pageHeader.parentElement;
-    const firstCard = Array.from(parent.children).find(
-      (n) => n.classList?.contains("card") && n.id !== POTION_PANEL_ID
-    );
-    if (firstCard) parent.insertBefore(panel, firstCard);
-    else if (!panel.parentElement) pageHeader.insertAdjacentElement("afterend", panel);
-
-    panel._blossomRenderList?.();
+    placePotionPanel(panel, pageHeader);
   };
+
+  let potionListsReady = false;
 
   const sync = () => {
     if (!isPotionCraftingPage()) {
+      potionListsReady = false;
       document.getElementById(POTION_PANEL_ID)?.remove();
       document.getElementById(CRAFT_ID)?.remove();
       return;
@@ -344,7 +355,11 @@
     ensurePotionManager();
     ensureCraftButtons();
     void gatePotionSwitching();
-    refreshSwitchingSelects();
+    if (!potionListsReady) {
+      potionListsReady = true;
+      void refreshSwitchingSelects();
+      void refreshRecipeSelect();
+    }
   };
 
   if (observeMain) {

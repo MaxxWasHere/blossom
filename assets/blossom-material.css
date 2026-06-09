@@ -16,7 +16,7 @@
   --md-outline: var(--border, #241a1e);
   --md-outline-strong: var(--border-hover, #32242a);
   --md-primary: var(--accent, #e891a8);
-  --md-primary-container: rgba(232, 145, 168, 0.14);
+  --md-primary-container: color-mix(in srgb, var(--accent, #e891a8) 14%, transparent);
   --md-on-surface: var(--text-primary, #e4e4e7);
   --md-on-surface-variant: var(--text-muted, #9ca3af);
   --md-ease: cubic-bezier(0.2, 0, 0, 1);
@@ -112,7 +112,7 @@
   font-size: 15px !important;
   line-height: 1 !important;
   border-radius: var(--md-radius-sm) !important;
-  border: 1px solid rgba(232, 145, 168, 0.28) !important;
+  border: 1px solid var(--border-accent, rgba(232, 145, 168, 0.28)) !important;
   background: var(--md-primary-container) !important;
   box-shadow: none !important;
 }
@@ -279,7 +279,7 @@
 .blsm-cal-tab.is-active {
   color: var(--md-on-surface);
   background: var(--md-surface);
-  border-color: rgba(232, 145, 168, 0.35);
+  border-color: var(--border-accent, rgba(232, 145, 168, 0.35));
 }
 
 /* ——— Lists / rows ——— */
