@@ -17,10 +17,7 @@ datas = [
     ('tea.png', '.'),
     ('icon.ico', '.'),
 ]
-# Bundle Tesseract OCR (used by blossom_ocr for merchant auto-buy) when present.
-_tess_dir = os.path.join(SPECPATH, 'assets', 'tesseract')
-if os.path.isdir(_tess_dir):
-    datas.append((_tess_dir, os.path.join('assets', 'tesseract')))
+datas.append((os.path.join(SPECPATH, 'assets', 'runtime_manifest.json'), 'assets'))
 
 binaries = []
 hiddenimports = [
@@ -39,8 +36,9 @@ hiddenimports = [
     'blossom_macro_session',
     'blossom_license',
     'blossom_biome_selector',
+    'blossom_custom_ui',
     'blossom_runtime_deps',
-    'pytesseract',
+    'blossom_bootstrap',
     'pyautogui',
     'PIL',
     'PIL.Image',

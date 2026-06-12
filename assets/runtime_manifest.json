@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "base_url": "https://github.com/MaxxWasHere/blossombeta/releases/download/runtime-deps",
+  "components": {
+    "cv2": {
+      "label": "OpenCV",
+      "version": "4.7",
+      "archive": "cv2-runtime-{abi}.zip",
+      "cache_subdir": "cv2-{abi}",
+      "payload_subpath": "cv2",
+      "sha256": {
+        "py314-win-amd64": "5bcb100e4c49b2f7fa842dd16e2bd781950040f454834c2b0da2329aee41d941"
+      }
+    },
+    "winocr": {
+      "label": "WinOCR",
+      "version": "0.0.15",
+      "archive": "winocr-runtime-{abi}.zip",
+      "cache_subdir": "winocr-{abi}",
+      "payload_subpath": "winocr",
+      "sha256": {
+        "py314-win-amd64": "04a9172e93604a2e63cdc7b81133cfe524c4889c63ca36dc8939f8ad4605d1ab"
+      }
+    }
+  }
+}

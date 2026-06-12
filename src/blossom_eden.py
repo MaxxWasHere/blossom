@@ -209,7 +209,7 @@ def run_auto_eden_check(
     chat_box_region = _region(config, "chat_box_ocr_pos")
     if chat_box_region is None:
         return "Skipped: chat_box_ocr_pos not calibrated"
-    if not blossom_ocr.tesseract_available():
+    if not blossom_ocr.ocr_available():
         return "Skipped: OCR unavailable"
 
     if focus_roblox_cb is not None:

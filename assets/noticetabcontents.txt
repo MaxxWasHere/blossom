@@ -1,3 +1,79 @@
+# Blossom 2.2.1
+
+## New
+- Custom UI — one CSS file restyles the entire app. Under Appearance → Custom UI, pick a `.css` from `%LOCALAPPDATA%\Blossom\themes\`, copy `custom-ui.example.css` as a starter, edit tokens and selectors, then Refresh. Built-in themes stay available when Custom UI = None.
+- Four new built-in themes: OLED (true black for AMOLED panels), Sakura (warm light pink), Midnight (deep navy with indigo), and Forest (mossy greens with emerald).
+- Fixed-name launchers `Blossom.exe` (stable) and `Blossom-beta.exe` (beta) download the full app into `%LOCALAPPDATA%\Blossom\app\{channel}\` on first run and when a newer release exists, sync optional runtime components, then start the current version. Keep one shortcut forever.
+
+## UI
+- Appearance is simplified: JSON Theme studio and the separate “full custom CSS” path are merged into one Custom UI section. Built-in theme pickers dim while custom CSS is active.
+- Full-frame launch overlay while Blossom starts up, syncs optional runtime components, and downloads updates — branded spinner, status text, and a progress bar when the total size is known.
+- Light and Sakura themes use dark readable text on bright surfaces — sidebar labels, active nav, cards, and inputs no longer stay pale-on-pale.
+
+## Improved
+- Bootstrap launchers show a branded splash window with download progress for the app payload and runtime components, then close automatically once the main Blossom interface is ready.
+- Merchant, Eden, and biome-selector OCR now use Windows WinOCR instead of bundled Tesseract. The WinOCR Python bundle downloads with other runtime components; you also need the Windows OCR language pack (en-US) if it is not already installed.
+- Optional runtime dependencies (OpenCV and WinOCR) share one hash-verified manifest. The launcher and the app both sync missing or outdated components on startup without blocking launch.
+
+## Fixed
+- Packaged builds configure HTTPS certificate paths for activation and retry with a built-in fallback if the `requests` library cannot reach the server — fixes false “Can't reach the server” on PCs where activation worked in dev but not from the `.exe`.
+- WinOCR is no longer reported as missing when the runtime bundle is already downloaded and cached.
+- Starting the macro no longer shrinks a maximized Roblox window to 800×600 — foreground focus only restores the window when it was minimized.
+- Appearance settings save reliably again — config writes happen immediately instead of on a debounced timer that could miss a quick restart.
+- The desktop window is resizable again on Windows with a minimum size of 860×540 so the layout does not break.
+- The merchant OCR unavailable notice no longer shows on startup. It only appears when a feature that needs OCR runs without WinOCR or the Windows OCR language pack.
+- Biome Notifier table rows scroll inside their container again; the header spans the full width of its scroll area.
+
+## Discord
+- Biome notifier and merchant webhook pings now send only your Private Server link — no extra embed text or hop-in reminders.
+
+# Blossom 2.2.0
+
+## New
+- Custom UI — one CSS file restyles the entire app. Under Appearance → Custom UI, pick a `.css` from `%LOCALAPPDATA%\Blossom\themes\`, copy `custom-ui.example.css` as a starter, edit tokens and selectors, then Refresh. Built-in themes stay available when Custom UI = None.
+- Four new built-in themes: OLED (true black for AMOLED panels), Sakura (warm light pink), Midnight (deep navy with indigo), and Forest (mossy greens with emerald). Pick them under Appearance next to Pink, Dark, and Light.
+- Fixed-name launchers `Blossom.exe` (stable) and `Blossom-beta.exe` (beta) download the full app into `%LOCALAPPDATA%\Blossom\app\{channel}\` on first run and when a newer release exists, sync optional runtime components, then start the current version. Keep one shortcut forever.
+
+## UI
+- Appearance is simplified: JSON Theme studio and the separate “full custom CSS” path are merged into one Custom UI section. Built-in theme pickers dim while custom CSS is active; your saved built-in choice is kept as fallback.
+- Appearance → Custom UI now explains the difference between built-in themes (palette only) and a full CSS reskin (every existing surface). `custom-ui.example.css` includes a DOM selector map for sidebar, header, tabs, cards, modals, loading overlay, update toast, calibrations hub, biome webhooks, and more.
+- Custom CSS is sanitized on load (no `@import`, remote URLs, or scripts) and applies before the first frame paints, so startup no longer flashes the default look.
+- Full-frame launch overlay while Blossom starts up, syncs optional runtime components, and downloads updates or the fishing vision component — branded spinner, status text, and a progress bar when the total size is known.
+- Appearance card header shows brief “Saving…” / “Saved” feedback when theme or layout settings are written to config.
+- Light and Sakura themes use dark readable text on bright surfaces — sidebar labels, active nav, cards, and inputs no longer stay pale-on-pale.
+
+## Improved
+- Bootstrap launchers (`Blossom.exe` / `Blossom-beta.exe`) now show a branded splash window with download progress for the app payload and runtime components, then close automatically once the main Blossom interface is ready — no console window left open.
+- Bootstrap splash matches the in-app launch overlay more closely: pink aurora backdrop, Blossom logo, smoother progress animation, and inline error text instead of a blocking dialog.
+- Release build output separates launchers (`launchers/`) from versioned payload exes (`app/`) so uploads and local testing stay organized.
+- Custom UI CSS persists reliably across restarts: cached stylesheet text applies immediately on pre-paint, then reloads from disk when the Python bridge is ready.
+- Merchant, Eden, and biome-selector OCR now use Windows WinOCR instead of bundled Tesseract. The WinOCR Python bundle downloads with other runtime components; you also need the Windows OCR language pack (en-US) if it is not already installed.
+- Optional runtime dependencies (OpenCV and WinOCR) share one hash-verified manifest. The launcher and the app both sync missing or outdated components on startup without blocking launch.
+
+## Fixed
+- Bootstrap splash no longer crashes on launch when the loading spinner draws its track ring — tkinter only accepts solid 6-digit hex colors, not CSS-style alpha hex.
+- Beta activation no longer fails with “Can't reach the server” when the license worker has not deployed `/challenge` yet — Blossom falls back to the legacy activate flow and shows clearer timeout, SSL, or DNS errors when the network really is down.
+- Packaged beta builds configure HTTPS certificate paths for activation and retry with a built-in fallback if the `requests` library cannot reach the server — fixes false “Can't reach the server” on PCs where activation worked in dev but not from the `.exe`.
+- WinOCR is no longer reported as missing when the runtime bundle is already downloaded and cached; biome selector and status checks respect the synced manifest.
+- Starting the macro no longer shrinks a maximized Roblox window to 800×600 — foreground focus only restores the window when it was minimized.
+- Appearance settings (built-in theme, custom UI CSS, accent, scale, motion, and window size) save reliably again — config writes happen immediately instead of on a debounced timer that could miss a quick restart, custom CSS filenames are no longer cleared when the Python bridge is still starting, and a dedicated merge save avoids races with other config updates.
+- If you had a JSON custom theme selected, Blossom falls back to your saved built-in theme and shows a one-time notice — your `.json` files remain in the themes folder for reference.
+- The desktop window is resizable again on Windows. Edge and corner drag handles use native Win32 resize, with a minimum size of 860×540 so the layout does not break.
+- The launch overlay no longer blocks the main window indefinitely when running from source (`py run_local_ui.py`). Critical overlay CSS and startup dismissal logic were corrected, and heavy Python startup work no longer blocks the pywebview bridge while settings load.
+- The app no longer hangs on launch when starting the macro from source (`py run_local_ui.py`). Fishing screen capture no longer imports PyAutoGUI at startup, which could freeze the terminal indefinitely on some Windows setups.
+- The merchant OCR unavailable notice no longer shows on startup. It only appears when a feature that needs OCR runs without WinOCR or the Windows OCR language pack.
+- Biome Notifier table rows scroll inside their container again, so the rare-ping footnote no longer covers user ID fields on shorter windows.
+- Biome Notifier table header now spans the full width of its scroll area instead of appearing as a floating bar with gaps on the sides.
+
+## Licensing & updates
+- Beta licensing is hardened: activation uses one-time server challenges when available, signed tokens are bound to your build and machine, and the license file is stored with Windows DPAPI instead of plain JSON. If you update to a new beta build and see a machine mismatch, use `/resethwid` in Discord once.
+
+## Macro
+- Removed the “rare aura — hop in before they switch” pre-switch hop behavior from aura webhook copy.
+
+## Discord
+- Biome notifier and merchant webhook pings now send only your Private Server link — no extra embed text or hop-in reminders.
+
 # Blossom 2.1.0
 
 ## New

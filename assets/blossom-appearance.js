@@ -1,7 +1,8 @@
 (function () {
-  const { observeMain, pageHeaderTitle, debounce } = window.Blossom || {};
+  const { observeMain, pageHeaderTitle } = window.Blossom || {};
   const CARD_ID = "blossom-appearance-card";
   const LS_KEY = "blossom-appearance";
+  const MIGRATION_LS_KEY = "blossom-appearance-json-migrated";
   const CUSTOM_STYLE_ID = "blsm-custom-ui";
   const APPEARANCE_PAGE = "Appearance";
   const THEMES_FOLDER_HINT = "%LOCALAPPDATA%\\Blossom\\themes\\";
@@ -34,19 +35,40 @@
     { key: "pink", label: "Pink", hint: "Rose accent, dark base", swatch: "#e891a8" },
     { key: "dark", label: "Dark", hint: "Neutral dark palette", swatch: "#3f3f46" },
     { key: "light", label: "Light", hint: "Bright surfaces", swatch: "#fafafa" },
+    { key: "oled", label: "OLED", hint: "True black for AMOLED panels", swatch: "linear-gradient(135deg,#000 60%,#f2a3b9 60%)" },
+    { key: "sakura", label: "Sakura", hint: "Warm petal pinks, light base", swatch: "linear-gradient(135deg,#f9eef3 50%,#d4537e 50%)" },
+    { key: "midnight", label: "Midnight", hint: "Deep navy, indigo accent", swatch: "linear-gradient(135deg,#070b14 55%,#818cf8 55%)" },
+    { key: "forest", label: "Forest", hint: "Mossy greens, emerald accent", swatch: "linear-gradient(135deg,#0a0f0b 55%,#5fd49a 55%)" },
   ];
 
   const VALID_THEMES = new Set(THEMES.map((t) => t.key));
+  const LIGHT_THEMES = new Set(["light", "sakura"]);
+
+  const isLightVisualTheme = (themeKey) => {
+    const key = String(themeKey || "").toLowerCase();
+    if (LIGHT_THEMES.has(key)) return true;
+    if (key === "system") {
+      try {
+        return window.matchMedia("(prefers-color-scheme: light)").matches;
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  };
+
+  const syncLightUiClass = (s) => {
+    const key = visualThemeKey(s || state);
+    document.documentElement.classList.toggle("blsm-light-ui", isLightVisualTheme(key));
+  };
 
   const LEGACY_THEME_MAP = {
-    midnight: "pink",
     blush: "pink",
     solar: "pink",
     lavender: "pink",
     sunset: "pink",
     cyberpunk: "pink",
     ocean: "dark",
-    forest: "dark",
     neon: "dark",
     arctic: "light",
   };
@@ -95,6 +117,8 @@
   const darken = (rgb, amt) => rgb.map((c) => c * (1 - amt));
   const lighten = (rgb, amt) => rgb.map((c) => c + (255 - c) * amt);
   const rgba = (rgb, a) => `rgba(${clamp(rgb[0])}, ${clamp(rgb[1])}, ${clamp(rgb[2])}, ${a})`;
+  const escAttr = (s) =>
+    String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
   const normalizeThemeKey = (raw) => {
     const key = String(raw || "").trim().toLowerCase();
@@ -103,17 +127,17 @@
     return DEFAULTS.theme;
   };
 
+  function PathBasename(name) {
+    const parts = String(name).replace(/\\/g, "/").split("/");
+    return parts[parts.length - 1] || "";
+  }
+
   const normalizeCustomCss = (raw) => {
     const name = PathBasename(String(raw || "").trim());
     return name && name.toLowerCase().endsWith(".css") && !name.toLowerCase().endsWith(".example.css")
       ? name
       : "";
   };
-
-  function PathBasename(name) {
-    const parts = String(name).replace(/\\/g, "/").split("/");
-    return parts[parts.length - 1] || "";
-  }
 
   const clearAccentInline = (el) => {
     if (!el) return;
@@ -128,9 +152,14 @@
     if (!value || value === "default") return;
     const rgb = hexToRgb(value);
     if (!rgb) return;
+    const dim = toHex(darken(rgb, 0.18));
     body.style.setProperty("--accent", toHex(rgb));
-    body.style.setProperty("--accent-dim", toHex(darken(rgb, 0.18)));
-    body.style.setProperty("--accent-text", toHex(lighten(rgb, 0.55)));
+    body.style.setProperty("--accent-dim", dim);
+    body.style.setProperty(
+      "--accent-text",
+      isLightVisualTheme(visualThemeKey(state)) ? dim : toHex(lighten(rgb, 0.55))
+    );
+    body.style.setProperty("--text-on-accent", "#ffffff");
     body.style.setProperty("--accent-glow", rgba(rgb, 0.15));
     body.style.setProperty("--border-accent", rgba(rgb, 0.3));
     body.style.setProperty("--shadow-glow", `0 0 20px ${rgba(rgb, 0.08)}`);
@@ -152,27 +181,26 @@
     const body = document.body;
     if (!body) return;
     body.setAttribute("data-theme", visualThemeKey(s));
+    body.classList.remove("blsm-json-theme");
     document.documentElement.classList.toggle("blsm-custom-ui-active", hasCustomUi(s));
+    syncLightUiClass(s);
   };
 
-  const applyBuiltinFallbackTheme = (s) => {
-    applyTheme(s.theme);
-    document.documentElement.classList.remove("blsm-custom-ui-active");
-  };
-
-  const injectCustomCssText = (css) => {
-    let el = document.getElementById(CUSTOM_STYLE_ID);
+  const injectStyleText = (id, css) => {
+    let el = document.getElementById(id);
     if (!css) {
       el?.remove();
       return;
     }
     if (!el) {
       el = document.createElement("style");
-      el.id = CUSTOM_STYLE_ID;
+      el.id = id;
       document.head.appendChild(el);
     }
     el.textContent = css;
   };
+
+  const injectCustomCssText = (css) => injectStyleText(CUSTOM_STYLE_ID, css);
 
   const applyCustomCss = async (filename, { cachedText } = {}) => {
     const fname = normalizeCustomCss(filename);
@@ -183,6 +211,8 @@
       return true;
     }
 
+    state.customCss = fname;
+
     const bridge = api();
     if (bridge?.read_custom_ui_css) {
       try {
@@ -191,7 +221,12 @@
           injectCustomCssText(res.css);
           state.customCssText = res.css;
           applyVisualTheme(state);
+          cacheAppearanceState();
           return true;
+        }
+        if (res && !res.ok) {
+          applyVisualTheme(state);
+          return false;
         }
       } catch (err) {
         console.warn("[appearance] custom UI load failed");
@@ -199,16 +234,14 @@
     }
 
     const fallback = cachedText || state.customCssText;
-    if (fallback && fname === state.customCss) {
+    if (fallback) {
       injectCustomCssText(fallback);
       applyVisualTheme(state);
+      cacheAppearanceState();
       return true;
     }
 
-    injectCustomCssText("");
-    state.customCssText = "";
-    state.customCss = "";
-    applyBuiltinFallbackTheme(state);
+    applyVisualTheme(state);
     return false;
   };
 
@@ -229,26 +262,58 @@
       clearAccentInline(accentEl());
       clearAccentInline(document.documentElement);
     }
-    const ok = await applyCustomCss(s.customCss, { cachedText: s.customCssText });
-    if (hasCustomUi(s) && !ok) {
-      state.customCss = "";
-      state.customCssText = "";
-    }
+
+    await applyCustomCss(s.customCss, { cachedText: s.customCssText });
+
     if (!hasCustomUi(state)) {
       applyVisualTheme(state);
       applyAccent(state.accent);
+    } else {
+      applyVisualTheme(state);
     }
     applyScale(s.scale);
     applyMotion(s.motion);
+    cacheAppearanceState();
+  };
+
+  const stripLegacyJsonThemeFields = (raw) => {
+    const out = { ...raw };
+    const hadJson =
+      !!normalizeCustomTheme(out.customTheme) ||
+      !!out.customThemeCss ||
+      !!out.customThemeBase;
+    delete out.customTheme;
+    delete out.customThemeBase;
+    delete out.customThemeCss;
+    delete out.customThemeIcons;
+    delete out.themeFile;
+    delete out.showCorners;
+    if (hadJson) {
+      try {
+        if (!localStorage.getItem(MIGRATION_LS_KEY)) {
+          out._jsonMigrationNotice = true;
+          localStorage.setItem(MIGRATION_LS_KEY, "1");
+        }
+      } catch {}
+    }
+    return out;
+  };
+
+  const normalizeCustomTheme = (raw) => {
+    const name = PathBasename(String(raw || "").trim());
+    return name && name.toLowerCase().endsWith(".json") && !name.toLowerCase().endsWith(".example.json")
+      ? name
+      : "";
   };
 
   const readLocal = () => {
     try {
-      const raw = { ...DEFAULTS, ...(JSON.parse(localStorage.getItem(LS_KEY)) || {}) };
+      const raw = stripLegacyJsonThemeFields({
+        ...DEFAULTS,
+        ...(JSON.parse(localStorage.getItem(LS_KEY)) || {}),
+      });
       raw.theme = normalizeThemeKey(raw.theme);
       raw.customCss = normalizeCustomCss(raw.customCss);
-      delete raw.themeFile;
-      delete raw.showCorners;
       return raw;
     } catch {
       return { ...DEFAULTS };
@@ -257,13 +322,21 @@
 
   const writeLocal = (s) => {
     try {
-      localStorage.setItem(LS_KEY, JSON.stringify(s));
+      const payload = { ...s };
+      delete payload._jsonMigrationNotice;
+      delete payload._needsJsonConfigClear;
+      localStorage.setItem(LS_KEY, JSON.stringify(payload));
     } catch {}
+  };
+
+  const cacheAppearanceState = () => {
+    writeLocal(state);
   };
 
   let state = readLocal();
   let systemMq = null;
   let customCatalog = [];
+  let needsJsonConfigClear = false;
 
   const normalizeFromConfig = (cfg) => {
     if (!cfg || typeof cfg !== "object") return null;
@@ -282,6 +355,16 @@
     if (typeof customKey === "string") {
       out.customCss = normalizeCustomCss(customKey);
       found = true;
+    }
+
+    if (typeof cfg.ui_custom_theme_json === "string" && cfg.ui_custom_theme_json) {
+      needsJsonConfigClear = true;
+      try {
+        if (!localStorage.getItem(MIGRATION_LS_KEY)) {
+          out._jsonMigrationNotice = true;
+          localStorage.setItem(MIGRATION_LS_KEY, "1");
+        }
+      } catch {}
     }
 
     if (typeof cfg.ui_accent === "string" && cfg.ui_accent) {
@@ -313,24 +396,118 @@
     return found ? out : null;
   };
 
-  const persist = (debounce ? debounce : (fn) => fn)(async () => {
+  const buildAppearancePatch = () => {
+    const patch = {
+      ui_theme: state.theme,
+      selected_theme: state.theme,
+      ui_custom_css: state.customCss || "",
+      ui_accent: state.accent,
+      ui_scale: state.scale,
+      ui_reduce_motion: state.motion,
+      ui_window_width: state.windowWidth,
+      ui_window_height: state.windowHeight,
+    };
+    if (needsJsonConfigClear) {
+      patch.ui_custom_theme_json = "";
+      needsJsonConfigClear = false;
+    }
+    return patch;
+  };
+
+  let persistInFlight = null;
+  let persistTimer = null;
+
+  const persistNow = async () => {
     const bridge = api();
-    if (!bridge?.get_config || !bridge?.save_config) return;
+    if (!bridge) return false;
+    const patch = buildAppearancePatch();
     try {
-      const cfg = (await bridge.get_config()) || {};
-      cfg.ui_theme = state.theme;
-      cfg.selected_theme = state.theme;
-      cfg.ui_custom_css = state.customCss || "";
-      cfg.ui_accent = state.accent;
-      cfg.ui_scale = state.scale;
-      cfg.ui_reduce_motion = state.motion;
-      cfg.ui_window_width = state.windowWidth;
-      cfg.ui_window_height = state.windowHeight;
-      await bridge.save_config(cfg);
+      if (typeof bridge.save_appearance_settings === "function") {
+        await bridge.save_appearance_settings(patch);
+        return true;
+      }
+      if (typeof bridge.get_config === "function" && typeof bridge.save_config === "function") {
+        const cfg = (await bridge.get_config()) || {};
+        Object.assign(cfg, patch);
+        await bridge.save_config(cfg);
+        return true;
+      }
     } catch (err) {
       console.warn("[appearance] save failed", err);
     }
-  }, 320);
+    return false;
+  };
+
+  const runPersist = () => {
+    persistTimer = null;
+    persistInFlight = persistNow().finally(() => {
+      persistInFlight = null;
+    });
+    return persistInFlight;
+  };
+
+  const persist = async ({ immediate = false, feedback = false } = {}) => {
+    const doSave = () => {
+      if (persistInFlight) return persistInFlight;
+      return runPersist();
+    };
+
+    if (immediate) {
+      clearTimeout(persistTimer);
+      persistTimer = null;
+      if (feedback) showCardSaveFeedback("saving");
+      const ok = await doSave();
+      if (feedback) showCardSaveFeedback(ok ? "saved" : "error");
+      return ok;
+    }
+
+    clearTimeout(persistTimer);
+    if (feedback) showCardSaveFeedback("saving");
+    persistTimer = setTimeout(async () => {
+      const ok = await doSave();
+      if (feedback) showCardSaveFeedback(ok ? "saved" : "error");
+    }, 280);
+    return true;
+  };
+
+  const flushPersist = () => {
+    clearTimeout(persistTimer);
+    persistTimer = null;
+    if (persistInFlight) return persistInFlight;
+    return runPersist();
+  };
+
+  let cardSaveFeedbackTimer = null;
+
+  const showCardSaveFeedback = (phase) => {
+    const el = document.getElementById(CARD_ID)?.querySelector(".blsm-appearance-save-status");
+    if (!el) return;
+    clearTimeout(cardSaveFeedbackTimer);
+    el.classList.remove("is-saving", "is-saved", "is-error");
+    if (!phase) {
+      el.hidden = true;
+      el.querySelector(".blsm-save-status-text").textContent = "";
+      return;
+    }
+    el.hidden = false;
+    const text = el.querySelector(".blsm-save-status-text");
+    if (phase === "saving") {
+      el.classList.add("is-saving");
+      if (text) text.textContent = "Saving…";
+      return;
+    }
+    if (phase === "saved") {
+      el.classList.add("is-saved");
+      if (text) text.textContent = "Saved";
+      cardSaveFeedbackTimer = setTimeout(() => showCardSaveFeedback(null), 1600);
+      return;
+    }
+    if (phase === "error") {
+      el.classList.add("is-error");
+      if (text) text.textContent = "Could not save";
+      cardSaveFeedbackTimer = setTimeout(() => showCardSaveFeedback(null), 2600);
+    }
+  };
 
   const accentMatches = (a, b) => {
     if (a === b) return true;
@@ -340,16 +517,16 @@
     return !!(na && nb && na === nb);
   };
 
-  const update = (patch, { save = true } = {}) => {
+  const update = (patch, { save = true, feedback = true } = {}) => {
     if (patch.theme != null) patch.theme = normalizeThemeKey(patch.theme);
     if (patch.customCss != null) patch.customCss = normalizeCustomCss(patch.customCss);
     if (hasCustomUi({ ...state, ...patch }) && patch.accent != null) {
       return;
     }
     state = { ...state, ...patch };
-    void applyAll(state).then(() => {
+    void applyAll(state).then(async () => {
       writeLocal(state);
-      if (save) persist();
+      if (save) await persist({ immediate: true, feedback });
       refreshCardFields();
     });
   };
@@ -379,7 +556,7 @@
       const cfg = await bridge.get_config();
       const fromCfg = normalizeFromConfig(cfg);
       if (fromCfg) {
-        state = fromCfg;
+        state = { ...state, ...fromCfg };
         await applyAll(state);
         writeLocal(state);
         refreshCardFields();
@@ -397,12 +574,12 @@
       const cfg = await bridge.get_config();
       const fromCfg = normalizeFromConfig(cfg);
       if (fromCfg) {
-        state = fromCfg;
+        state = { ...state, ...fromCfg };
         await applyAll(state);
         writeLocal(state);
         refreshCardFields();
       } else {
-        persist();
+        void persist({ immediate: true });
       }
       const size = bridge.get_window_size ? await bridge.get_window_size() : null;
       if (size?.width && size?.height) {
@@ -468,19 +645,26 @@
       `<option value="">None — use built-in theme below</option>`,
       ...customCatalog.map(
         (t) =>
-          `<option value="${t.filename}"${t.filename === cur ? " selected" : ""}>${t.label || t.filename}</option>`
+          `<option value="${escAttr(t.filename)}"${t.filename === cur ? " selected" : ""}>${escAttr(t.label || t.filename)}</option>`
       ),
     ];
     sel.innerHTML = opts.join("");
     const status = card.querySelector(".blsm-custom-ui-status");
-    if (status) {
-      if (cur && !customCatalog.some((t) => t.filename === cur)) {
-        status.textContent = `"${cur}" is missing or blocked. Using your saved built-in theme.`;
-        status.hidden = false;
-      } else {
-        status.hidden = true;
-        status.textContent = "";
-      }
+    if (!status) return;
+    if (state._jsonMigrationNotice) {
+      status.textContent =
+        "JSON themes were retired — pick a built-in theme or create a custom-ui.css file. Your old .json files are still in the themes folder.";
+      status.hidden = false;
+      state._jsonMigrationNotice = false;
+      writeLocal(state);
+      return;
+    }
+    if (cur && !customCatalog.some((t) => t.filename === cur)) {
+      status.textContent = `"${cur}" is missing or blocked. Using your saved built-in theme.`;
+      status.hidden = false;
+    } else {
+      status.hidden = true;
+      status.textContent = "";
     }
   };
 
@@ -555,7 +739,7 @@
     writeLocal(state);
     refreshCardFields();
     await applyWindowSize(preset.width, preset.height);
-    persist();
+    void persist({ immediate: true, feedback: true });
   };
 
   const applyCustomWindowSize = async () => {
@@ -570,12 +754,12 @@
     writeLocal(state);
     refreshCardFields();
     await applyWindowSize(w, h);
-    persist();
+    void persist({ immediate: true, feedback: true });
   };
 
   const wireCard = (card) => {
     card.querySelectorAll(".blsm-theme-card").forEach((btn) => {
-      btn.addEventListener("click", () => update({ theme: btn.dataset.theme }));
+      btn.addEventListener("click", () => update({ theme: btn.dataset.theme, customCss: "" }));
     });
     card.querySelectorAll(".blsm-accent-swatch").forEach((btn) => {
       btn.addEventListener("click", () => update({ accent: btn.dataset.accent }));
@@ -600,7 +784,17 @@
     });
 
     card.querySelector(".blsm-custom-ui-refresh").addEventListener("click", () => {
-      void loadCustomCatalog().then(() => refreshCardFields());
+      void loadCustomCatalog().then(async () => {
+        if (state.customCss) {
+          await applyCustomCss(state.customCss);
+          await persist({ immediate: true, feedback: true });
+        }
+        refreshCardFields();
+      });
+    });
+
+    card.querySelector(".blsm-custom-ui-folder").addEventListener("click", () => {
+      void api()?.open_themes_folder?.();
     });
 
     card.querySelector(".blsm-window-apply").addEventListener("click", () => {
@@ -646,29 +840,34 @@
           <h3>Appearance</h3>
           <p>Theme, custom UI, colors, layout, window, and motion</p>
         </div>
+        <div class="blsm-appearance-save-status" hidden aria-live="polite">
+          <span class="blsm-save-status-icon" aria-hidden="true"></span>
+          <span class="blsm-save-status-text"></span>
+        </div>
       </div>
       <div class="blsm-appearance-body">
         <section class="blsm-app-section">
           <header class="blsm-app-section-head">
-            <h4>Full custom theme</h4>
-            <p>Your CSS file controls the entire app look. Built-in theme below is used only when Custom = None.</p>
+            <h4>Custom UI</h4>
+            <p>Full visual reskin — not just colors. One CSS file can reshape every surface the app already renders (sidebar, tabs, cards, modals, loading screen). Stored in <code class="blsm-app-code">${THEMES_FOLDER_HINT}</code>.</p>
           </header>
           <div class="blsm-custom-ui-row">
             <label class="blsm-app-field blsm-custom-ui-field">
               <span class="blsm-app-label">Custom stylesheet</span>
               <select class="form-input blsm-custom-ui-select"></select>
             </label>
-            <button type="button" class="btn btn-secondary blsm-custom-ui-refresh" title="Rescan themes folder">Refresh</button>
+            <button type="button" class="btn btn-secondary blsm-custom-ui-refresh" title="Rescan themes folder and re-apply">Refresh</button>
+            <button type="button" class="btn btn-secondary blsm-custom-ui-folder" title="Open the themes folder in Explorer">Open folder</button>
           </div>
-          <p class="blsm-app-hint">Edit <code class="blsm-app-code">.css</code> in <code class="blsm-app-code">${THEMES_FOLDER_HINT}</code>. Copy <code class="blsm-app-code">custom-ui.example.css</code> as a starter. No restart needed — use Refresh after saving.</p>
+          <p class="blsm-app-hint">Copy <code class="blsm-app-code">custom-ui.example.css</code> as a starter — it lists every major selector. Built-in themes only swap palette tokens; Custom UI can hide, reorder (flex/grid), round corners, change fonts, and reskin the whole shell. You cannot add tabs, remove features, or replace HTML — that needs a Blossom build. CSS only; unsafe rules are blocked. Refresh after edits — no restart.</p>
           <p class="blsm-app-hint blsm-custom-ui-status" hidden role="status"></p>
         </section>
 
         <section class="blsm-app-section">
           <header class="blsm-app-section-head">
             <h4>Built-in theme</h4>
-            <p class="blsm-theme-fallback-note">Fallback only — not applied while a custom theme is active.</p>
-            <p>Pink, Dark, or Light — or Match system to follow Windows light/dark.</p>
+            <p class="blsm-theme-fallback-note">Not applied while Custom UI is active — your saved choice is kept as fallback.</p>
+            <p>Eight looks, from true-black OLED to light Sakura — or Match system to follow Windows light/dark.</p>
           </header>
           <div class="blsm-theme-grid">${themeCards}</div>
         </section>
@@ -676,7 +875,7 @@
         <section class="blsm-app-section blsm-accent-section">
           <header class="blsm-app-section-head">
             <h4>Colors</h4>
-            <p>Optional accent override when using a built-in theme (disabled for full custom themes).</p>
+            <p>Optional accent override when using a built-in theme (disabled for custom UI).</p>
           </header>
           <div class="blsm-accent-row">
             <button type="button" class="blsm-accent-swatch blsm-accent-default" data-accent="default" title="Theme default" aria-label="Theme default"></button>
@@ -811,4 +1010,15 @@
     sync();
   });
   void reconcile();
+
+  window.addEventListener("pagehide", () => {
+    writeLocal(state);
+    void flushPersist();
+  });
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      writeLocal(state);
+      void flushPersist();
+    }
+  });
 })();

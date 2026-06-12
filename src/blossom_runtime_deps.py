@@ -1,43 +1,25 @@
 """On-demand, hash-verified loader for heavy OPTIONAL runtime dependencies.
 
-To keep the shipped exe lightweight, large optional native packages (currently
-OpenCV / ``cv2``) are NOT bundled by PyInstaller. Instead they are downloaded
-once, on first use of the feature that needs them, into the per-user cache
-``%LOCALAPPDATA%\\Blossom\\runtime`` and imported from there.
+Large optional native packages (OpenCV / ``cv2``, WinOCR / ``winocr``) are NOT
+bundled by PyInstaller. They are downloaded into ``%LOCALAPPDATA%\\Blossom\\runtime``
+and imported from there. Component versions and SHA-256 pins live in the bundled
+``assets/runtime_manifest.json``; ``sync_runtime_manifest()`` keeps the cache
+aligned on boot and after updates.
 
 SECURITY MODEL (read before editing)
 ------------------------------------
-The cache lives in a user-writable directory and we load *native code* from it,
-so the loader is deliberately strict:
-
-* The downloaded archive's SHA-256 is verified against a hash PINNED in this
-  (bundled, optionally PyArmor-obfuscated) source file BEFORE the archive is
-  extracted and BEFORE the cache dir is ever placed on ``sys.path``.
-* On every launch the cached archive is re-hashed; a tampered or truncated
-  cached archive is detected, deleted, and re-fetched.
-* If verification fails for any reason we refuse to load and return ``None`` so
-  the caller falls back to its pure-Python (NumPy) path. We never import
-  unverified native code.
-
-This protects against MITM / supply-chain tampering of the download. It does not
-(and cannot) stop a user from replacing files on their own machine — but ``cv2``
-is not a security component (it only speeds up fishing colour detection and has a
-full NumPy fallback), so local self-tampering grants nothing that running from
-source wouldn't already.
-
-ABI / VERSION CAVEAT
---------------------
-A native extension (``cv2.pyd``) must match the EXACT CPython version + arch of
-the frozen build (e.g. CPython 3.14, win-amd64). The cache dir and the download
-URL are both keyed by ``py{major}{minor}-{arch}`` so a mismatched cache is never
-used, and a hosted bundle built for the wrong interpreter is simply not found.
-When the build's Python is upgraded, rebuild + re-host the bundle and update the
-pinned hash below.
+* Downloaded archives are SHA-256 verified against pins in the manifest BEFORE
+  extraction and BEFORE the cache dir is placed on ``sys.path``.
+* Cached archives are re-hashed on every sync; tampered copies are deleted and
+  re-fetched.
+* Verification failure returns ``None`` so callers fall back gracefully. We never
+  import unverified native code.
 """
 
 from __future__ import annotations
 
 import hashlib
+import json
 import shutil
 import sys
 import sysconfig
@@ -46,7 +28,7 @@ import zipfile
 from pathlib import Path
 from typing import Any, Callable
 
-from blossom_dirs import ensure_runtime_deps_dir
+from blossom_dirs import RUNTIME_MANIFEST_STATE, dev_repo_root, ensure_runtime_deps_dir
 
 ProgressCb = Callable[[int, int], None]
 
@@ -59,7 +41,6 @@ def _arch_tag() -> str:
         return "win-amd64"
     if "win32" in plat:
         return "win-win32"
-    # Fall back to the raw platform string so a mismatch is obvious and unique.
     return plat.replace("-", "_") or "unknown"
 
 
@@ -73,35 +54,91 @@ def abi_key() -> str:
 
 
 # --------------------------------------------------------------------------- #
-# OpenCV (cv2) descriptor
+# Manifest
 # --------------------------------------------------------------------------- #
-# Hosted bundle: a zip whose top level is a ``cv2/`` package directory
-# (cv2.pyd + the ffmpeg DLL + cv2 python files). Upload one asset per ABI key.
-#
-# Release asset URL (user must upload the produced zip here):
-#   https://github.com/MaxxWasHere/blossombeta/releases/download/runtime-deps/cv2-runtime-<abi_key>.zip
-_CV2_BASE_URL = (
-    "https://github.com/MaxxWasHere/blossombeta/releases/download/runtime-deps"
-)
-
-# Pinned SHA-256 of the archive, keyed by ABI. Filled in by scripts/make_cv2_runtime.py
-# (or by hand) after the bundle is produced. An ABI with no pinned hash is treated
-# as "unavailable" and the caller falls back to NumPy.
-_CV2_SHA256: dict[str, str] = {
-    "py314-win-amd64": "5bcb100e4c49b2f7fa842dd16e2bd781950040f454834c2b0da2329aee41d941",
-}
+_manifest_cache: dict[str, Any] | None = None
 
 
+def _bundle_root() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(getattr(sys, "_MEIPASS", dev_repo_root()))
+    return dev_repo_root()
+
+
+def manifest_path() -> Path:
+    return _bundle_root() / "assets" / "runtime_manifest.json"
+
+
+def load_manifest(*, force_reload: bool = False) -> dict[str, Any]:
+    global _manifest_cache
+    if _manifest_cache is not None and not force_reload:
+        return _manifest_cache
+    path = manifest_path()
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        print(f"[runtime-deps] manifest unreadable ({path}): {error}")
+        data = {"version": 0, "components": {}}
+    if not isinstance(data, dict):
+        data = {"version": 0, "components": {}}
+    _manifest_cache = data
+    return data
+
+
+def _component_spec(component_id: str) -> dict[str, Any] | None:
+    manifest = load_manifest()
+    components = manifest.get("components") or {}
+    spec = components.get(component_id)
+    return spec if isinstance(spec, dict) else None
+
+
+def component_archive_name(component_id: str, key: str | None = None) -> str:
+    spec = _component_spec(component_id) or {}
+    template = str(spec.get("archive") or f"{component_id}-runtime-{{abi}}.zip")
+    return template.replace("{abi}", key or abi_key())
+
+
+def component_archive_url(component_id: str, key: str | None = None) -> str:
+    manifest = load_manifest()
+    base = str(manifest.get("base_url") or "").rstrip("/")
+    return f"{base}/{component_archive_name(component_id, key)}"
+
+
+def component_pinned_hash(component_id: str, key: str | None = None) -> str:
+    spec = _component_spec(component_id) or {}
+    hashes = spec.get("sha256") or {}
+    if not isinstance(hashes, dict):
+        return ""
+    return str(hashes.get(key or abi_key(), "")).strip().lower()
+
+
+def component_cache_subdir(component_id: str, key: str | None = None) -> str:
+    spec = _component_spec(component_id) or {}
+    template = str(spec.get("cache_subdir") or f"{component_id}-{{abi}}")
+    return template.replace("{abi}", key or abi_key())
+
+
+def component_payload_subpath(component_id: str) -> str:
+    spec = _component_spec(component_id) or {}
+    return str(spec.get("payload_subpath") or component_id)
+
+
+def component_label(component_id: str) -> str:
+    spec = _component_spec(component_id) or {}
+    return str(spec.get("label") or component_id)
+
+
+# Backward-compatible cv2 helpers (manifest-backed).
 def cv2_archive_name(key: str | None = None) -> str:
-    return f"cv2-runtime-{key or abi_key()}.zip"
+    return component_archive_name("cv2", key)
 
 
 def cv2_archive_url(key: str | None = None) -> str:
-    return f"{_CV2_BASE_URL}/{cv2_archive_name(key)}"
+    return component_archive_url("cv2", key)
 
 
 def cv2_pinned_hash(key: str | None = None) -> str:
-    return _CV2_SHA256.get(key or abi_key(), "").strip().lower()
+    return component_pinned_hash("cv2", key)
 
 
 # --------------------------------------------------------------------------- #
@@ -134,7 +171,6 @@ def _is_within(base: Path, target: Path) -> bool:
 
 
 def _extract_zip_safely(archive: Path, dest_dir: Path) -> bool:
-    """Extract ``archive`` into ``dest_dir``, rejecting path-traversal entries."""
     try:
         with zipfile.ZipFile(archive) as zf:
             for member in zf.namelist():
@@ -159,19 +195,6 @@ def _ensure_verified_payload(
     progress_cb: ProgressCb | None,
     offline_zip: Path | None = None,
 ) -> Path | None:
-    """Return a verified, extracted payload dir, downloading if needed.
-
-    ``cache_subdir`` is created under the runtime deps dir and holds the
-    downloaded ``<name>.zip`` plus its extracted contents. ``payload_subpath`` is
-    the path (relative to the extracted root) that must exist for success, e.g.
-    ``"cv2"``. Returns the extracted root dir (the one to put on sys.path), or
-    ``None`` on any failure (caller should fall back).
-
-    ``offline_zip`` is an optional user-supplied archive (e.g. dropped into the
-    runtime folder for an air-gapped install). It is consumed ONLY if its
-    SHA-256 matches ``pinned_sha256`` exactly — the same security gate as the
-    network path — so an unverified local file is never trusted.
-    """
     if not pinned_sha256:
         print(
             f"[runtime-deps] {label}: no pinned hash for this Python/arch "
@@ -190,13 +213,11 @@ def _ensure_verified_payload(
     extract_root = base / "extracted"
     payload = extract_root / payload_subpath
 
-    # Fast path: cached archive still matches the pinned hash and is extracted.
     if archive.is_file():
         try:
             if _sha256_file(archive) == pinned_sha256:
                 if payload.exists():
                     return extract_root
-                # Verified archive present but extraction missing/partial: redo it.
                 _safe_rmtree(extract_root)
                 extract_root.mkdir(parents=True, exist_ok=True)
                 if _extract_zip_safely(archive, extract_root) and payload.exists():
@@ -209,9 +230,6 @@ def _ensure_verified_payload(
         _safe_rmtree(archive)
         _safe_rmtree(extract_root)
 
-    # Offline install: a user-supplied archive next to the cache. Verified by the
-    # SAME pinned hash as the download, then promoted into the cache so the normal
-    # extract path runs. A mismatched local file is ignored (we still try network).
     if offline_zip is not None:
         try:
             if offline_zip.is_file() and _sha256_file(offline_zip) == pinned_sha256:
@@ -232,7 +250,6 @@ def _ensure_verified_payload(
         except OSError as error:
             print(f"[runtime-deps] {label}: local archive unusable ({error}); trying download.")
 
-    # Download (lazy import so a missing updater never breaks the fallback path).
     try:
         from blossom_updater import download_file
     except Exception as error:  # noqa: BLE001
@@ -244,12 +261,11 @@ def _ensure_verified_payload(
     print(f"[runtime-deps] {label}: downloading from {url}")
     try:
         download_file(url, tmp, progress_cb=progress_cb)
-    except Exception as error:  # noqa: BLE001 - offline / 404 / network all fall back
+    except Exception as error:  # noqa: BLE001
         print(f"[runtime-deps] {label}: download failed ({error}); using fallback.")
         _safe_rmtree(tmp)
         return None
 
-    # MANDATORY: verify before extracting or touching sys.path.
     try:
         actual = _sha256_file(tmp)
     except OSError as error:
@@ -283,6 +299,134 @@ def _ensure_verified_payload(
     return extract_root
 
 
+def _read_manifest_state() -> dict[str, Any]:
+    try:
+        if RUNTIME_MANIFEST_STATE.is_file():
+            data = json.loads(RUNTIME_MANIFEST_STATE.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                return data
+    except (OSError, json.JSONDecodeError):
+        pass
+    return {"manifest_version": 0, "components": {}}
+
+
+def _write_manifest_state(state: dict[str, Any]) -> None:
+    try:
+        ensure_runtime_deps_dir()
+        RUNTIME_MANIFEST_STATE.write_text(
+            json.dumps(state, indent=2) + "\n", encoding="utf-8"
+        )
+    except OSError as error:
+        print(f"[runtime-deps] could not write manifest state: {error}")
+
+
+def _component_needs_sync(component_id: str, *, force: bool) -> bool:
+    if force:
+        return True
+    manifest = load_manifest()
+    spec = _component_spec(component_id)
+    if not spec:
+        return False
+    pinned = component_pinned_hash(component_id)
+    if not pinned:
+        return False
+    state = _read_manifest_state()
+    installed = (state.get("components") or {}).get(component_id) or {}
+    manifest_version = int(manifest.get("version") or 0)
+    if int(state.get("manifest_version") or 0) != manifest_version:
+        return True
+    if str(installed.get("version") or "") != str(spec.get("version") or ""):
+        return True
+    if str(installed.get("abi") or "") != abi_key():
+        return True
+    key = abi_key()
+    base = ensure_runtime_deps_dir() / component_cache_subdir(component_id, key)
+    archive = base / "payload.zip"
+    payload = base / "extracted" / component_payload_subpath(component_id)
+    if not archive.is_file() or not payload.exists():
+        return True
+    if component_id == "winocr" and not _winocr_payload_present(payload.parent):
+        return True
+    try:
+        return _sha256_file(archive) != pinned
+    except OSError:
+        return True
+
+
+def _sync_component(
+    component_id: str,
+    *,
+    progress_cb: ProgressCb | None,
+    force: bool,
+) -> dict[str, Any]:
+    label = component_label(component_id)
+    pinned = component_pinned_hash(component_id)
+    if not pinned:
+        return {"id": component_id, "state": "unavailable", "abi": abi_key()}
+
+    key = abi_key()
+    offline = ensure_runtime_deps_dir() / component_archive_name(component_id, key)
+    extract_root = _ensure_verified_payload(
+        label=label,
+        url=component_archive_url(component_id, key),
+        pinned_sha256=pinned,
+        cache_subdir=component_cache_subdir(component_id, key),
+        payload_subpath=component_payload_subpath(component_id),
+        progress_cb=progress_cb,
+        offline_zip=offline,
+    )
+    if extract_root is None:
+        return {"id": component_id, "state": "failed", "abi": key}
+
+    spec = _component_spec(component_id) or {}
+    state = _read_manifest_state()
+    manifest = load_manifest()
+    components = dict(state.get("components") or {})
+    components[component_id] = {
+        "version": str(spec.get("version") or ""),
+        "abi": key,
+    }
+    state["manifest_version"] = int(manifest.get("version") or 0)
+    state["components"] = components
+    _write_manifest_state(state)
+    return {"id": component_id, "state": "installed", "abi": key, "path": str(extract_root)}
+
+
+def sync_runtime_manifest(
+    progress_cb: ProgressCb | None = None,
+    *,
+    components: list[str] | None = None,
+    force: bool = False,
+) -> dict[str, Any]:
+    """Ensure all manifest components are present and up to date.
+
+    Never raises; returns a summary dict. Optional components that fail to
+    download do not block callers.
+    """
+    manifest = load_manifest()
+    all_ids = list((manifest.get("components") or {}).keys())
+    target = components if components is not None else all_ids
+    results: list[dict[str, Any]] = []
+    for component_id in target:
+        if component_id not in all_ids:
+            continue
+        if not _component_needs_sync(component_id, force=force):
+            results.append({"id": component_id, "state": "installed", "abi": abi_key()})
+            continue
+        try:
+            results.append(_sync_component(component_id, progress_cb=progress_cb, force=force))
+        except Exception as error:  # noqa: BLE001
+            print(f"[runtime-deps] sync {component_id} failed: {error}")
+            results.append({"id": component_id, "state": "failed", "error": str(error)})
+    return {"ok": True, "components": results, "manifest_version": manifest.get("version")}
+
+
+def _prepend_sys_path(extract_root: Path) -> None:
+    root_str = str(extract_root)
+    if root_str not in sys.path:
+        sys.path.insert(0, root_str)
+
+
 # --------------------------------------------------------------------------- #
 # OpenCV public API
 # --------------------------------------------------------------------------- #
@@ -292,28 +436,18 @@ _cv2_attempted = False
 
 
 def _cv2_cache_dirs(key: str | None = None) -> tuple[Path, Path, Path]:
-    """Return (cache_base, cached_archive, extracted_payload) for the ABI key."""
-    base = ensure_runtime_deps_dir() / f"cv2-{key or abi_key()}"
+    base = ensure_runtime_deps_dir() / component_cache_subdir("cv2", key)
     return base, base / "payload.zip", base / "extracted" / "cv2"
 
 
 def _cv2_offline_zip(key: str | None = None) -> Path:
-    """User-droppable offline archive: <runtime-deps>/cv2-runtime-<abi>.zip."""
     return ensure_runtime_deps_dir() / cv2_archive_name(key)
 
 
 def cv2_status() -> dict[str, Any]:
-    """Report whether the verified cv2 runtime is present, WITHOUT downloading.
-
-    Returns a dict with ``state`` in ``{"installed", "not_installed",
-    "unavailable"}`` plus optional ``version``, ``path``, ``size`` and
-    ``message``. ``unavailable`` means no SHA-256 is pinned for this Python/arch,
-    so no verified component can be installed (fishing uses its NumPy fallback).
-    """
     key = abi_key()
     pinned = cv2_pinned_hash(key)
 
-    # Already imported this process (dev cv2, or installed earlier this session).
     if _cv2_module is not None:
         return {
             "state": "installed",
@@ -323,7 +457,6 @@ def cv2_status() -> dict[str, Any]:
         }
 
     if not pinned:
-        # Maybe a system/dev cv2 is importable even though we have no pinned build.
         try:
             import cv2 as _dev  # type: ignore
 
@@ -342,7 +475,6 @@ def cv2_status() -> dict[str, Any]:
             "message": "No verified vision component is published for this build yet.",
         }
 
-    # Cached + verified archive already extracted? -> installed (no download).
     try:
         _base, archive, payload = _cv2_cache_dirs(key)
         if archive.is_file() and payload.exists() and _sha256_file(archive) == pinned:
@@ -354,7 +486,6 @@ def cv2_status() -> dict[str, Any]:
     except OSError:
         pass
 
-    # A dev cv2 may still be importable even with a pinned build defined.
     try:
         import cv2 as _dev2  # type: ignore
 
@@ -374,19 +505,6 @@ def cv2_status() -> dict[str, Any]:
 def ensure_opencv(
     progress_cb: ProgressCb | None = None, *, force: bool = False
 ) -> Any | None:
-    """Return the ``cv2`` module, downloading + verifying it on first use.
-
-    Thread-safe and idempotent: the heavy work (download/verify/extract/import)
-    happens at most once per process. Returns ``None`` on any failure so callers
-    can use their NumPy fallback. Never imports unverified native code.
-
-    ``progress_cb(downloaded, total)`` is forwarded to the downloader so a UI can
-    show a "downloading vision component" state; it must not raise or block.
-
-    ``force=True`` clears the "already tried and failed" guard so the explicit
-    in-app installer can retry a download that previously 404'd (e.g. before the
-    asset was uploaded) without restarting the app.
-    """
     global _cv2_module, _cv2_attempted
 
     if _cv2_module is not None:
@@ -396,8 +514,6 @@ def ensure_opencv(
         if _cv2_module is not None:
             return _cv2_module
 
-        # If cv2 is importable already (running from source / dev with cv2
-        # installed, or a future build that bundles it), just use it.
         try:
             import cv2 as _already  # type: ignore
 
@@ -415,7 +531,7 @@ def ensure_opencv(
             label="OpenCV",
             url=cv2_archive_url(),
             pinned_sha256=cv2_pinned_hash(),
-            cache_subdir=f"cv2-{abi_key()}",
+            cache_subdir=component_cache_subdir("cv2"),
             payload_subpath="cv2",
             progress_cb=progress_cb,
             offline_zip=_cv2_offline_zip(),
@@ -423,22 +539,177 @@ def ensure_opencv(
         if extract_root is None:
             return None
 
-        root_str = str(extract_root)
-        if root_str not in sys.path:
-            sys.path.insert(0, root_str)
+        _prepend_sys_path(extract_root)
         try:
             import cv2 as _loaded  # type: ignore
 
             _cv2_module = _loaded
             print("[runtime-deps] OpenCV loaded from AppData cache.")
             return _cv2_module
-        except Exception as error:  # noqa: BLE001 - import/ABI failure -> fallback
+        except Exception as error:  # noqa: BLE001
             print(
                 f"[runtime-deps] OpenCV import failed after verify "
                 f"({error}); using NumPy fallback. (ABI {abi_key()})"
             )
             try:
-                sys.path.remove(root_str)
+                sys.path.remove(str(extract_root))
             except ValueError:
                 pass
             return None
+
+
+# --------------------------------------------------------------------------- #
+# WinOCR public API
+# --------------------------------------------------------------------------- #
+_winocr_lock = threading.Lock()
+_winocr_ready = False
+_winocr_attempted = False
+
+
+def _winocr_cache_dirs(key: str | None = None) -> tuple[Path, Path, Path]:
+    base = ensure_runtime_deps_dir() / component_cache_subdir("winocr", key)
+    extract_root = base / "extracted"
+    payload = extract_root / component_payload_subpath("winocr")
+    return base, base / "payload.zip", payload
+
+
+def _winocr_payload_present(extract_root: Path) -> bool:
+    """True when a verified WinOCR tree exists under the extract root."""
+    payload = extract_root / component_payload_subpath("winocr")
+    if payload.is_file():
+        return True
+    if payload.is_dir():
+        if (payload / "__init__.py").is_file():
+            return True
+        return any(payload.iterdir())
+    init_only = extract_root / "winocr" / "__init__.py"
+    return init_only.is_file()
+
+
+def _winocr_offline_zip(key: str | None = None) -> Path:
+    return ensure_runtime_deps_dir() / component_archive_name("winocr", key)
+
+
+def winocr_status() -> dict[str, Any]:
+    key = abi_key()
+    pinned = component_pinned_hash("winocr")
+
+    if _winocr_ready:
+        return {"state": "installed", "abi": key}
+
+    if not pinned:
+        try:
+            import winocr  # type: ignore
+
+            return {
+                "state": "installed",
+                "abi": key,
+                "version": getattr(winocr, "__version__", None),
+                "message": "Using WinOCR from this Python environment.",
+            }
+        except ImportError:
+            pass
+        return {
+            "state": "unavailable",
+            "abi": key,
+            "message": "No verified WinOCR bundle is published for this build yet.",
+        }
+
+    try:
+        _base, archive, payload = _winocr_cache_dirs(key)
+        extract_root = payload.parent
+        if (
+            archive.is_file()
+            and _winocr_payload_present(extract_root)
+            and _sha256_file(archive) == pinned
+        ):
+            try:
+                size = archive.stat().st_size
+            except OSError:
+                size = None
+            return {"state": "installed", "abi": key, "path": str(payload), "size": size}
+    except OSError:
+        pass
+
+    state = _read_manifest_state()
+    installed = (state.get("components") or {}).get("winocr") or {}
+    if str(installed.get("abi") or "") == key and str(installed.get("version") or ""):
+        try:
+            _base, archive, payload = _winocr_cache_dirs(key)
+            if archive.is_file() and _winocr_payload_present(payload.parent):
+                return {
+                    "state": "installed",
+                    "abi": key,
+                    "path": str(payload),
+                    "message": "WinOCR runtime synced.",
+                }
+        except OSError:
+            pass
+
+    try:
+        import winocr as _dev  # type: ignore
+
+        return {
+            "state": "installed",
+            "abi": key,
+            "version": getattr(_dev, "__version__", None),
+            "message": "Using WinOCR from this Python environment.",
+        }
+    except ImportError:
+        pass
+
+    return {"state": "not_installed", "abi": key}
+
+
+def ensure_winocr(
+    progress_cb: ProgressCb | None = None, *, force: bool = False
+) -> bool:
+    """Return True when winocr is importable (cached or dev install)."""
+    global _winocr_ready, _winocr_attempted
+
+    if _winocr_ready:
+        return True
+
+    with _winocr_lock:
+        if _winocr_ready:
+            return True
+
+        try:
+            import winocr  # type: ignore  # noqa: F401
+
+            _winocr_ready = True
+            _winocr_attempted = True
+            return True
+        except ImportError:
+            pass
+
+        if _winocr_attempted and not force:
+            return False
+        _winocr_attempted = True
+
+        extract_root = _ensure_verified_payload(
+            label="WinOCR",
+            url=component_archive_url("winocr"),
+            pinned_sha256=component_pinned_hash("winocr"),
+            cache_subdir=component_cache_subdir("winocr"),
+            payload_subpath="winocr",
+            progress_cb=progress_cb,
+            offline_zip=_winocr_offline_zip(),
+        )
+        if extract_root is None:
+            return False
+
+        _prepend_sys_path(extract_root)
+        try:
+            import winocr  # type: ignore  # noqa: F401
+
+            _winocr_ready = True
+            print("[runtime-deps] WinOCR loaded from AppData cache.")
+            return True
+        except Exception as error:  # noqa: BLE001
+            print(f"[runtime-deps] WinOCR import failed after verify ({error}).")
+            try:
+                sys.path.remove(str(extract_root))
+            except ValueError:
+                pass
+            return False

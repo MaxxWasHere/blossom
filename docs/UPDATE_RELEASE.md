@@ -23,11 +23,11 @@ Close running Blossom before building if PyInstaller hits PermissionError.
 
 ## GitHub releases
 
-**Stable** — normal release on [MaxxWasHere/blossom](https://github.com/MaxxWasHere/blossom/releases), upload `Blossom-{version}.exe`.
+**Stable** — normal release on [MaxxWasHere/blossom](https://github.com/MaxxWasHere/blossom/releases). Upload **`Blossom.exe`** (launcher) and **`Blossom-2.2.1.exe`** (payload).
 
-**Beta** — pre-release on [MaxxWasHere/blossombeta](https://github.com/MaxxWasHere/blossombeta/releases), upload `Blossom-{version}.exe`.
+**Beta** — pre-release on [MaxxWasHere/blossombeta](https://github.com/MaxxWasHere/blossombeta/releases). Upload **`Blossom-beta.exe`** (launcher) and **`Blossom-{version}.exe`** (payload).
 
-Legacy `BlossomMacro.exe` still works as an updater fallback.
+Users should download only the fixed-name launcher; the bootstrap syncs the versioned payload from the same release.
 
 ## Auto-update
 

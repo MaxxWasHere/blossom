@@ -178,7 +178,10 @@ class MacroHotkeyManager:
             if target_thread:
                 user32.AttachThreadInput(current_thread, target_thread, True)
 
-            user32.ShowWindow(hwnd, SW_RESTORE)
+            # Only restore minimized windows — SW_RESTORE on a maximized Roblox
+            # client can shrink it to the default 800×600 windowed size.
+            if user32.IsIconic(hwnd):
+                user32.ShowWindow(hwnd, SW_RESTORE)
             user32.BringWindowToTop(hwnd)
             user32.SetForegroundWindow(hwnd)
             user32.SetActiveWindow(hwnd)

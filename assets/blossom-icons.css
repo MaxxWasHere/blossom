@@ -6,7 +6,8 @@
   display: inline-block;
   vertical-align: -0.14em;
   flex-shrink: 0;
-  color: currentColor;
+  /* Themes may recolor every icon via --blsm-icon-color (see theme engine). */
+  color: var(--blsm-icon-color, currentColor);
   overflow: visible;
 }
 
@@ -20,7 +21,7 @@
 .blsm-vec ellipse {
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: var(--blsm-icon-stroke, 2);
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;

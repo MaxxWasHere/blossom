@@ -9,6 +9,7 @@ from typing import Callable
 from macro_engine import _sleep_sec, github_original_click_at
 
 import blossom_ocr
+from blossom_runtime_deps import winocr_status
 
 CalibrationPoint = tuple[int, int] | None
 GetRegion = Callable[[str], tuple[int, int, int, int] | None]
@@ -197,8 +198,9 @@ def biome_selector_ready(
     missing = _inventory_ready(get_point)
     if get_region is not None and config is not None:
         missing.extend(_ui_ready(get_point, get_region, config))
-    if not blossom_ocr.tesseract_available():
-        missing.append("tesseract_ocr")
+    runtime = winocr_status()
+    if runtime.get("state") != "installed" and not blossom_ocr.ocr_available():
+        missing.append("winocr")
     return (not missing, missing)
 
 
@@ -214,7 +216,7 @@ def calibration_status(
     return {
         "inventory_ready": not inv_missing,
         "ui_ready": not ui_missing,
-        "ocr_ready": blossom_ocr.tesseract_available(),
+        "ocr_ready": blossom_ocr.ocr_available(),
         "inventory_missing": inv_missing,
         "ui_missing": ui_missing,
         "layout": {
@@ -346,7 +348,7 @@ def _click_confirm(
         return False
 
     region = _resolve_region(get_region, "biome_selector_confirm_pos")
-    if region is not None and blossom_ocr.tesseract_available():
+    if region is not None and blossom_ocr.ocr_available():
         text = _ocr_row_label(region)
         print(f"[main macro] biome selector: confirm OCR -> {text!r}")
         if text and "confirm" not in text and "cancel" in text:
@@ -365,7 +367,7 @@ def _run_drive_panel(
     get_region: GetRegion,
     cancel_event,
 ) -> str:
-    if not blossom_ocr.tesseract_available():
+    if not blossom_ocr.ocr_available():
         return "Error: Tesseract OCR required for Biome Selector drives"
 
     enabled = _enabled_drives(config)

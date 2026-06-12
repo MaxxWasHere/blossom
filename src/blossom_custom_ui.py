@@ -8,7 +8,7 @@ from pathlib import Path
 from blossom_dirs import THEMES_DIR, ensure_app_data_dirs
 
 SAMPLE_FILENAME = "custom-ui.example.css"
-SAMPLE_MARKER = "Blossom full custom UI template v2"
+SAMPLE_MARKER = "Blossom full custom UI template v3"
 MAX_CSS_BYTES = 512 * 1024
 
 _UNSAFE_CSS_PATTERNS = (
@@ -37,20 +37,35 @@ def ensure_themes_dir() -> Path:
 def _sample_css_text() -> str:
     return """\
 /*
-  Blossom full custom UI template v2
+  Blossom full custom UI template v3
 
-  Copy this file to a new name (e.g. my-theme.css), edit it, then select it
-  under Appearance -> Full custom theme.
+  Copy this file to a new name (e.g. my-skin.css), edit it, then select it under
+  Appearance → Custom UI → Refresh.
 
   Folder (CSS only — never put HTML or JS here):
   %LOCALAPPDATA%\\Blossom\\themes\\
 
-  When selected, YOUR file controls the whole look. Built-in Pink/Dark/Light
-  are stored as fallback but not applied until you set Custom = None.
-  Only CSS variables and selectors — no scripts, imports, or remote URLs.
+  ── What Custom UI can do ──
+  • Full visual reskin of the existing app — every painted surface if you target
+    the selectors documented below.
+  • Override design tokens (--accent, --bg-card, radii, fonts, shadows).
+  • Layout tweaks on the current DOM (flex order, grid, gaps, hide with
+    display:none, pseudo-element decorations, background images via data: URLs).
+
+  ── What it cannot do (requires a Blossom build / fork) ──
+  • Add or remove sidebar tabs, macro features, or settings sections.
+  • Change React page structure, wire new buttons, or inject HTML/JS.
+  • Replace the app with a totally different UI shell.
+
+  When selected, YOUR file controls the whole look. Built-in themes are stored
+  as fallback but not applied until Custom UI = None.
+  No @import, remote url(), or script-like CSS — unsafe rules are blocked.
 */
 
-/* ── Design tokens (set all surfaces here) ── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §1  DESIGN TOKENS — fastest way to reskin everything
+   Set on body (or body[data-theme="custom"]). Most components read these.
+   ═══════════════════════════════════════════════════════════════════════════ */
 body,
 body[data-theme="custom"] {
   /* App shell */
@@ -76,6 +91,7 @@ body[data-theme="custom"] {
   --accent-glow: rgba(232, 145, 168, 0.15);
   --border-accent: rgba(232, 145, 168, 0.3);
   --shadow-glow: 0 0 20px rgba(232, 145, 168, 0.08);
+  --text-on-accent: #ffffff;
 
   /* Status colors */
   --success: #22c55e;
@@ -106,7 +122,15 @@ body[data-theme="custom"] {
   font-family: Sarpanch, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* ── Shell: title bar, sidebar, main ── */
+/* html.blsm-custom-ui-active — set while Custom UI is active (Appearance card dims) */
+/* html.blsm-light-ui — light palette hint; override tokens above for light skins */
+/* html.blsm-reduce-motion — user disabled motion in Appearance */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §2  WINDOW SHELL — outer frame, title bar, native resize handles
+   Selectors: .window-frame, .titlebar, .coteab-injected-titlebar,
+              .titlebar-btn, .blsm-window-resize, .blsm-window-resize-root
+   ═══════════════════════════════════════════════════════════════════════════ */
 .window-frame {
   background: var(--bg-root);
 }
@@ -118,20 +142,114 @@ body[data-theme="custom"] {
   color: var(--text-secondary);
 }
 
+/* .titlebar-btn.minimize | .maximize | .close — window chrome buttons */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §3  LAUNCH / DOWNLOAD OVERLAY — shown at startup and during runtime sync
+   Selectors: #blossom-loading-overlay, .blossom-loading-overlay,
+              .blossom-loading-card, .blossom-loading-brand,
+              .blossom-loading-message, .blossom-loading-spinner,
+              .blossom-loading-progress, .blossom-loading-aurora
+   ═══════════════════════════════════════════════════════════════════════════ */
+#blossom-loading-overlay,
+.blossom-loading-overlay {
+  background: var(--bg-root);
+  color: var(--text-primary);
+}
+
+.blossom-loading-card {
+  /* Center card on the overlay */
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §4  SIDEBAR — brand, grouped nav, footer
+   Selectors: .sidebar, .sidebar-brand, .sidebar-brand h1, .sidebar-brand .version,
+              .sidebar-nav, .sidebar-section-label, .sidebar-group,
+              .sidebar-item, .sidebar-item.active, .sidebar-item .icon,
+              .sidebar-footer, .sidebar-footer .by-line
+   Legacy alias: .nav-item (older React markup — prefer .sidebar-item)
+   ═══════════════════════════════════════════════════════════════════════════ */
 .sidebar {
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border);
 }
 
+.sidebar-item {
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+}
+
+.sidebar-item.active,
+.sidebar-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.sidebar-section-label {
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §5  TOP HEADER BAR — start/stop macro, pin, status dropdown
+   Selectors: .header-bar, .header-left, .header-right,
+              .btn-start, .btn-stop, .pin-btn,
+              .blossom-macro-btn-label, .blossom-dropdown (in header)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.header-bar {
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border);
+}
+
+.btn-start {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn-stop {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §6  MAIN CONTENT — page shell and route markers
+   Selectors: .page-content, .main-content, .page-header, .page-header h2,
+              .page-header p, .fade-in, .info-banner
+   Route: .page-content[data-blossom-page="…"] or html.blsm-page-macro-calibrations
+          html.blsm-biome-webhooks-active — page-specific overrides
+   React mount: #root
+   ═══════════════════════════════════════════════════════════════════════════ */
 .page-content,
 .main-content {
   background: var(--bg-main);
 }
 
-/* ── Cards (macro tabs, Appearance, webhooks, etc.) ── */
+.page-header h2 {
+  color: var(--text-primary);
+}
+
+.page-header p,
+.info-banner {
+  color: var(--text-muted);
+}
+
+/* Example: style one tab only
+.page-content[data-blossom-page="Macro"] .card { … }
+.page-content[data-blossom-page="Webhook"] .card { … }
+.page-content[data-blossom-page="Macro Calibrations"] #blsm-cal-hub { … }
+*/
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §7  CARDS — every settings / macro panel
+   Selectors: .card, .card-header, .card-header h3, .card-header p, .card-icon,
+              .corner-bracket.tl|.tr|.bl|.br (decorated macro cards)
+   Blossom-injected cards: #blsm-appearance-card, #blsm-cal-hub,
+              #blsm-biome-webhooks-hub, #blossom-runtime-card, .blsm-appearance-card
+   ═══════════════════════════════════════════════════════════════════════════ */
 .card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
 }
 
 .card-header h3 {
@@ -139,18 +257,23 @@ body[data-theme="custom"] {
 }
 
 .card-header p,
-.form-hint,
-.page-header p {
+.form-hint {
   color: var(--text-muted);
 }
 
-/* ── Forms & buttons ── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §8  FORMS — inputs, labels, toggles, groups
+   Selectors: .form-group, .form-label, .form-input, .form-hint,
+              .toggle, .toggle-row, .toggle-switch, .toggle-slider,
+              textarea.form-input, select.form-input, input[type="checkbox"]
+   ═══════════════════════════════════════════════════════════════════════════ */
 .form-input,
 select.form-input,
 textarea.form-input {
   background: var(--bg-input);
   border: 1px solid var(--border);
   color: var(--text-primary);
+  border-radius: var(--radius-sm);
 }
 
 .form-input:focus {
@@ -162,6 +285,15 @@ textarea.form-input {
   color: var(--text-secondary);
 }
 
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §9  BUTTONS
+   Selectors: .btn, .btn-accent, .btn-secondary, .btn-danger (if used),
+              .blsm-save-feedback-btn, .blsm-rt-btn
+   ═══════════════════════════════════════════════════════════════════════════ */
 .btn-accent {
   background: var(--accent);
   color: var(--accent-text);
@@ -174,27 +306,103 @@ textarea.form-input {
   color: var(--text-primary);
 }
 
-/* ── Sidebar nav ── */
-.nav-item {
-  color: var(--text-secondary);
-}
-
-.nav-item.active,
-.nav-item:hover {
+/* ═══════════════════════════════════════════════════════════════════════════
+   §10  CUSTOM DROPDOWNS — replaces native selects in many panels
+   Selectors: .blossom-dropdown, .blossom-dropdown-trigger, .blossom-dropdown-label,
+              .blossom-dropdown-chevron, .blossom-dropdown-menu,
+              .blossom-dropdown-menu--portal, .blossom-dropdown-list,
+              .blossom-dropdown-option, .blossom-dropdown-option.is-selected
+   ═══════════════════════════════════════════════════════════════════════════ */
+.blossom-dropdown-trigger {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
   color: var(--text-primary);
-  background: var(--bg-card-hover);
 }
 
-/* ── Modals & overlays (license, intro, update toast) ── */
+.blossom-dropdown-option.is-selected {
+  background: var(--accent-glow);
+  color: var(--accent-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §11  CALIBRATIONS HUB — Macro Calibrations tab
+   Selectors: #blsm-cal-hub, .blsm-cal-tab-nav, .blsm-cal-tab, .blsm-cal-tab.is-active,
+              .blsm-cal-mark-row, .blsm-cal-step-row, .blsm-mouse-cal-card,
+              .blsm-cal-preset-card, .blsm-cal-hint-in-hub
+   ═══════════════════════════════════════════════════════════════════════════ */
+.blsm-cal-tab.is-active {
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §12  BIOME NOTIFIER / WEBHOOKS — Webhook tab hub
+   Selectors: #blsm-biome-webhooks-hub, .blsm-legacy-biome-config-card (hidden)
+   Table rows use inline grid in React — target .card descendants or hub id
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §13  RUNTIME COMPONENTS CARD — OpenCV / WinOCR sync UI
+   Selectors: #blossom-runtime-card, .blsm-rt-card, .blsm-rt-body,
+              .blsm-rt-status, .blsm-rt-progress, .blsm-rt-message,
+              .blsm-rt-actions, .blsm-rt-btn
+   data-state="installed" | "missing" | "downloading" on .blsm-rt-card
+   ═══════════════════════════════════════════════════════════════════════════ */
+.blsm-rt-card[data-state="installed"] .blsm-rt-status {
+  color: var(--success);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §14  APPEARANCE CARD (injected) — theme picker, custom UI controls
+   Selectors: #blsm-appearance-card, .blsm-appearance-card, .blsm-app-section,
+              .blsm-theme-grid, .blsm-theme-card, .blsm-accent-swatch,
+              .blsm-seg, .blsm-seg-btn, .blsm-custom-ui-select
+   html.blsm-custom-ui-active dims .blsm-theme-grid and .blsm-accent-section
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §15  MODALS & OVERLAYS — license gate, intro wizard, update toast, credits
+   License: .blsm-license-overlay, .blsm-license-card, .blsm-license-input,
+            .blsm-license-actions, .blsm-license-status, .blsm-license-hwid
+   Intro:  .blsm-intro-overlay, .blsm-intro-card (first-run setup)
+   Update: .blossom-update-overlay, .blossom-update-dialog, .blossom-update-x
+           (.update-banner is hidden — Blossom uses the corner dialog)
+   Credits / donations: .blsm-credits-card, .blossom-credits-card
+   ═══════════════════════════════════════════════════════════════════════════ */
 .blossom-update-dialog,
-.blossom-license-card,
+.blsm-license-card,
 .blossom-credits-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   color: var(--text-primary);
 }
 
-/* ── Scrollbars (WebView2 / Chromium) ── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   §16  COMMAND PALETTE — Ctrl+K quick nav
+   Selectors: #blsm-cmdk, .blsm-cmdk-backdrop, .blsm-cmdk-panel, .blsm-cmdk-input,
+              .blsm-cmdk-list, .blsm-cmdk-item, .blsm-cmdk-item.is-active
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §17  ICONS — Lucide vectors injected by blossom-icons.js
+   Selectors: .blsm-vec, .blsm-vec.is-solid, svg.blsm-vec path
+   ═══════════════════════════════════════════════════════════════════════════ */
+.blsm-vec {
+  color: var(--text-secondary);
+}
+
+.sidebar-item.active .blsm-vec {
+  color: var(--accent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §18  CHANGELOG TAB — rendered from noticetabcontents.txt
+   Selectors: .changelog-item, .changelog-item h4, .changelog-item ul
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §19  SCROLLBARS — WebView2 / Chromium
+   ═══════════════════════════════════════════════════════════════════════════ */
 * {
   scrollbar-color: var(--border-hover) var(--bg-input);
 }
@@ -212,6 +420,16 @@ textarea.form-input {
 *::-webkit-scrollbar-track {
   background: var(--bg-input);
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   §20  ADVANCED — hide surfaces (visual only; features still exist in app)
+   Uncomment to experiment. Hiding controls can break workflows.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/*
+.sidebar-footer { display: none !important; }
+.header-bar .pin-btn { display: none !important; }
+.blsm-theme-fallback-note { display: none !important; }
+*/
 """
 
 

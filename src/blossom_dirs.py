@@ -16,6 +16,9 @@ OBBY_PATHS_DIR = APP_DATA_DIR / "paths"
 # from this dir is hash-verified against a pinned constant before use; see
 # blossom_runtime_deps.py.
 RUNTIME_DEPS_DIR = APP_DATA_DIR / "runtime"
+RUNTIME_MANIFEST_STATE = RUNTIME_DEPS_DIR / "manifest-state.json"
+APP_STABLE_DIR = APP_DATA_DIR / "app" / "stable"
+APP_BETA_DIR = APP_DATA_DIR / "app" / "beta"
 THEMES_DIR = APP_DATA_DIR / "themes"
 CHAR_ALIGN_FILENAME = "char_align.json"
 CHAR_ALIGN_PATH = OBBY_PATHS_DIR / CHAR_ALIGN_FILENAME
@@ -45,6 +48,37 @@ def ensure_runtime_deps_dir() -> Path:
     """Create and return the cache dir for externalized runtime dependencies."""
     RUNTIME_DEPS_DIR.mkdir(parents=True, exist_ok=True)
     return RUNTIME_DEPS_DIR
+
+
+def app_channel_dir(channel: str | None = None) -> Path:
+    """Managed app payload dir: %LOCALAPPDATA%\\Blossom\\app\\{stable|beta}."""
+    ch = str(channel or "stable").strip().lower()
+    return APP_BETA_DIR if ch == "beta" else APP_STABLE_DIR
+
+
+def current_app_json_path(channel: str | None = None) -> Path:
+    return app_channel_dir(channel) / "current.json"
+
+
+def ui_ready_marker_path() -> Path:
+    """Written by the main app when pywebview is ready; bootstrap polls this."""
+    return APP_DATA_DIR / ".ui-ready"
+
+
+def is_managed_install() -> bool:
+    return os.environ.get("BLOSSOM_MANAGED", "").strip() == "1"
+
+
+def managed_channel() -> str:
+    raw = os.environ.get("BLOSSOM_CHANNEL", "").strip().lower()
+    if raw in ("stable", "beta"):
+        return raw
+    try:
+        from blossom_updater import build_channel
+
+        return build_channel()
+    except Exception:
+        return "stable"
 
 
 def _copy_tree_files(source_dir: Path, dest_dir: Path, pattern: str, label: str) -> None:

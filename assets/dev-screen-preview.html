@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="midnight">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Blossom — loading / update / runtime preview</title>
+  <link rel="stylesheet" href="./blossom-loading.css" />
+  <link rel="stylesheet" href="./blossom-update.css" />
+  <link rel="stylesheet" href="./blossom-runtime.css" />
+  <style>
+    :root,
+    [data-theme="midnight"] {
+      --bg-root: #0a0809;
+      --bg-sidebar: #100c0e;
+      --bg-main: #0d090b;
+      --bg-card: #161014;
+      --bg-card-hover: #1c1519;
+      --bg-input: #120e10;
+      --accent: #e891a8;
+      --accent-dim: #c46d88;
+      --accent-glow: rgba(232, 145, 168, 0.15);
+      --accent-text: #f5c6d4;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --text-primary: #ece8ea;
+      --text-secondary: #a8a0a4;
+      --text-muted: #6e6468;
+      --border: #241a1e;
+      --border-accent: rgba(232, 145, 168, 0.3);
+      --shadow-glow: 0 0 20px rgba(232, 145, 168, 0.08);
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      font-family: Sarpanch, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text-primary);
+      background: var(--bg-root);
+    }
+
+    .preview-shell {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    .preview-nav {
+      position: relative;
+      z-index: 100010;
+      padding: 20px 16px;
+      border-right: 1px solid var(--border);
+      background: var(--bg-sidebar);
+    }
+
+    .preview-nav h1 {
+      margin: 0 0 6px;
+      font-size: 1rem;
+      color: var(--accent-text);
+    }
+
+    .preview-nav p {
+      margin: 0 0 16px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    .preview-nav button {
+      display: block;
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 10px 12px;
+      text-align: left;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .preview-nav button:hover,
+    .preview-nav button.is-active {
+      border-color: var(--border-accent);
+      color: var(--accent-text);
+    }
+
+    .preview-stage-wrap {
+      position: relative;
+      min-height: 100vh;
+      background:
+        radial-gradient(900px 420px at 50% 0%, rgba(232, 124, 192, 0.08), transparent 60%),
+        var(--bg-main);
+    }
+
+    .preview-stage {
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .preview-fake-app {
+      padding: 28px;
+      opacity: 0.35;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .preview-fake-app h2 {
+      margin: 0 0 8px;
+      color: var(--accent-text);
+    }
+
+    .preview-fake-app p {
+      margin: 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .preview-note {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      z-index: 100003;
+      max-width: 420px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: rgba(22, 16, 20, 0.92);
+      font-size: 12px;
+      line-height: 1.45;
+      color: var(--text-secondary);
+    }
+
+    .preview-note strong { color: var(--accent-text); }
+
+    .card {
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      margin: 24px;
+      max-width: 640px;
+    }
+
+    .card-header {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-header .card-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-glow);
+    }
+
+    .card-header h3 {
+      margin: 0 0 4px;
+      font-size: 1rem;
+      color: var(--text-primary);
+    }
+
+    .card-header p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .btn {
+      min-height: 32px;
+      padding: 7px 14px;
+      border: none;
+      cursor: pointer;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .btn-accent {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .preview-settings-page {
+      padding: 24px;
+    }
+
+    .page-header h2 {
+      margin: 0 0 6px;
+      color: var(--accent-text);
+    }
+
+    .page-header p {
+      margin: 0 0 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .preview-shell { grid-template-columns: 1fr; }
+      .preview-nav { border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+  <div class="preview-shell">
+    <nav class="preview-nav" aria-label="Screen picker">
+      <h1>Blossom UI preview</h1>
+      <p>Dev-only page. Same CSS/classes as production. Pick a screen to render it over a dim fake app background.</p>
+      <button type="button" data-screen="startup" class="is-active">1. Startup overlay (spinner)</button>
+      <button type="button" data-screen="runtime-sync">2. Runtime sync (cv2 / winocr)</button>
+      <button type="button" data-screen="update-prompt">3. Update available toast</button>
+      <button type="button" data-screen="update-download">4. Update download progress</button>
+      <button type="button" data-screen="update-install">5. Installing update</button>
+      <button type="button" data-screen="update-launcher">6. Restart launcher</button>
+      <button type="button" data-screen="update-manual">7. Manual reinstall</button>
+      <button type="button" data-screen="update-failed">8. Update failed</button>
+      <button type="button" data-screen="runtime-card">9. Settings — fishing vision card</button>
+      <button type="button" data-screen="runtime-install">10. Runtime install overlay + card</button>
+    </nav>
+
+    <div class="preview-stage-wrap">
+      <div class="preview-note" id="preview-note">
+        <strong>Startup overlay</strong> — full-screen pink aurora, centered card, Blossom logo, spinner, status text.
+      </div>
+      <div class="preview-stage" id="preview-stage">
+        <div class="preview-fake-app">
+          <h2>Macro</h2>
+          <p>Dimmed main UI behind the overlay (not shown in real app until startup finishes).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const NOTES = {
+      startup: "<strong>Startup overlay</strong> — full-screen dark pink aurora, centered card with logo, “Blossom”, message, spinning ring. Version line at bottom when bridge loads.",
+      "runtime-sync": "<strong>Runtime sync</strong> — same full overlay; message “Syncing runtime components…” with indeterminate or % progress bar (cv2 + winocr on first launch / after cache clear).",
+      "update-prompt": "<strong>Update toast</strong> — bottom-right card (~380px), non-blocking. Dismiss / Update buttons; Esc dismisses.",
+      "update-download": "<strong>Update download</strong> — toast switches to progress view: title, version, bar, bytes.",
+      "update-install": "<strong>Installing</strong> — bar at 100%, title “Installing”, sub “Blossom will restart…”.",
+      "update-launcher": "<strong>Managed install</strong> — bar shows Ready; asks to reopen Blossom.exe.",
+      "update-manual": "<strong>Manual reinstall</strong> — full installer staged; Explorer opened.",
+      "update-failed": "<strong>Failed</strong> — warning status, Retry + Close.",
+      "runtime-card": "<strong>Settings card</strong> — inline on Settings &amp; extras; optional OpenCV installer with its own mini bar.",
+      "runtime-install": "<strong>Runtime install</strong> — full overlay + Settings card installing state together (matches clicking Install)."
+    };
+
+    function clearStage() {
+      document.getElementById("preview-stage").innerHTML = `
+        <div class="preview-fake-app">
+          <h2>Macro</h2>
+          <p>Dimmed main UI behind the overlay (not shown in real app until startup finishes).</p>
+        </div>`;
+    }
+
+    function mountStartup() {
+      const el = document.createElement("div");
+      el.id = "blossom-loading-overlay";
+      el.className = "blossom-loading-overlay is-active";
+      el.innerHTML = `
+        <div class="blossom-loading-aurora a1" aria-hidden="true"></div>
+        <div class="blossom-loading-aurora a2" aria-hidden="true"></div>
+        <div class="blossom-loading-card">
+          <img class="blossom-loading-logo" src="./blossom.png" alt="" width="72" height="72" onerror="this.style.display='none'" />
+          <h2 class="blossom-loading-brand">Blossom</h2>
+          <p class="blossom-loading-message">Loading interface…</p>
+          <div class="blossom-loading-spinner" data-blsm-spinner aria-hidden="true"></div>
+          <div class="blossom-loading-progress" data-blsm-progress hidden>
+            <div class="blossom-loading-progress-track"><div class="blossom-loading-progress-fill"></div></div>
+            <div class="blossom-loading-progress-meta">
+              <span class="blsm-loading-pct">Starting…</span>
+              <span class="blsm-loading-bytes"></span>
+            </div>
+          </div>
+          <p class="blossom-loading-version" data-blsm-version>2.1.0-dev</p>
+        </div>`;
+      document.getElementById("preview-stage").appendChild(el);
+    }
+
+    function mountRuntimeSync() {
+      const el = document.createElement("div");
+      el.id = "blossom-loading-overlay";
+      el.className = "blossom-loading-overlay is-active";
+      el.style.zIndex = "100002";
+      el.innerHTML = `
+        <div class="blossom-loading-aurora a1" aria-hidden="true"></div>
+        <div class="blossom-loading-aurora a2" aria-hidden="true"></div>
+        <div class="blossom-loading-card">
+          <img class="blossom-loading-logo" src="./blossom.png" alt="" width="72" height="72" onerror="this.style.display='none'" />
+          <h2 class="blossom-loading-brand">Blossom</h2>
+          <p class="blossom-loading-message">Syncing runtime components…</p>
+          <div class="blossom-loading-spinner" data-blsm-spinner hidden aria-hidden="true"></div>
+          <div class="blossom-loading-progress" data-blsm-progress data-state="determinate">
+            <div class="blossom-loading-progress-track">
+              <div class="blossom-loading-progress-fill" style="width: 47%"></div>
+            </div>
+            <div class="blossom-loading-progress-meta">
+              <span class="blsm-loading-pct">47%</span>
+              <span class="blsm-loading-bytes">18.2 MB / 38.7 MB</span>
+            </div>
+          </div>
+          <p class="blossom-loading-version" data-blsm-version>2.1.0-dev</p>
+        </div>`;
+      document.getElementById("preview-stage").appendChild(el);
+    }
+
+    function mountUpdatePrompt() {
+      const overlay = document.createElement("div");
+      overlay.id = "blossom-update-overlay";
+      overlay.className = "blossom-update-overlay";
+      overlay.innerHTML = `
+        <div class="blossom-update-dialog blossom-update-toast" role="dialog" aria-label="Update available">
+          <button type="button" class="blossom-update-x" aria-label="Dismiss">×</button>
+          <h3>Update available — 2.2.0</h3>
+          <p>
+            A newer Blossom build is ready. Updating closes and restarts the app
+            with the new version. Your settings in
+            <code>%LOCALAPPDATA%\\Blossom\\</code> are kept.
+          </p>
+          <p class="blossom-update-status"></p>
+          <div class="blossom-update-actions">
+            <button type="button" class="btn btn-secondary">Dismiss</button>
+            <button type="button" class="btn btn-accent">Update</button>
+          </div>
+        </div>`;
+      document.getElementById("preview-stage").appendChild(overlay);
+    }
+
+    function mountUpdateDownload() {
+      const overlay = document.createElement("div");
+      overlay.id = "blossom-update-overlay";
+      overlay.className = "blossom-update-overlay";
+      overlay.innerHTML = `
+        <div class="blossom-update-dialog">
+          <h3 class="blossom-update-title">Downloading update</h3>
+          <p class="blossom-update-sub">Blossom <strong>2.2.0</strong> is downloading. Keep the app open.</p>
+          <div class="blossom-progress" data-state="determinate">
+            <div class="blossom-progress-track"><div class="blossom-progress-fill" style="width: 62%"></div></div>
+            <div class="blossom-progress-meta">
+              <span class="blossom-progress-percent">62%</span>
+              <span class="blossom-progress-bytes">41 MB / 66 MB</span>
+            </div>
+          </div>
+          <p class="blossom-update-status"></p>
+        </div>`;
+      document.getElementById("preview-stage").appendChild(overlay);
+    }
+
+    function mountUpdateInstall() {
+      const overlay = document.createElement("div");
+      overlay.id = "blossom-update-overlay";
+      overlay.className = "blossom-update-overlay";
+      overlay.innerHTML = `
+        <div class="blossom-update-dialog">
+          <h3 class="blossom-update-title">Installing</h3>
+          <p class="blossom-update-sub">Blossom will restart with the new version.</p>
+          <div class="blossom-progress" data-state="determinate">
+            <div class="blossom-progress-track"><div class="blossom-progress-fill" style="width: 100%"></div></div>
+            <div class="blossom-progress-meta">
+              <span class="blossom-progress-percent">100%</span>
+              <span class="blossom-progress-bytes">66 MB / 66 MB</span>
+            </div>
+          </div>
+          <p class="blossom-update-status"></p>
+        </div>`;
+      document.getElementById("preview-stage").appendChild(overlay);
+    }
+
+    function mountUpdateLauncher() {
+      const overlay = document.createElement("div");
+      overlay.id = "blossom-update-overlay";
+      overlay.className = "blossom-update-overlay";
+      overlay.innerHTML = `
+        <div class="blossom-update-dialog">
+          <h3 class="blossom-update-title">Restart the launcher</h3>
+          <p class="blossom-update-sub">Blossom <strong>2.2.0</strong> was downloaded. Close this window, then open <code>Blossom.exe</code> again to run the new version.</p>
+          <div class="blossom-progress" data-state="determinate">
+            <div class="blossom-progress-track"><div class="blossom-progress-fill" style="width: 100%"></div></div>
+            <div class="blossom-progress-meta">
+              <span class="blossom-progress-percent">Ready</span>
+              <span class="blossom-progress-bytes"></span>
+            </div>
+          </div>
+          <p class="blossom-update-status">Your settings in %LOCALAPPDATA%\\Blossom\\ are kept.</p>
+          <div class="blossom-update-actions">
+            <button type="button" class="btn btn-secondary">Close</button>
+          </div>
+        </div>`;
+      document.getElementById("preview-stage").appendChild(overlay);
+    }
+
+    function mountUpdateManual() {
+      const overlay = document.createElement("div");
+      overlay.id = "blossom-update-overlay";
+      overlay.className = "blossom-update-overlay";
+      overlay.innerHTML = `
+        <div class="blossom-update-dialog">
+          <h3 class="blossom-update-title">Manual install required</h3>
+          <p class="blossom-update-sub">Blossom <strong>2.2.0</strong> needs a full reinstall. The file location was opened:<br><code>C:\\Users\\max\\Downloads\\Blossom-2.2.0-setup.exe</code><br>Close Blossom and run the downloaded installer.</p>
+          <div class="blossom-progress" data-state="determinate">
+            <div class="blossom-progress-track"><div class="blossom-progress-fill" style="width: 100%"></div></div>
+            <div class="blossom-progress-meta">
+              <span class="blossom-progress-percent">Downloaded</span>
+              <span class="blossom-progress-bytes"></span>
+            </div>
+          </div>
+          <p class="blossom-update-status"></p>
+          <div class="blossom-update-actions">
+            <button type="button" class="btn btn-secondary">Close</button>
+          </div>
+        </div>`;
+      document.getElementById("preview-stage").appendChild(overlay);
+    }
+
+    function mountUpdateFailed() {
+      const overlay = document.createElement("div");
+      overlay.id = "blossom-update-overlay";
+      overlay.className = "blossom-update-overlay";
+      overlay.innerHTML = `
+        <div class="blossom-update-dialog">
+          <h3 class="blossom-update-title">Update failed</h3>
+          <p class="blossom-update-sub">The download could not be completed.</p>
+          <div class="blossom-progress" data-state="indeterminate">
+            <div class="blossom-progress-track"><div class="blossom-progress-fill"></div></div>
+            <div class="blossom-progress-meta">
+              <span class="blossom-progress-percent">Starting…</span>
+              <span class="blossom-progress-bytes"></span>
+            </div>
+          </div>
+          <p class="blossom-update-status">You can retry, or download the latest build from GitHub.</p>
+          <div class="blossom-update-actions">
+            <button type="button" class="btn btn-secondary">Close</button>
+            <button type="button" class="btn btn-accent">Retry</button>
+          </div>
+        </div>`;
+      document.getElementById("preview-stage").appendChild(overlay);
+    }
+
+    function mountRuntimeCard(state) {
+      const page = document.createElement("div");
+      page.className = "preview-settings-page";
+      page.innerHTML = `
+        <div class="page-header">
+          <h2>Settings &amp; extras</h2>
+          <p>Runtime components and optional tools</p>
+        </div>
+        <div class="card blsm-rt-card" id="blossom-runtime-card" data-state="${state}">
+          <div class="card-header">
+            <div class="card-icon">🎣</div>
+            <div>
+              <h3>Fishing vision component</h3>
+              <p>Optional faster bite &amp; reel detection for Fishing Mode</p>
+            </div>
+          </div>
+          <div class="blsm-rt-body">
+            <p class="blsm-rt-status">Fishing vision component: ${state === "installing" ? "Installing…" : state === "installed" ? "Installed" : "Not installed"}</p>
+            <p class="blsm-rt-detail" ${state === "installed" ? "" : "hidden"}>OpenCV 4.10.0 · 38.7 MB</p>
+            <p class="blsm-rt-explain">
+              Fishing can use this component for faster, more reliable bite and reel
+              detection. Without it, fishing still works using the slower built-in
+              fallback, so installing it is optional.
+            </p>
+            <div class="blsm-rt-progress" ${state === "installing" ? "" : "hidden"}>
+              <div class="blsm-rt-progress-track ${state === "installing" ? "is-indeterminate" : ""}">
+                <div class="blsm-rt-progress-fill"></div>
+              </div>
+              <span class="blsm-rt-progress-text">Downloading…</span>
+            </div>
+            <p class="blsm-rt-message" role="status" ${state === "installing" ? "" : "hidden"}>Preparing download…</p>
+            <div class="blsm-rt-actions">
+              <button type="button" class="btn btn-accent blsm-rt-btn">${state === "installing" ? "Installing…" : state === "installed" ? "Reinstall" : "Install"}</button>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById("preview-stage").innerHTML = "";
+      document.getElementById("preview-stage").appendChild(page);
+    }
+
+    function mountRuntimeInstall() {
+      mountRuntimeSync();
+      const page = document.createElement("div");
+      page.className = "preview-settings-page";
+      page.style.position = "relative";
+      page.style.zIndex = "1";
+      page.style.opacity = "0.25";
+      page.innerHTML = `
+        <div class="page-header"><h2>Settings &amp; extras</h2></div>
+        <div class="card blsm-rt-card" data-state="installing">
+          <div class="card-header"><div class="card-icon">🎣</div><div><h3>Fishing vision component</h3></div></div>
+          <div class="blsm-rt-body"><p class="blsm-rt-status">Fishing vision component: Installing…</p></div>
+        </div>`;
+      document.getElementById("preview-stage").querySelector(".blossom-loading-message").textContent =
+        "Installing fishing vision component…";
+      document.getElementById("preview-stage").appendChild(page);
+    }
+
+    const MOUNTERS = {
+      startup: mountStartup,
+      "runtime-sync": mountRuntimeSync,
+      "update-prompt": mountUpdatePrompt,
+      "update-download": mountUpdateDownload,
+      "update-install": mountUpdateInstall,
+      "update-launcher": mountUpdateLauncher,
+      "update-manual": mountUpdateManual,
+      "update-failed": mountUpdateFailed,
+      "runtime-card": () => mountRuntimeCard("not_installed"),
+      "runtime-install": mountRuntimeInstall,
+    };
+
+    function showScreen(id) {
+      clearStage();
+      (MOUNTERS[id] || mountStartup)();
+      document.getElementById("preview-note").innerHTML = NOTES[id] || "";
+      document.querySelectorAll(".preview-nav button").forEach((btn) => {
+        btn.classList.toggle("is-active", btn.dataset.screen === id);
+      });
+      if (location.hash.replace("#", "") !== id) location.hash = id;
+    }
+
+    document.querySelectorAll(".preview-nav button").forEach((btn) => {
+      btn.addEventListener("click", () => showScreen(btn.dataset.screen));
+    });
+
+    const screenFromHash = () => {
+      const id = location.hash.replace("#", "") || "startup";
+      return MOUNTERS[id] ? id : "startup";
+    };
+
+    showScreen(screenFromHash());
+    window.addEventListener("hashchange", () => showScreen(screenFromHash()));
+  </script>
+</body>
+</html>

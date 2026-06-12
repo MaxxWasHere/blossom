@@ -38,12 +38,13 @@
         handle.className = "blsm-window-resize";
         handle.dataset.blsmWindowResize = edge;
         handle.title = "Resize window";
-        handle.addEventListener("pointerdown", (event) => {
+        handle.addEventListener("mousedown", (event) => {
+          if (event.button !== 0) return;
           event.preventDefault();
           event.stopPropagation();
           const bridge = api();
           if (bridge?.start_window_resize) {
-            void bridge.start_window_resize(edge);
+            bridge.start_window_resize(edge);
           }
         });
         root.appendChild(handle);

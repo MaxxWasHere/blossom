@@ -13,7 +13,15 @@
       case "expired_build":
         return "Beta expired";
       case "offline":
+      case "dns_error":
         return "Can't reach the server";
+      case "timeout":
+        return "Server timed out";
+      case "ssl_error":
+        return "Secure connection failed";
+      case "server_error":
+      case "not_found":
+        return "Activation server error";
       case "unconfigured":
         return "Activation unavailable";
       case "invalid":

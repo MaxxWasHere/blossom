@@ -16,10 +16,6 @@ venv/
 env/
 discord-bot/
 
-# --- Node (icon generator only) ---
-node_modules/
-package-lock.json
-
 # --- Build / packaging ---
 build/
 dist/
@@ -53,12 +49,6 @@ license-server/
 # --- Agent / editor scratch (never ship) ---
 _*.txt
 _brand_out.txt
-scripts/out_*.txt
-scripts/_tmp_*
-scripts/_*.txt
-scripts/_snip*.txt
-scripts/_m*.txt
-scripts/_scan_out.txt
 
 # --- OS / IDE (optional local) ---
 .DS_Store

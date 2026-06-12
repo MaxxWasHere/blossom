@@ -29,7 +29,165 @@ html.blsm-reduce-motion *::after,
 
 .blsm-appearance-card .blsm-appearance-header {
   border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
 }
+
+.blsm-appearance-header > div:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+
+.blsm-appearance-save-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: var(--radius-md, 10px);
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.blsm-appearance-save-status[hidden] {
+  display: none !important;
+}
+
+.blsm-save-status-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.blsm-appearance-save-status.is-saving .blsm-save-status-icon {
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent);
+  animation: blsm-appearance-save-spin 0.75s linear infinite;
+}
+
+.blsm-appearance-save-status.is-saving {
+  color: var(--text-primary);
+  border-color: var(--border-accent, var(--border));
+}
+
+.blsm-appearance-save-status.is-saved {
+  color: var(--success, #22c55e);
+  border-color: color-mix(in srgb, var(--success, #22c55e) 45%, var(--border));
+  animation: blsm-appearance-save-pop 0.35s ease;
+}
+
+.blsm-appearance-save-status.is-saved .blsm-save-status-icon::before {
+  content: "";
+  position: absolute;
+  inset: 1px 4px 4px 1px;
+  border: solid var(--success, #22c55e);
+  border-width: 0 0 2px 2px;
+  transform: rotate(-45deg);
+}
+
+.blsm-appearance-save-status.is-error {
+  color: var(--danger, #ef4444);
+  border-color: color-mix(in srgb, var(--danger, #ef4444) 45%, var(--border));
+}
+
+.blsm-save-feedback-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 7.5rem;
+}
+
+.blsm-save-feedback-btn .blsm-save-btn-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.blsm-save-feedback-btn.is-saving .blsm-save-btn-icon {
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  border-top-color: currentColor;
+  animation: blsm-appearance-save-spin 0.75s linear infinite;
+}
+
+.blsm-save-feedback-btn.is-saving .blsm-save-btn-label {
+  opacity: 0.72;
+}
+
+.blsm-save-feedback-btn.is-saved {
+  animation: blsm-appearance-save-pop 0.35s ease;
+}
+
+.blsm-save-feedback-btn.is-saved .blsm-save-btn-icon::before {
+  content: "";
+  position: absolute;
+  inset: 1px 4px 4px 1px;
+  border: solid currentColor;
+  border-width: 0 0 2px 2px;
+  transform: rotate(-45deg);
+}
+
+.blsm-save-feedback-btn.is-error {
+  animation: blsm-appearance-save-shake 0.4s ease;
+}
+
+@keyframes blsm-appearance-save-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes blsm-appearance-save-pop {
+  0% {
+    transform: scale(0.96);
+    opacity: 0.85;
+  }
+  55% {
+    transform: scale(1.03);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes blsm-appearance-save-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  75% {
+    transform: translateX(3px);
+  }
+}
+
+.blsm-reduce-motion .blsm-appearance-save-status,
+.blsm-reduce-motion .blsm-save-feedback-btn {
+  animation: none !important;
+  transition: none !important;
+}
+
+.blsm-reduce-motion .blsm-appearance-save-status.is-saving .blsm-save-status-icon,
+.blsm-reduce-motion .blsm-save-feedback-btn.is-saving .blsm-save-btn-icon {
+  animation: none !important;
+  border-top-color: var(--accent);
+  opacity: 0.65;
+}
+
 
 .blsm-appearance-body {
   padding: 4px 20px 18px;
@@ -178,6 +336,8 @@ html.blsm-reduce-motion *::after,
 .blsm-custom-ui-path {
   word-break: break-all;
 }
+
+/* While custom UI CSS is active, built-in pickers below are dimmed. */
 
 /* ——— Accent row ——— */
 .blsm-accent-row {

@@ -23,11 +23,11 @@
   padding: clamp(10px, 1.8vw, 18px) !important;
 }
 
-/* Sidebar: fluid width */
+/* Sidebar: fluid width (JSON themes may set --blsm-sidebar-width) */
 .window-frame .sidebar {
-  width: clamp(168px, 22vw, 212px) !important;
+  width: var(--blsm-sidebar-width, clamp(168px, 22vw, 212px)) !important;
   min-width: 0 !important;
-  flex: 0 0 clamp(168px, 22vw, 212px) !important;
+  flex: 0 0 var(--blsm-sidebar-width, clamp(168px, 22vw, 212px)) !important;
 }
 
 .window-frame .sidebar-nav {

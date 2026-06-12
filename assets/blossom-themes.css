@@ -91,6 +91,7 @@ body[data-theme="dark"],
 
 body[data-theme="light"],
 :root[data-theme="light"] {
+  color-scheme: light;
   --bg-root: #f4f4f5;
   --bg-sidebar: #ececef;
   --bg-main: #fafafa;
@@ -101,7 +102,8 @@ body[data-theme="light"],
   --accent: #db2777;
   --accent-dim: #be185d;
   --accent-glow: rgba(219, 39, 119, 0.12);
-  --accent-text: #ffffff;
+  --accent-text: #be185d;
+  --text-on-accent: #ffffff;
   --border-accent: rgba(219, 39, 119, 0.25);
   --shadow-glow: 0 0 20px rgba(219, 39, 119, 0.06);
   --text-primary: #18181b;
@@ -140,6 +142,7 @@ body[data-theme="system"],
 @media (prefers-color-scheme: light) {
   body[data-theme="system"],
   :root[data-theme="system"] {
+    color-scheme: light;
     --bg-root: #f4f4f5;
     --bg-sidebar: #ececef;
     --bg-main: #fafafa;
@@ -150,7 +153,8 @@ body[data-theme="system"],
     --accent: #db2777;
     --accent-dim: #be185d;
     --accent-glow: rgba(219, 39, 119, 0.12);
-    --accent-text: #ffffff;
+    --accent-text: #be185d;
+    --text-on-accent: #ffffff;
     --border-accent: rgba(219, 39, 119, 0.25);
     --shadow-glow: 0 0 20px rgba(219, 39, 119, 0.06);
     --text-primary: #18181b;
@@ -161,7 +165,6 @@ body[data-theme="system"],
   }
 }
 
-body[data-theme="midnight"],
 body[data-theme="blush"] {
   --bg-root: #0a0809;
   --bg-sidebar: #100c0e;
@@ -180,6 +183,120 @@ body[data-theme="blush"] {
   --text-muted: #6e6468;
   --border: #241a1e;
   --border-hover: #32242a;
+}
+
+/* OLED — true black, hairline borders, no glow. Made for AMOLED panels. */
+body[data-theme="oled"],
+:root[data-theme="oled"] {
+  --bg-root: #000000;
+  --bg-sidebar: #000000;
+  --bg-main: #000000;
+  --bg-card: #0a0a0c;
+  --bg-card-hover: #111114;
+  --bg-input: #070709;
+  --bg-input-focus: #101013;
+  --accent: #f2a3b9;
+  --accent-dim: #cf7892;
+  --accent-glow: rgba(242, 163, 185, 0.1);
+  --accent-text: #ffd9e4;
+  --border-accent: rgba(242, 163, 185, 0.32);
+  --shadow-glow: none;
+  --shadow-card: none;
+  --text-primary: #f2f2f4;
+  --text-secondary: #9c9ca4;
+  --text-muted: #5e5e66;
+  --border: #1a1a1e;
+  --border-hover: #2c2c32;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  color: var(--text-primary);
+  background: var(--bg-root);
+}
+
+/* Sakura — warm light theme, petal pinks on cream surfaces. */
+body[data-theme="sakura"],
+:root[data-theme="sakura"] {
+  color-scheme: light;
+  --bg-root: #f9eef3;
+  --bg-sidebar: #f4e2ea;
+  --bg-main: #fcf4f8;
+  --bg-card: #fffbfd;
+  --bg-card-hover: #faeef4;
+  --bg-input: #fdf7fa;
+  --bg-input-focus: #f8e9f0;
+  --accent: #d4537e;
+  --accent-dim: #b73a64;
+  --accent-glow: rgba(212, 83, 126, 0.14);
+  --accent-text: #b73a64;
+  --text-on-accent: #ffffff;
+  --border-accent: rgba(212, 83, 126, 0.3);
+  --shadow-glow: 0 0 24px rgba(212, 83, 126, 0.09);
+  --shadow-card: 0 1px 3px rgba(151, 71, 102, 0.12);
+  --text-primary: #38202b;
+  --text-secondary: #6f4a59;
+  --text-muted: #a07f8d;
+  --border: #efd8e2;
+  --border-hover: #e2bfd0;
+  --radius-sm: 10px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  color: var(--text-primary);
+  background: var(--bg-root);
+}
+
+/* Midnight — deep navy with indigo accents. */
+body[data-theme="midnight"],
+:root[data-theme="midnight"] {
+  --bg-root: #070b14;
+  --bg-sidebar: #0a0f1d;
+  --bg-main: #080d17;
+  --bg-card: #0f1626;
+  --bg-card-hover: #151e33;
+  --bg-input: #0c1220;
+  --bg-input-focus: #131b2e;
+  --accent: #818cf8;
+  --accent-dim: #5c66d6;
+  --accent-glow: rgba(129, 140, 248, 0.16);
+  --accent-text: #e0e3ff;
+  --border-accent: rgba(129, 140, 248, 0.32);
+  --shadow-glow: 0 0 24px rgba(99, 110, 235, 0.1);
+  --shadow-card: 0 2px 14px rgba(2, 5, 16, 0.45);
+  --text-primary: #e6eaf6;
+  --text-secondary: #97a1bd;
+  --text-muted: #5d667f;
+  --border: #18213a;
+  --border-hover: #26314f;
+  color: var(--text-primary);
+  background: var(--bg-root);
+}
+
+/* Forest — mossy dark greens with a soft emerald accent. */
+body[data-theme="forest"],
+:root[data-theme="forest"] {
+  --bg-root: #090e0a;
+  --bg-sidebar: #0c120d;
+  --bg-main: #0a100b;
+  --bg-card: #111a13;
+  --bg-card-hover: #17221a;
+  --bg-input: #0e1610;
+  --bg-input-focus: #141e16;
+  --accent: #4cbd87;
+  --accent-dim: #379a6b;
+  --accent-glow: rgba(76, 189, 135, 0.13);
+  --accent-text: #d9f7e7;
+  --border-accent: rgba(95, 212, 154, 0.3);
+  --shadow-glow: 0 0 22px rgba(95, 212, 154, 0.07);
+  --shadow-card: 0 2px 12px rgba(2, 8, 4, 0.45);
+  --text-primary: #e7efe9;
+  --text-secondary: #9cab9f;
+  --text-muted: #5f6e63;
+  --border: #1c281f;
+  --border-hover: #2b3b2f;
+  color: var(--text-primary);
+  background: var(--bg-root);
 }
 
 html.blsm-custom-ui-active .blsm-theme-grid,

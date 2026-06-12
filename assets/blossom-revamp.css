@@ -194,7 +194,7 @@
   height: 30px !important;
   border-radius: var(--r-sm) !important;
   background: linear-gradient(135deg, var(--accent, #e891a8), var(--accent-dim, #c46d88)) !important;
-  color: #fff !important;
+  color: var(--text-on-accent, #fff) !important;
   box-shadow: 0 4px 12px var(--blsm-accent-soft) !important;
 }
 
@@ -213,23 +213,23 @@
 
 .window-frame .header-bar .btn-start {
   background: var(--success, #22c55e) !important;
-  color: #fff !important;
+  color: var(--text-on-accent, #fff) !important;
   box-shadow: none !important;
 }
 
 .window-frame .btn-start {
   background: linear-gradient(180deg, var(--success, #22c55e), var(--success-dim, #16a34a)) !important;
-  color: #fff !important;
+  color: var(--text-on-accent, #fff) !important;
   box-shadow: 0 2px 8px color-mix(in srgb, var(--success, #22c55e) 22%, transparent) !important;
 }
 .window-frame .btn-stop {
   background: linear-gradient(180deg, var(--danger, #ef4444), var(--danger-dim, #dc2626)) !important;
-  color: #fff !important;
+  color: var(--text-on-accent, #fff) !important;
   box-shadow: 0 6px 16px color-mix(in srgb, var(--danger, #ef4444) 30%, transparent) !important;
 }
 .window-frame .btn-accent {
   background: linear-gradient(180deg, var(--accent, #e891a8), var(--accent-dim, #c46d88)) !important;
-  color: #fff !important;
+  color: var(--text-on-accent, #fff) !important;
   box-shadow: 0 6px 16px var(--blsm-accent-soft) !important;
 }
 .window-frame .btn-secondary,

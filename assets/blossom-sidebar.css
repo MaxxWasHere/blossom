@@ -14,7 +14,7 @@
   font-weight: 700 !important;
   letter-spacing: 0.06em !important;
   text-transform: uppercase !important;
-  color: var(--accent-text) !important;
+  color: var(--text-muted) !important;
   opacity: 0.85;
 }
 
@@ -53,7 +53,7 @@
 .sidebar-group .sidebar-item.active {
   transform: none !important;
   background: var(--accent-glow) !important;
-  color: var(--accent-text) !important;
+  color: var(--accent-dim, var(--accent)) !important;
   box-shadow: inset 3px 0 0 var(--accent);
 }
 

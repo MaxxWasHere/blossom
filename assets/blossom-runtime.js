@@ -148,6 +148,10 @@
     model.percent = -1;
     model.downloaded = 0;
     model.total = 0;
+    window.BlossomLoading?.begin?.(
+      "runtime-install",
+      "Installing fishing vision component…"
+    );
     render();
     try {
       await bridge.install_opencv();
@@ -156,6 +160,7 @@
       model.state = "error";
       model.message = "Install failed. Fishing still works using the built-in fallback.";
       model.percent = null;
+      window.BlossomLoading?.end?.("runtime-install");
       render();
     }
   };
@@ -238,6 +243,7 @@
       model.downloaded = Number(downloaded) || 0;
       model.total = Number(total) || 0;
       if (model.state !== "installing") model.state = "installing";
+      window.BlossomLoading?.setProgress?.(percent, downloaded, total);
       render();
     },
     onInstallState(state, message) {
@@ -245,9 +251,13 @@
       model.message = message || "";
       if (state === "installed") {
         model.percent = null;
+        window.BlossomLoading?.end?.("runtime-install");
         void refreshStatus();
       } else if (state !== "installing") {
         model.percent = null;
+        if (state === "error" || state === "unavailable") {
+          window.BlossomLoading?.end?.("runtime-install");
+        }
       }
       render();
     },

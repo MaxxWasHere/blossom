@@ -244,6 +244,14 @@ def _post_multipart(
         return error.code, error.read().decode("utf-8", errors="replace")
 
 
+def _ps_link_only_payload(ps_link: str | None) -> dict[str, Any] | None:
+    """Discord payload containing only the private-server link (no embeds)."""
+    link = str(ps_link or "").strip()
+    if not link:
+        return None
+    return {"content": link}
+
+
 def send_merchant_found_webhook(
     urls: list[str],
     *,
@@ -257,24 +265,9 @@ def send_merchant_found_webhook(
     if not urls:
         return 0
 
-    unix = int(datetime.now(timezone.utc).timestamp())
-    embed: dict[str, Any] = {
-        **_merchant_embed_base(merchant_name),
-        "title": f"🛎️ {merchant_name} merchant appeared",
-        "description": (
-            f"**{merchant_name}** was detected on screen.\n"
-            f"Spotted <t:{unix}:R> — opening shop next."
-        ),
-    }
-    if ps_link:
-        embed["fields"] = [
-            {"name": "Rejoin", "value": f"[Private server]({ps_link})", "inline": False}
-        ]
-
-    payload: dict[str, Any] = {"embeds": [embed]}
-    if ping_id:
-        payload["content"] = f"<@{ping_id}>"
-        payload["allowed_mentions"] = {"parse": ["everyone", "roles", "users"]}
+    payload = _ps_link_only_payload(ps_link)
+    if payload is None:
+        return 0
 
     return _dispatch(urls, payload, screenshot_path=None, timeout=timeout, label="merchant-found")
 
@@ -289,39 +282,19 @@ def send_merchant_webhook(
     purchased: list[str] | None = None,
     timeout: float = 15.0,
 ) -> int:
-    """Shop-open embed with optional full-screen screenshot (distinct from merchant-found alert)."""
+    """Shop-open alert — private-server link only. Returns count sent."""
     urls = normalize_webhook_urls(urls)
     if not urls:
         return 0
 
-    unix = int(datetime.now(timezone.utc).timestamp())
-    embed: dict[str, Any] = {
-        **_merchant_embed_base(merchant_name),
-        "title": f"🛒 {merchant_name} shop open",
-        "description": f"**{merchant_name}** shop is open.\nCaptured <t:{unix}:R>",
-    }
-    if purchased:
-        embed["fields"] = [
-            {"name": "Auto-bought", "value": "\n".join(f"• {item}" for item in purchased), "inline": False}
-        ]
-    if ps_link:
-        embed.setdefault("fields", []).append(
-            {"name": "Rejoin", "value": f"[Private server]({ps_link})", "inline": False}
-        )
-
-    has_image = bool(screenshot_path) and os.path.isfile(str(screenshot_path))
-    if has_image:
-        embed["image"] = {"url": f"attachment://{os.path.basename(str(screenshot_path))}"}
-
-    payload: dict[str, Any] = {"embeds": [embed]}
-    if ping_id:
-        payload["content"] = f"<@{ping_id}>"
-        payload["allowed_mentions"] = {"parse": ["everyone", "roles", "users"]}
+    payload = _ps_link_only_payload(ps_link)
+    if payload is None:
+        return 0
 
     return _dispatch(
         urls,
         payload,
-        screenshot_path=str(screenshot_path) if has_image else None,
+        screenshot_path=None,
         timeout=timeout,
         label="merchant-shop",
     )
@@ -511,66 +484,21 @@ def send_biome_webhook(
     screenshot_path: str | None = None,
     timeout: float = 15.0,
 ) -> int:
-    """Rich biome-detected embed (per-biome color/thumbnail/ping). Returns count sent."""
+    """Biome-detected alert — private-server link only. Returns count sent."""
     urls = normalize_webhook_urls(urls)
     if not urls:
         return 0
 
-    name = str(biome_name).strip()
-    upper = name.upper()
-    is_rare = is_rare_biome(upper)
-    emoji = "🌟" if is_rare else "🌿"
-    unix = int(datetime.now(timezone.utc).timestamp())
-
-    # Original-style: biome name as the headline, relative spot time in the body.
-    description = f"Spotted <t:{unix}:R>"
-    if is_rare:
-        description += "\n_Rare biome — hop in before it ends!_"
-
-    fields: list[dict[str, Any]] = []
-    if username:
-        fields.append({"name": "Player", "value": str(username), "inline": True})
-    if ps_link:
-        fields.append({"name": "Rejoin", "value": f"[Private server]({ps_link})", "inline": True})
-
-    embed: dict[str, Any] = {
-        "title": f"{emoji} {upper} Biome",
-        "description": description,
-        "color": _coerce_color(color) or BLOSSOM_ACCENT,
-        "timestamp": _now_iso(),
-        "author": {"name": "Blossom · Biome Notifier", "icon_url": BLOSSOM_FOOTER_ICON},
-        "footer": {"text": "Blossom Macro"},
-    }
-    if fields:
-        embed["fields"] = fields
-
-    # Biome art sits in the compact thumbnail slot (top-right) so embeds stay
-    # small. A live screenshot, when provided, takes the large image slot.
-    has_image = bool(screenshot_path) and os.path.isfile(str(screenshot_path))
-    if has_image:
-        embed["image"] = {"url": f"attachment://{os.path.basename(str(screenshot_path))}"}
-    if thumbnail_url:
-        embed["thumbnail"] = {"url": str(thumbnail_url)}
-
-    payload: dict[str, Any] = {"embeds": [embed]}
-    content, allowed = build_biome_webhook_mentions(
-        ping,
-        biome_name=upper,
-        global_rare_mode=_coerce_rare_mention_mode(rare_mention_mode),
-    )
-    if content:
-        payload["content"] = content
-        payload["allowed_mentions"] = allowed
+    payload = _ps_link_only_payload(ps_link)
+    if payload is None:
+        return 0
 
     sent = 0
     errors: list[str] = []
     for url in urls:
         try:
             _validate_url(url)
-            if has_image:
-                status, body = _post_multipart(url, payload, str(screenshot_path), timeout)
-            else:
-                status, body = _post_json(url, payload, timeout)
+            status, body = _post_json(url, payload, timeout)
             if status >= 400:
                 errors.append(f"HTTP {status}: {body.strip().replace(chr(10), ' ')[:200]}")
                 continue
@@ -724,59 +652,19 @@ def send_aura_webhook(
     screenshot_path: str | None = None,
     timeout: float = 15.0,
 ) -> int:
-    """Equipped-aura alert (original rarity rules, Blossom embed style). Returns count sent."""
+    """Equipped-aura alert — private-server link only. Returns count sent."""
     urls = normalize_webhook_urls(urls)
     if not urls:
         return 0
 
-    name = str(aura_name).strip()
-    unix = int(datetime.now(timezone.utc).timestamp())
-    description = f"Equipped <t:{unix}:R>"
-    if rarity and rarity >= 100_000:
-        description += "\n_Rare aura — hop in before they switch!_"
-
-    fields: list[dict[str, Any]] = []
-    if rarity:
-        fields.append({"name": "Rarity", "value": f"1 in {rarity:,}", "inline": True})
-    if username:
-        fields.append({"name": "Player", "value": str(username), "inline": True})
-    if ps_link:
-        fields.append({"name": "Rejoin", "value": f"[Private server]({ps_link})", "inline": True})
-
-    embed: dict[str, Any] = {
-        "title": f"✨ {name}",
-        "description": description,
-        "color": 0xB37FEB,
-        "timestamp": _now_iso(),
-        "author": {"name": "Blossom · Aura Notifier", "icon_url": BLOSSOM_FOOTER_ICON},
-        "footer": {"text": "Blossom Macro"},
-    }
-    if fields:
-        embed["fields"] = fields
-
-    has_image = bool(screenshot_path) and os.path.isfile(str(screenshot_path))
-    if has_image:
-        embed["image"] = {"url": f"attachment://{os.path.basename(str(screenshot_path))}"}
-
-    payload: dict[str, Any] = {"embeds": [embed]}
-    mention = build_ping_mention(ping)
-    if mention:
-        payload["content"] = mention
-        allowed: dict[str, Any] = {"parse": [], "users": [], "roles": []}
-        if isinstance(ping, dict):
-            pid = str(ping.get("id") or "").strip()
-            kind = str(ping.get("type") or "userid").strip().lower()
-            if pid.isdigit():
-                if kind in ("role", "roleid", "role_id"):
-                    allowed["roles"] = [pid]
-                else:
-                    allowed["users"] = [pid]
-        payload["allowed_mentions"] = allowed
+    payload = _ps_link_only_payload(ps_link)
+    if payload is None:
+        return 0
 
     return _dispatch(
         urls,
         payload,
-        screenshot_path=str(screenshot_path) if has_image else None,
+        screenshot_path=None,
         timeout=timeout,
         label="aura",
     )

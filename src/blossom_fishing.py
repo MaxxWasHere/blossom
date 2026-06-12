@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any, Callable
 import autoit
 import numpy as np
-import pyautogui
 import win32clipboard
+from PIL import ImageGrab
 
 _CV2 = None
 _CV2_CHECKED = False
@@ -57,8 +57,6 @@ try:
     import mss
 except Exception:
     mss = None
-
-pyautogui.FAILSAFE = False
 
 DEFAULT_FISHING_CONFIG = {
     "fishing_bar_region": [757, 762, 405, 21],          # this is the big ahh fishing bar
@@ -264,7 +262,7 @@ def _get_pixel_rgb(x: int, y: int, sct: Any | None = None) -> tuple[int, int, in
             return int(r), int(g), int(b)
         except Exception:
             pass
-    pixel = pyautogui.screenshot(region=(x, y, 1, 1)).getpixel((0, 0))
+    pixel = ImageGrab.grab(bbox=(int(x), int(y), int(x) + 1, int(y) + 1)).getpixel((0, 0))
     return int(pixel[0]), int(pixel[1]), int(pixel[2])
 
 
@@ -285,7 +283,9 @@ def _grab_region_bgr(region: tuple[int, int, int, int], sct: Any | None = None) 
         except Exception:
             pass
 
-    pil_img = pyautogui.screenshot(region=(int(x), int(y), int(w), int(h)))
+    pil_img = ImageGrab.grab(
+        bbox=(int(x), int(y), int(x) + int(w), int(y) + int(h))
+    )
     arr = np.array(pil_img)
     cv2 = _cv2_module()
     if cv2 is not None:

@@ -80,6 +80,7 @@
   };
 
   const updateProgress = (percent, downloaded, total) => {
+    window.BlossomLoading?.setProgress?.(percent, downloaded, total);
     // Ignore stray progress frames if the overlay isn't showing a download view.
     if (!document.getElementById(OVERLAY_ID)) return;
     if (!document.querySelector(".blossom-progress")) buildProgressView();
@@ -115,6 +116,23 @@
     }
     setProgressTitle("Installing", "Blossom will restart with the new version.");
     setStatus("");
+  };
+
+  const markLauncherRestart = (version, launcher) => {
+    const wrap = document.querySelector(".blossom-progress");
+    if (wrap) {
+      wrap.setAttribute("data-state", "determinate");
+      const fill = wrap.querySelector(".blossom-progress-fill");
+      if (fill) fill.style.width = "100%";
+      const pctEl = wrap.querySelector(".blossom-progress-percent");
+      if (pctEl) pctEl.textContent = "Ready";
+    }
+    setProgressTitle(
+      "Restart the launcher",
+      `Blossom <strong>${version || ""}</strong> was downloaded. Close this window, then open <code>${launcher || "Blossom.exe"}</code> again to run the new version.`
+    );
+    setStatus("Your settings in %LOCALAPPDATA%\\Blossom\\ are kept.");
+    showProgressActions({ retry: false });
   };
 
   const markManual = (version, path) => {
@@ -251,13 +269,22 @@
       if (!document.getElementById(OVERLAY_ID)) return;
       const text = String(status || "");
       if (text === "downloading") {
+        window.BlossomLoading?.begin?.("update", "Downloading update…");
         if (!document.querySelector(".blossom-progress")) buildProgressView();
       } else if (text === "failed") {
+        window.BlossomLoading?.end?.("update");
         markFailed();
         allowApply = false;
       } else if (text.startsWith("done|")) {
+        window.BlossomLoading?.setMessage?.("Installing update…");
         markInstalling();
+      } else if (text.startsWith("launcher|")) {
+        window.BlossomLoading?.end?.("update");
+        const parts = text.split("|");
+        markLauncherRestart(parts[1] || "", parts[2] || "Blossom.exe");
+        allowApply = false;
       } else if (text.startsWith("manual|")) {
+        window.BlossomLoading?.end?.("update");
         const parts = text.split("|");
         markManual(parts[1] || "", parts.slice(2).join("|") || "");
         allowApply = false;

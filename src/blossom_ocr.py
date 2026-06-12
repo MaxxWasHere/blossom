@@ -1,12 +1,11 @@
-"""Tesseract OCR helper for merchant name / item detection (ported from Coteab macro)."""
+"""WinOCR helper for merchant name / item detection (ported from Coteab macro)."""
 
 from __future__ import annotations
 
+import asyncio
 import difflib
-import os
-import shutil
-import sys
-from pathlib import Path
+import subprocess
+import threading
 
 # OCR misdetection corrections (from the original Noteab Merchant_Handler).
 OCR_MISDETECT_KEY: dict[str, str] = {
@@ -24,125 +23,179 @@ OCR_MISDETECT_KEY: dict[str, str] = {
     "geor b": "gear b",
 }
 
-from blossom_dirs import dev_repo_root
-
-_tesseract_cmd: str | None = None
+_ocr_lock = threading.Lock()
 _init_done = False
+_ocr_ready = False
 _warned_missing = False
+_windows_ocr_checked = False
+_windows_ocr_ready = False
 
 
-def _bundle_dir() -> Path:
-    if getattr(sys, "frozen", False):
-        return Path(getattr(sys, "_MEIPASS", dev_repo_root()))
-    return dev_repo_root()
+def _check_windows_ocr_language() -> bool:
+    """True when the en-US Windows OCR language capability is installed."""
+    global _windows_ocr_checked, _windows_ocr_ready
+    if _windows_ocr_checked:
+        return _windows_ocr_ready
+    _windows_ocr_checked = True
+    try:
+        script = (
+            "(Get-WindowsCapability -Online | "
+            "Where-Object { $_.Name -like 'Language.OCR*en-US*' }).State"
+        )
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", script],
+            capture_output=True,
+            text=True,
+            timeout=45,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        _windows_ocr_ready = "Installed" in (result.stdout or "")
+    except Exception as error:
+        print(f"[ocr] Windows OCR language check failed: {error}")
+        _windows_ocr_ready = False
+    if not _windows_ocr_ready:
+        print(
+            "[ocr] Windows OCR language pack (en-US) is not installed. "
+            "Run in an elevated PowerShell: "
+            "Add-WindowsCapability -Online -Name Language.OCR~~~en-US~0.0.1.0"
+        )
+    return _windows_ocr_ready
 
 
-def _install_dir() -> Path:
-    if getattr(sys, "frozen", False):
-        return Path(sys.executable).resolve().parent
-    return dev_repo_root()
+def _recognize_pil(image, *, lang: str = "en") -> str:
+    import winocr
 
-
-def _candidate_tesseract_paths() -> list[Path]:
-    candidates: list[Path] = []
-    for base in (_bundle_dir(), _install_dir()):
-        candidates.append(base / "assets" / "tesseract" / "tesseract.exe")
-        candidates.append(base / "tesseract" / "tesseract.exe")
-    local = os.environ.get("LOCALAPPDATA", "")
-    if local:
-        candidates.append(Path(local) / "Programs" / "Tesseract-OCR" / "tesseract.exe")
-    for env in ("PROGRAMFILES", "PROGRAMFILES(X86)"):
-        root = os.environ.get(env, "")
-        if root:
-            candidates.append(Path(root) / "Tesseract-OCR" / "tesseract.exe")
-    return candidates
-
-
-def _locate_tesseract() -> str | None:
-    for path in _candidate_tesseract_paths():
-        try:
-            if path.is_file():
-                return str(path)
-        except OSError:
-            continue
-    found = shutil.which("tesseract")
-    if found:
-        return found
-    return None
-
-
-def init_tesseract() -> bool:
-    """Locate Tesseract and configure pytesseract. Safe to call repeatedly."""
-    global _tesseract_cmd, _init_done
-    if _init_done:
-        return _tesseract_cmd is not None
-    _init_done = True
-
-    cmd = _locate_tesseract()
-    if not cmd:
-        # Stay quiet here: init runs from passive readiness/status checks at
-        # startup (biome selector, calibration status), and printing the "auto-buy
-        # disabled" warning then surfaces as a scary notice before the user has
-        # asked for anything OCR-related. The warning is emitted only when OCR is
-        # actually attempted — see warn_if_unavailable() / ocr_region().
-        return False
+    async def _run() -> str:
+        result = await winocr.recognize_pil(image, lang)
+        return str(getattr(result, "text", "") or "").strip()
 
     try:
-        import pytesseract
+        return asyncio.run(_run())
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        try:
+            return loop.run_until_complete(_run())
+        finally:
+            loop.close()
 
-        pytesseract.pytesseract.tesseract_cmd = cmd
-    except Exception as error:
-        print(f"[ocr] pytesseract import failed: {error}")
-        return False
 
-    # Point at bundled tessdata when present.
-    tess_root = Path(cmd).parent
-    tessdata = tess_root / "tessdata"
-    if tessdata.is_dir():
-        os.environ.setdefault("TESSDATA_PREFIX", str(tess_root))
+def init_ocr() -> bool:
+    """Ensure WinOCR is available. Safe to call repeatedly."""
+    global _init_done, _ocr_ready
+    if _init_done:
+        return _ocr_ready
+    with _ocr_lock:
+        if _init_done:
+            return _ocr_ready
+        _init_done = True
+        if not _check_windows_ocr_language():
+            return False
+        try:
+            from blossom_runtime_deps import ensure_winocr
 
-    _tesseract_cmd = cmd
-    print(f"[ocr] Tesseract ready: {cmd}")
-    return True
+            if not ensure_winocr():
+                return False
+        except Exception as error:
+            print(f"[ocr] WinOCR runtime setup failed: {error}")
+            return False
+        _ocr_ready = True
+        print("[ocr] WinOCR ready.")
+        return True
+
+
+def ocr_available() -> bool:
+    return init_ocr()
 
 
 def tesseract_available() -> bool:
-    return init_tesseract()
+    """Backward-compatible alias for code that still checks Tesseract naming."""
+    return ocr_available()
+
+
+def ocr_status() -> dict:
+    """Status for UI: installed, language_missing, runtime_missing, unavailable."""
+    from blossom_runtime_deps import winocr_status
+
+    runtime = winocr_status()
+    runtime_state = str(runtime.get("state") or "")
+
+    if init_ocr():
+        return {"state": "installed", "runtime": runtime}
+
+    if runtime_state == "installed":
+        lang_ok = _windows_ocr_checked and _windows_ocr_ready
+        if not _windows_ocr_checked:
+            lang_ok = _check_windows_ocr_language()
+        if not lang_ok:
+            return {
+                "state": "language_missing",
+                "runtime": runtime,
+                "message": (
+                    "Windows OCR language pack (en-US) is not installed. "
+                    "Install it with: Add-WindowsCapability -Online "
+                    "-Name Language.OCR~~~en-US~0.0.1.0"
+                ),
+            }
+        return {
+            "state": "installed",
+            "runtime": runtime,
+            "message": "WinOCR runtime is installed.",
+        }
+
+    lang_ok = _windows_ocr_checked and _windows_ocr_ready
+    if not _windows_ocr_checked:
+        lang_ok = _check_windows_ocr_language()
+    if not lang_ok:
+        return {
+            "state": "language_missing",
+            "runtime": runtime,
+            "message": (
+                "Windows OCR language pack (en-US) is not installed. "
+                "Install it with: Add-WindowsCapability -Online "
+                "-Name Language.OCR~~~en-US~0.0.1.0"
+            ),
+        }
+    if runtime_state == "unavailable":
+        return {
+            "state": "unavailable",
+            "runtime": runtime,
+            "message": runtime.get("message")
+            or "WinOCR bundle is not published for this build yet.",
+        }
+    return {
+        "state": "not_installed",
+        "runtime": runtime,
+        "message": "WinOCR runtime is not installed yet.",
+    }
 
 
 def warn_if_unavailable() -> bool:
-    """Warn (once) that OCR is unavailable, only when a feature actually needs it.
-
-    Returns True when Tesseract is ready. Call this from the point a merchant-OCR
-    or biome-selector OCR action is genuinely about to run — not from passive
-    startup status checks — so the warning never pops on initial load.
-    """
     global _warned_missing
-    if init_tesseract():
+    if init_ocr():
         return True
     if not _warned_missing:
         _warned_missing = True
+        status = ocr_status()
         print(
-            "[ocr] Tesseract not found — merchant OCR auto-buy disabled. "
-            "Bundle assets/tesseract/tesseract.exe or install Tesseract-OCR."
+            "[ocr] WinOCR unavailable — merchant OCR auto-buy disabled. "
+            f"{status.get('message', '')}"
         )
     return False
 
 
 def ocr_region(region: tuple[int, int, int, int], *, psm: int = 6) -> str:
     """Return OCR text for a screen region (left, top, width, height). '' on failure."""
+    del psm  # WinOCR has no Tesseract PSM equivalent; kept for call-site compatibility.
     if not warn_if_unavailable():
         return ""
     try:
         import pyautogui
-        import pytesseract
 
         x, y, w, h = (int(round(v)) for v in region)
         if w <= 0 or h <= 0:
             return ""
         screenshot = pyautogui.screenshot(region=(x, y, w, h))
-        text = pytesseract.image_to_string(screenshot, config=f"--psm {psm}")
-        return text.strip()
+        return _recognize_pil(screenshot, lang="en")
     except Exception as error:
         print(f"[ocr] region OCR failed for {region}: {error}")
         return ""

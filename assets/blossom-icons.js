@@ -1,6 +1,6 @@
 /*
  * Blossom vector icons (Lucide, ISC).
- * Bundled locally — no CDN. Regenerate: node scripts/gen_blossom_lucide_icons.mjs
+ * Bundled locally — no CDN.
  *
  * Two jobs:
  *   1. Expose window.BlossomIcons.svg(name) so the other local scripts (intro,
@@ -85,11 +85,17 @@
 
   const stripVs = (s) => String(s || "").replace(/[\uFE00-\uFE0F\u200D]/g, "").trim();
 
+  // Theme-provided icon overrides (sanitized inner-SVG markup keyed by icon
+  // name) plus color/stroke tweaks. Set via BlossomIcons.applyTheme(); the
+  // markup must already be passed through BlossomThemeEngine.sanitizeIconSvg.
+  let themeOverrides = {};
+
   const svg = (name, extraClass) => {
     const ico = ICONS[name];
     if (!ico) return "";
-    const cls = "blsm-vec" + (ico.solid ? " is-solid" : "") + (extraClass ? " " + extraClass : "");
-    return `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${ico.p}</svg>`;
+    const cls = "blsm-vec" + (ico.solid && !themeOverrides[name] ? " is-solid" : "") + (extraClass ? " " + extraClass : "");
+    const inner = themeOverrides[name] || ico.p;
+    return `<svg class="${cls}" data-icon="${name}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${inner}</svg>`;
   };
 
   const nameForEmoji = (text) => EMOJI[stripVs(text)] || null;
@@ -98,7 +104,44 @@
     return n ? svg(n, extraClass) : "";
   };
 
-  window.BlossomIcons = { svg, nameForEmoji, svgForEmoji, ICONS, EMOJI };
+  // Re-render every icon already in the DOM (used when overrides change).
+  const rerenderAll = () => {
+    document.querySelectorAll("svg.blsm-vec[data-icon]").forEach((el) => {
+      const name = el.getAttribute("data-icon");
+      const ico = ICONS[name];
+      if (!ico) return;
+      el.innerHTML = themeOverrides[name] || ico.p;
+      el.classList.toggle("is-solid", !!ico.solid && !themeOverrides[name]);
+    });
+  };
+
+  /*
+   * Apply a theme's icon settings:
+   *   { color, strokeWidth, overrides: { name: "<path .../>" } }
+   * Pass null/{} to reset to defaults. Values are validated upstream by the
+   * theme engine; this only stores and renders.
+   */
+  const applyTheme = (icons) => {
+    const spec = icons && typeof icons === "object" ? icons : {};
+    const root = document.documentElement;
+    if (spec.color) root.style.setProperty("--blsm-icon-color", String(spec.color));
+    else root.style.removeProperty("--blsm-icon-color");
+    if (spec.strokeWidth) root.style.setProperty("--blsm-icon-stroke", String(spec.strokeWidth));
+    else root.style.removeProperty("--blsm-icon-stroke");
+    const sanitizer = window.BlossomThemeEngine?.sanitizeIconSvg;
+    const next = {};
+    if (spec.overrides && typeof spec.overrides === "object" && sanitizer) {
+      Object.keys(spec.overrides).forEach((name) => {
+        if (!ICONS[name]) return;
+        const clean = sanitizer(spec.overrides[name]);
+        if (clean) next[name] = clean;
+      });
+    }
+    themeOverrides = next;
+    rerenderAll();
+  };
+
+  window.BlossomIcons = { svg, nameForEmoji, svgForEmoji, applyTheme, ICONS, EMOJI };
 
   // --- DOM swapping for the minified React bundle -------------------------
 

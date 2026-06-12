@@ -8,17 +8,19 @@ Based on the **Coteab** macro by Vapure (xVapure), which itself grew out of the 
 
 | Channel | Get it |
 |---------|--------|
-| **Stable** | [github.com/MaxxWasHere/blossom/releases](https://github.com/MaxxWasHere/blossom/releases) — download `Blossom-{version}.exe`, extract, run. No license key. |
-| **Beta** | [github.com/MaxxWasHere/blossombeta/releases](https://github.com/MaxxWasHere/blossombeta/releases) — same exe name; you need a beta key on first launch. |
+| **Stable** | [github.com/MaxxWasHere/blossom/releases](https://github.com/MaxxWasHere/blossom/releases) — download **`Blossom.exe`**, run it once. The launcher syncs the full app to `%LOCALAPPDATA%\Blossom\`. No license key. |
+| **Beta** | [github.com/MaxxWasHere/blossombeta/releases](https://github.com/MaxxWasHere/blossombeta/releases) — download **`Blossom-beta.exe`**; same bootstrap install. You need a beta key on first launch. |
 
 Windows only. If the window is blank, install [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/).
 
 ## First run
 
-1. Run the exe (or from source: `py run_local_ui.py` after `pip install -r requirements.txt`).
+1. Run **`Blossom.exe`** (stable) or **`Blossom-beta.exe`** (beta). First launch downloads the app payload and any optional runtime components into AppData, then opens Blossom.
 2. Calibrate — Macro Calibrations tab, or follow [this tutorial](https://youtu.be/s2S7Bncx9ns).
 3. Beta only: paste your license key when prompted.
 4. Optional: add a Discord webhook on the Webhook tab for biome / merchant pings.
+
+Keep the same launcher shortcut — it checks for updates on each run.
 
 More detail: [`docs/WHAT_IS_BLOSSOM.md`](docs/WHAT_IS_BLOSSOM.md).
 

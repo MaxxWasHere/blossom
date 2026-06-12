@@ -83,11 +83,14 @@ from blossom_dirs import (
     POTION_DIR,
     dev_repo_root,
     ensure_app_data_dirs,
+    is_managed_install,
+    managed_channel,
     migrate_all_user_data,
 )
-from blossom_runtime_deps import abi_key, cv2_status, ensure_opencv
+from blossom_runtime_deps import abi_key, cv2_status, ensure_opencv, sync_runtime_manifest, winocr_status
 from blossom_custom_ui import (
     ensure_sample_custom_ui_file,
+    ensure_themes_dir,
     list_custom_ui_themes,
     read_custom_ui_css,
 )
@@ -160,7 +163,11 @@ def _bundle_root() -> Path:
 
 
 def _install_root() -> Path:
-    """Folder where BlossomMacro.exe / the project lives — persistent data goes here."""
+    """Folder where the active Blossom payload lives (managed AppData or beside exe)."""
+    if is_managed_install():
+        from blossom_dirs import app_channel_dir
+
+        return app_channel_dir(managed_channel())
     if getattr(sys, "frozen", False):
         return Path(sys.executable).resolve().parent
     return dev_repo_root()
@@ -311,9 +318,11 @@ def apply_windows_frameless_chrome(window) -> None:
         WS_MINIMIZEBOX = 0x00020000
         WS_MAXIMIZEBOX = 0x00010000
         WS_CAPTION = 0x00C00000
+        WS_SYSMENU = 0x00080000
 
         style = user32.GetWindowLongW(hwnd, GWL_STYLE)
-        style |= WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_CAPTION
+        style |= WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX
+        style &= ~(WS_CAPTION | WS_SYSMENU)
         user32.SetWindowLongW(hwnd, GWL_STYLE, style)
 
         SWP_FRAMECHANGED = 0x0020
@@ -366,6 +375,32 @@ _WIN32_RESIZE_EDGES = frozenset(
         "bottom-right",
     }
 )
+
+_WIN32_RESIZE_HIT_TEST = {
+    "left": 10,
+    "right": 11,
+    "top": 12,
+    "top-left": 13,
+    "top-right": 14,
+    "bottom": 15,
+    "bottom-left": 16,
+    "bottom-right": 17,
+}
+
+
+def _begin_native_window_resize(hwnd: int, edge: str) -> bool:
+    """Start a native Win32 edge drag (needs WS_THICKFRAME on the HWND)."""
+    import ctypes
+
+    user32 = ctypes.windll.user32
+    if user32.IsZoomed(hwnd):
+        return False
+    hit = _WIN32_RESIZE_HIT_TEST.get(edge)
+    if hit is None:
+        return False
+    WM_NCLBUTTONDOWN = 0x00A1
+    user32.ReleaseCapture()
+    return bool(user32.SendMessageW(hwnd, WM_NCLBUTTONDOWN, hit, 0))
 
 
 def _manual_resize_window(hwnd: int, edge: str, min_size: tuple[int, int]) -> None:
@@ -787,11 +822,30 @@ class LocalUiApi:
             json.dumps(self._config, indent=2),
             encoding="utf-8",
         )
+        self._config_mtime = self._config_file_mtime()
         if self._macro_hotkey_pair() != previous_keys:
             self._hotkeys.reload()
         if "always_on_top" in self._config:
             self._apply_always_on_top(config_enabled(self._config, "always_on_top"))
         return True
+
+    def save_appearance_settings(self, appearance):
+        """Merge UI appearance keys into the live config (avoids client read-modify-write races)."""
+        patch = appearance if isinstance(appearance, dict) else {}
+        allowed = (
+            "ui_theme",
+            "selected_theme",
+            "ui_custom_css",
+            "ui_accent",
+            "ui_scale",
+            "ui_reduce_motion",
+            "ui_window_width",
+            "ui_window_height",
+        )
+        for key in allowed:
+            if key in patch:
+                self._config[key] = patch[key]
+        return self.save_config(self._config)
 
     def _macro_hotkey_pair(self) -> tuple[str | None, str | None]:
         return (
@@ -955,6 +1009,32 @@ class LocalUiApi:
         except Exception as error:
             print(f"[update] UI notify failed: {error}")
 
+    def _notify_loading_begin(self, phase: str, message: str = "") -> None:
+        self._evaluate_js(
+            "if (window.BlossomLoading?.begin) "
+            f"window.BlossomLoading.begin({json.dumps(phase)}, {json.dumps(message)});"
+        )
+
+    def _notify_loading_end(self, phase: str) -> None:
+        self._evaluate_js(
+            "if (window.BlossomLoading?.end) "
+            f"window.BlossomLoading.end({json.dumps(phase)});"
+        )
+
+    def _notify_loading_message(self, message: str) -> None:
+        self._evaluate_js(
+            "if (window.BlossomLoading?.setMessage) "
+            f"window.BlossomLoading.setMessage({json.dumps(message)});"
+        )
+
+    def _notify_loading_progress(
+        self, percent: float, downloaded: int, total: int
+    ) -> None:
+        self._evaluate_js(
+            "if (window.BlossomLoading?.setProgress) "
+            f"window.BlossomLoading.setProgress({percent}, {downloaded}, {total});"
+        )
+
     def _notify_update_available(self, version: str, url: str) -> None:
         v, u = json.dumps(version), json.dumps(url)
         self._evaluate_js(
@@ -963,7 +1043,24 @@ class LocalUiApi:
         )
 
     def _notify_update_status(self, status: str) -> None:
+        text = str(status or "")
+        loading_js = ""
+        if text == "downloading":
+            loading_js = (
+                "if (window.BlossomLoading?.begin) "
+                "window.BlossomLoading.begin('update', 'Downloading update…');"
+            )
+        elif text.startswith("done|"):
+            loading_js = (
+                "if (window.BlossomLoading?.setMessage) "
+                "window.BlossomLoading.setMessage('Installing update…');"
+            )
+        elif text in ("failed",) or text.startswith(("launcher|", "manual|")):
+            loading_js = (
+                "if (window.BlossomLoading?.end) window.BlossomLoading.end('update');"
+            )
         self._evaluate_js(
+            f"{loading_js}"
             f"if (window.onUpdateStatus) window.onUpdateStatus({json.dumps(status)});"
         )
 
@@ -978,6 +1075,8 @@ class LocalUiApi:
         self._evaluate_js(
             "if (window.BlossomUpdate?.onDownloadProgress) "
             f"window.BlossomUpdate.onDownloadProgress({percent}, {downloaded}, {total});"
+            "if (window.BlossomLoading?.setProgress) "
+            f"window.BlossomLoading.setProgress({percent}, {downloaded}, {total});"
         )
 
     def _make_download_progress_cb(self):
@@ -1218,6 +1317,30 @@ class LocalUiApi:
                 cached = self._update_cache or fetch_latest_release()
                 asset_name = (cached or {}).get("asset_name")
                 reinstall_required = bool((cached or {}).get("reinstall_required"))
+                version_label = str(version or "").strip() or APP_VERSION
+
+                if is_managed_install():
+                    from blossom_bootstrap import apply_managed_update, bootstrap_exe_name
+
+                    result = apply_managed_update(
+                        managed_channel(),
+                        download_url,
+                        version=version_label,
+                        asset_name=asset_name,
+                        progress_cb=self._make_download_progress_cb(),
+                    )
+                    if not result.get("ok"):
+                        self._notify_update_status("failed")
+                        print(f"[update] {result.get('error', 'failed')}")
+                        return
+                    launcher = bootstrap_exe_name(managed_channel())
+                    self._notify_update_status(
+                        f"launcher|{version_label}|{launcher}"
+                    )
+                    time.sleep(0.35)
+                    self.close_window()
+                    return
+
                 result = apply_exe_update(
                     INSTALL_ROOT,
                     download_url,
@@ -1234,7 +1357,6 @@ class LocalUiApi:
                     self._notify_update_status("failed")
                     print(f"[update] {result.get('error', 'failed')}")
                     return
-                version_label = str(version or "").strip() or APP_VERSION
                 if result.get("reinstall"):
                     staged_path = str(result.get("path") or "")
                     self._reveal_in_explorer(staged_path)
@@ -1270,6 +1392,8 @@ class LocalUiApi:
         self._evaluate_js(
             "if (window.BlossomRuntime?.onInstallProgress) "
             f"window.BlossomRuntime.onInstallProgress({percent}, {downloaded}, {total});"
+            "if (window.BlossomLoading?.setProgress) "
+            f"window.BlossomLoading.setProgress({percent}, {downloaded}, {total});"
         )
 
     def _make_install_progress_cb(self):
@@ -1339,6 +1463,10 @@ class LocalUiApi:
 
         self._notify_install_state("installing", "Preparing download…")
         self._notify_install_progress(-1, 0, 0)
+        self._notify_loading_begin(
+            "runtime-install",
+            "Installing fishing vision component…",
+        )
 
         def work() -> None:
             try:
@@ -1377,6 +1505,7 @@ class LocalUiApi:
                     "Install failed. Fishing still works using the built-in fallback.",
                 )
             finally:
+                self._notify_loading_end("runtime-install")
                 with self._opencv_install_lock:
                     self._opencv_installing = False
 
@@ -1386,51 +1515,69 @@ class LocalUiApi:
         return {"ok": True, "started": True}
 
     def boot_install_runtime_deps(self) -> None:
-        """Check for required optional runtime deps on boot and install them.
+        """Sync all manifest runtime components on boot (non-blocking).
 
-        The Discord bot no longer brokers these dependencies — the app owns the
-        whole flow now. On startup we check the verified on-disk cache and, if a
-        component is missing but a verified build exists for this Python/arch, we
-        fetch it on a daemon thread so it is ready before the user needs it
-        (e.g. fishing vision). Everything degrades to the built-in fallback, so a
-        failed or offline check never blocks launch.
+        OpenCV and WinOCR are optional: failures degrade to built-in fallbacks
+        and never block launch.
         """
 
-        def _check_and_install() -> None:
-            try:
-                status = cv2_status()
-            except Exception as error:  # noqa: BLE001 - boot must never crash
-                print(f"[runtime] boot dependency check failed: {error}")
-                return
-            state = status.get("state")
-            if state == "installed":
-                print("[runtime] boot dependency check: OpenCV already present.")
-                return
-            if state == "unavailable":
-                # No verified build pinned for this ABI; fishing uses the fallback.
-                print(
-                    "[runtime] boot dependency check: no verified vision "
-                    f"component for this build ({status.get('abi')}); using fallback."
-                )
-                return
-            print("[runtime] boot dependency check: installing OpenCV runtime…")
-            self.install_opencv()
+        def _sync_all() -> None:
+            syncing = False
 
-        Thread(
-            target=_check_and_install, name="BlossomBootDeps", daemon=True
-        ).start()
+            def progress_cb(downloaded: int, total: int) -> None:
+                nonlocal syncing
+                total_i = int(total or 0)
+                downloaded_i = int(downloaded or 0)
+                if total_i > 0:
+                    percent = round(downloaded_i / total_i * 100, 1)
+                else:
+                    percent = -1
+                if not syncing:
+                    syncing = True
+                    self._notify_loading_begin(
+                        "runtime-sync",
+                        "Syncing runtime components…",
+                    )
+                self._notify_loading_progress(percent, downloaded_i, total_i)
+
+            try:
+                summary = sync_runtime_manifest(progress_cb=progress_cb)
+            except Exception as error:  # noqa: BLE001 - boot must never crash
+                print(f"[runtime] boot dependency sync failed: {error}")
+                return
+            finally:
+                if syncing:
+                    self._notify_loading_end("runtime-sync")
+
+            for item in summary.get("components") or []:
+                print(
+                    f"[runtime] boot sync {item.get('id')}: {item.get('state')}"
+                )
+
+        Thread(target=_sync_all, name="BlossomBootDeps", daemon=True).start()
 
     def check_winocr_status(self):
         try:
-            import winocr  # type: ignore
+            import blossom_ocr
 
-            version = getattr(winocr, "__version__", "unknown")
-            return {"installed": True, "version": version}
-        except ImportError:
+            status = blossom_ocr.ocr_status()
+            runtime = status.get("runtime") or winocr_status()
+            runtime_state = str(runtime.get("state") or "")
+            ocr_state = str(status.get("state") or "")
+            installed = ocr_state == "installed" or runtime_state == "installed"
+            return {
+                "installed": installed,
+                "state": "installed" if installed else ocr_state,
+                "version": runtime.get("version") or "unknown",
+                "message": status.get("message", ""),
+                "runtime": runtime,
+            }
+        except Exception as error:  # noqa: BLE001
             return {
                 "installed": False,
+                "state": "error",
                 "version": "unknown",
-                "message": "WinOCR not installed in this Python environment",
+                "message": str(error),
             }
 
     def list_potion_files(self):
@@ -2631,15 +2778,16 @@ class LocalUiApi:
             return blossom_license.get_status(refresh=bool(refresh))
         except Exception as error:
             print(f"[license] status error: {error}")
+            required = blossom_license.licensing_required()
             return {
-                "required": blossom_license.licensing_required(),
-                "licensed": not blossom_license.licensing_required(),
-                "state": "offline",
+                "required": required,
+                "licensed": False if required else True,
+                "state": "invalid" if required else "not_required",
                 "reason": "offline",
                 "message": "Could not check license.",
                 "key_masked": "",
-                "server_configured": False,
-                "hwid": "",
+                "server_configured": bool(getattr(blossom_license, "LICENSE_SERVER_URL", "")),
+                "hwid": blossom_license.compute_hwid() if required else "",
                 "expiry": None,
             }
 
@@ -3658,6 +3806,14 @@ class LocalUiApi:
     def read_custom_ui_css(self, filename: str):
         return read_custom_ui_css(filename)
 
+    def open_themes_folder(self):
+        try:
+            folder = ensure_themes_dir()
+            os.startfile(str(folder))  # noqa: S606 — local folder open by user action
+            return {"ok": True, "path": str(folder)}
+        except Exception as error:
+            return {"ok": False, "error": str(error)}
+
     def set_biome_detection(self, enabled):
         enabled = bool(enabled)
         self._config["enable_biome_detection"] = enabled
@@ -3719,7 +3875,7 @@ class LocalUiApi:
         self.toggle_maximize()
 
     def start_window_resize(self, edge: str = "right") -> bool:
-        """Begin edge resize (frameless pywebview uses manual SetWindowPos loop)."""
+        """Begin edge resize for the frameless pywebview window."""
         if sys.platform != "win32":
             return False
         edge_key = str(edge or "").strip().lower()
@@ -3728,6 +3884,8 @@ class LocalUiApi:
         hwnd = _window_hwnd(self._window)
         if not hwnd:
             return False
+        if _begin_native_window_resize(hwnd, edge_key):
+            return True
         if not self._resize_lock.acquire(blocking=False):
             return False
 
@@ -3752,6 +3910,8 @@ class LocalUiApi:
 
 def main() -> int:
     global _SERVER_BASE
+
+    blossom_license.guard_startup()
 
     if not INDEX_HTML.exists():
         print(f"UI file not found: {INDEX_HTML}")
@@ -3786,6 +3946,14 @@ def main() -> int:
     )
 
     def on_ready():
+        if is_managed_install():
+            try:
+                from blossom_dirs import ui_ready_marker_path
+
+                ui_ready_marker_path().write_text(str(time.time()), encoding="utf-8")
+            except OSError:
+                pass
+
         apply_windows_window_icon(window, APP_ICON_PATH)
         apply_windows_frameless_chrome(window)
 
@@ -3817,11 +3985,15 @@ def main() -> int:
 
         Thread(target=_retry_window_chrome, daemon=True).start()
         Thread(target=_restore_always_on_top, daemon=True).start()
-        api.init_hotkeys()
-        api.start_listeners()
-        api.start_license_guard()
-        api.check_for_updates()
-        api.boot_install_runtime_deps()
+
+        def _deferred_startup() -> None:
+            api.init_hotkeys()
+            api.start_listeners()
+            api.start_license_guard()
+            api.check_for_updates()
+            api.boot_install_runtime_deps()
+
+        Thread(target=_deferred_startup, name="BlossomDeferredStartup", daemon=True).start()
 
     webview.start(debug=False, func=on_ready)
     api._stop_local_macro()

@@ -224,8 +224,9 @@
 
   const normalizeIntroTheme = (raw) => {
     const k = String(raw || "system").toLowerCase();
-    if (k === "system" || k === "pink" || k === "dark" || k === "light") return k;
-    const legacy = { midnight: "pink", blush: "pink", solar: "pink", ocean: "dark", arctic: "light" };
+    const valid = ["system", "pink", "dark", "light", "oled", "sakura", "midnight", "forest"];
+    if (valid.includes(k)) return k;
+    const legacy = { blush: "pink", solar: "pink", ocean: "dark", arctic: "light" };
     return legacy[k] || "system";
   };
 
