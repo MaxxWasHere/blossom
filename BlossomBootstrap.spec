@@ -12,34 +12,28 @@ _datas = [
 if os.path.isfile(os.path.join(SPECPATH, "assets", "blossom.png")):
     _datas.append(("assets/blossom.png", "assets"))
 
-datas = _datas
-
-hiddenimports = [
-    "blossom_dirs",
-    "blossom_runtime_deps",
-    "blossom_updater",
-    "blossom_build_info",
-    "blossom_bootstrap_ui",
-    "tkinter",
-    "_tkinter",
-]
-
 a = Analysis(
     [os.path.join("src", "blossom_bootstrap.py")],
     pathex=[os.path.join(SPECPATH, "src")],
     binaries=[],
-    datas=datas,
-    hiddenimports=hiddenimports,
+    datas=_datas,
+    hiddenimports=[
+        "blossom_dirs",
+        "blossom_runtime_deps",
+        "blossom_updater",
+        "blossom_build_info",
+        "blossom_bootstrap_ui",
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[
         "cv2",
-        "webview",
         "PIL",
         "pyautogui",
         "numpy",
         "pip",
+        "webview",
     ],
     noarchive=False,
     optimize=0,

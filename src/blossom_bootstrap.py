@@ -56,6 +56,7 @@ class BootstrapReporter(Protocol):
     def set_version(self, version: str) -> None: ...
     def set_progress(self, downloaded: int, total: int) -> None: ...
     def set_indeterminate(self, active: bool = True) -> None: ...
+    def set_phase(self, phase: str) -> None: ...
     def show_error(self, message: str) -> None: ...
 
 
@@ -72,6 +73,9 @@ class _NullReporter:
             print(f"[bootstrap] progress {pct}% ({downloaded}/{total})")
 
     def set_indeterminate(self, active: bool = True) -> None:
+        pass
+
+    def set_phase(self, phase: str) -> None:
         pass
 
     def show_error(self, message: str) -> None:
@@ -215,6 +219,7 @@ def sync_app_payload(
     payload_dir = app_channel_dir(ch)
     payload_dir.mkdir(parents=True, exist_ok=True)
 
+    ui.set_phase("update")
     ui.set_message("Checking for updates…")
     ui.set_indeterminate(True)
 
@@ -265,6 +270,7 @@ def sync_app_payload(
     try:
         if tmp.exists():
             tmp.unlink()
+        ui.set_phase("update")
         ui.set_message(f"Downloading {asset_name}…")
         ui.set_indeterminate(False)
         download_file(download_url, tmp, progress_cb=progress_cb)
@@ -340,6 +346,7 @@ def launch_payload(
         env.update(extra_env)
 
     _clear_ui_ready_marker()
+    ui.set_phase("launch")
     ui.set_message("Launching Blossom…")
     ui.set_indeterminate(True)
 
@@ -435,6 +442,7 @@ def run_bootstrap(
 ) -> int:
     ui = reporter or _NullReporter()
     ch = bootstrap_channel()
+    ui.set_phase("starting")
     ui.set_message(f"Starting {bootstrap_exe_name(ch)}…")
     ui.set_version(BOOTSTRAP_VERSION or (BETA_VERSION if ch == "beta" else STABLE_VERSION))
 
@@ -446,14 +454,21 @@ def run_bootstrap(
         return 1
 
     if not skip_runtime:
-        ui.set_message("Syncing runtime components…")
-        ui.set_indeterminate(True)
-        runtime_progress = _make_progress_cb(ui, prefix="Downloading runtime")
-        try:
-            sync_runtime_manifest(progress_cb=runtime_progress)
-            ui.set_message("Runtime components ready")
-        except Exception as error:  # noqa: BLE001
-            ui.set_message(f"Runtime sync warning: {error}")
+        from blossom_runtime_deps import component_label, load_manifest, sync_runtime_manifest
+
+        ui.set_phase("runtime")
+        manifest = load_manifest()
+        component_ids = list((manifest.get("components") or {}).keys())
+        for component_id in component_ids:
+            label = component_label(component_id)
+            ui.set_message(f"Syncing {label}…")
+            ui.set_indeterminate(True)
+            runtime_progress = _make_progress_cb(ui, prefix=f"Downloading {label}")
+            try:
+                sync_runtime_manifest(components=[component_id], progress_cb=runtime_progress)
+            except Exception as error:  # noqa: BLE001
+                ui.set_message(f"{label} sync warning: {error}")
+        ui.set_message("Runtime components ready")
 
     payload = str(app_result.get("path") or "")
     if not payload:

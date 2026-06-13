@@ -1,3 +1,16 @@
+# Blossom 2.2.2
+
+## Fixed
+- Bootstrap launchers no longer crash on startup with “Too early to create variable: no default root window” — tkinter variables are created after the splash window exists.
+
+## Improved
+- Bootstrap launchers use a lightweight splash window with a custom title bar, logo, status text, and progress bar — faster cold start and a smaller `.exe` than the previous webview bootstrap, then auto-close when the main app is ready.
+- Bootstrap runtime sync shows per-component progress (OpenCV, WinOCR) instead of one combined step.
+
+## Discord
+- Biome and merchant webhook pings use Blossom embeds again — each includes your Private Server link as a Rejoin field, without hop-in reminder text.
+- Aura equip pings use the original Blossom aura embed again — rarity, player, optional screenshot, and pings — without a Private Server link or hop-in reminder text.
+
 # Blossom 2.2.1
 
 ## New
