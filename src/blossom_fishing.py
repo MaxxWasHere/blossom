@@ -1,9 +1,10 @@
-﻿import json
+import json
 import threading
 import time
 from pathlib import Path
 from typing import Any, Callable
 import autoit
+from macro_engine import click_at_settled
 import numpy as np
 import win32clipboard
 from PIL import ImageGrab
@@ -477,13 +478,13 @@ def _run_pre_fishing_sequence(
 
     collections_x, collections_y = cfg["collections_button"]
     if collections_x > 0:
-        autoit.mouse_click("left", collections_x, collections_y, speed=3)
+        click_at_settled(collections_x, collections_y)
     if not sleep_interruptible(1.0 + fishing_actions_delay):
         return False
 
     exit_x, exit_y = cfg["exit_collections_button"]
     if exit_x > 0:
-        autoit.mouse_click("left", exit_x, exit_y, speed=3)
+        click_at_settled(exit_x, exit_y)
     if not sleep_interruptible(0.2 + fishing_actions_delay):
         return False
 
@@ -693,13 +694,13 @@ def _run_sell_fish_sequence(
 
     collections_x, collections_y = cfg["collections_button"]
     if collections_x > 0:
-        autoit.mouse_click("left", collections_x, collections_y, speed=3)
+        click_at_settled(collections_x, collections_y)
     if not sleep_interruptible(1.0 + fishing_actions_delay):
         return False
 
     exit_x, exit_y = cfg["exit_collections_button"]
     if exit_x > 0:
-        autoit.mouse_click("left", exit_x, exit_y, speed=3)
+        click_at_settled(exit_x, exit_y)
     if not sleep_interruptible(0.2 + fishing_actions_delay):
         return False
 

@@ -1,0 +1,14 @@
+{
+  "id": "char_align",
+  "filename": "char_align.json",
+  "label": "char_align",
+  "task": "",
+  "recorded_at": "2026-05-27T21:43:10.269020+00:00",
+  "event_count": 39,
+  "screen": {
+    "w": 1920,
+    "h": 1080
+  },
+  "keys_only": true,
+  "validation_issues": []
+}

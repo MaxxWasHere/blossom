@@ -16,14 +16,22 @@ from macro_engine import (
     align_camera_look_down,
     focus_roblox_window,
     load_json,
+    normalize_events,
     release_stuck_inputs,
     reset_character_in_game,
 )
 
 CHAR_ALIGN_STEM = "char_align"
 PRE_PATH_WAIT_AFTER_CAMERA_SEC = 0.0
+# Settle time after char_align.json finishes, before the main path plays. Gives
+# the character a beat to stop drifting from the align nudge.
+POST_CHAR_ALIGN_WAIT_SEC = 2.0
 COLLECTIONS_CONFIG_KEY = "collections_button"
 EXIT_COLLECTIONS_CONFIG_KEY = "exit_collections_button"
+
+# Eden paths are excluded from the char_align pre-step (they have their own
+# entry/alignment and char_align throws the route off).
+_EDEN_PATH_STEMS = frozenset({"eden", "edenpath", "eden_path"})
 
 
 def _calibration_point_from_config(config: dict, key: str) -> tuple[int, int] | None:
@@ -57,6 +65,26 @@ def is_char_align_path(path: Path | None) -> bool:
     if path is None:
         return False
     return path.stem.lower() == CHAR_ALIGN_STEM
+
+
+def is_eden_path(path: Path | None) -> bool:
+    if path is None:
+        return False
+    return path.stem.lower() in _EDEN_PATH_STEMS
+
+
+def _keys_only_payload(payload: dict) -> dict:
+    """Strip mouse events so char_align never moves the cursor during replay."""
+    events = [
+        e
+        for e in (payload.get("events") or [])
+        if isinstance(e, dict) and str(e.get("type", "")).startswith("key_")
+    ]
+    return {
+        **payload,
+        "events": normalize_events(events),
+        "keys_only": True,
+    }
 
 
 def resolve_char_align_path(search_dirs: Sequence[Path]) -> Path | None:
@@ -156,8 +184,8 @@ def run_pre_path_alignment(
         print("[pre-path align] char_align.json not found — skipping character align")
         return None
 
-    print(f"[pre-path align] replaying {align_path.name} (multiplier={multiplier:g})")
-    char_payload = load_json(align_path)
+    print(f"[pre-path align] replaying {align_path.name} (multiplier={multiplier:g}, keys only)")
+    char_payload = _keys_only_payload(load_json(align_path))
     char_result = replayer.replay(
         char_payload,
         focus_roblox=False,
@@ -169,6 +197,12 @@ def run_pre_path_alignment(
     if not release_stuck_inputs(reason="after char_align", cancel=cancel):
         return "Cancelled"
     print("[pre-path align] char_align finished")
+
+    post_wait = max(0.0, float(POST_CHAR_ALIGN_WAIT_SEC))
+    if post_wait > 0:
+        print(f"[pre-path align] settle {post_wait:g}s after char_align")
+        if not _sleep_sec(post_wait, cancel):
+            return "Cancelled"
     return None
 
 
@@ -182,13 +216,18 @@ def replay_movement_path(
     wait_after_camera_sec: float = PRE_PATH_WAIT_AFTER_CAMERA_SEC,
     focus_roblox: bool = True,
 ) -> str:
-    """Camera align + wait + char_align, then the requested path."""
+    """Camera align + wait + char_align, then the requested path.
+
+    Eden paths skip the char_align pre-step (and its settle) since char_align
+    knocks the Eden route off its own entry alignment.
+    """
+    skip_char_align = is_char_align_path(path_file) or is_eden_path(path_file)
     pre_error = run_pre_path_alignment(
         replayer,
         search_dirs=search_dirs,
         camera_down_px=camera_down_px,
         wait_after_camera_sec=wait_after_camera_sec,
-        skip_char_align_replay=is_char_align_path(path_file),
+        skip_char_align_replay=skip_char_align,
         cancel=replayer._external_cancel,
     )
     if pre_error:

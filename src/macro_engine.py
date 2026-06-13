@@ -87,8 +87,8 @@ MAX_EVENT_GAP_SEC = 8.0
 MOVEMENT_REPLAY_MAX_GAP_SEC = 90.0
 REPLAY_KEY_SETTLE_SEC = 0.012
 REPLAY_INPUT_RESET_SEC = 0.08
-CHAR_RESET_WAIT_SEC = 2.0
-CHAR_RESET_KEY_GAP_SEC = 0.05
+CHAR_RESET_WAIT_SEC = 1.35
+CHAR_RESET_KEY_GAP_SEC = 0.04
 CANCEL_SLEEP_CHUNK_SEC = 0.05
 RELEASE_KEYS = (
     "w",
@@ -108,11 +108,24 @@ RELEASE_KEYS = (
 )
 CAMERA_ALIGN_DOWN_PX = 80
 CAMERA_ALIGN_RMB_HOLD_SEC = 0.2
-CAMERA_ALIGN_UI_GAP_SEC = 0.22
+CAMERA_ALIGN_UI_GAP_SEC = 0.19
 CAMERA_ALIGN_DRAG_SEC = 0.28
 CAMERA_ALIGN_DRAG_STEPS = 16
 CAMERA_ALIGN_RETURN_SEC = 0.24
 CAMERA_ALIGN_RETURN_STEPS = 14
+
+# Inventory / UI click pacing (15% faster). Not applied to potion crafting or fishing.
+UI_CLICK_SPEED_MULTIPLIER = 0.85
+
+
+def inventory_click_delay_sec(config: dict, *, default_ms: float = 350) -> float:
+    """Config inventory_click_delay in seconds, scaled for faster UI clicks."""
+    raw = config.get("inventory_click_delay", default_ms)
+    try:
+        ms = float(raw)
+    except (TypeError, ValueError):
+        ms = default_ms
+    return max(0.05, (ms / 1000.0) * UI_CLICK_SPEED_MULTIPLIER)
 
 
 def _cursor_pos() -> tuple[int, int]:
@@ -182,7 +195,8 @@ def align_camera_look_down(
 
     if collections and (collections[0] > 0 or collections[1] > 0):
         print(f"[camera align] click collections at {collections[0]},{collections[1]}")
-        github_original_click_at(collections[0], collections[1], pre_sleep_sec=0.12)
+        if not click_at_settled(collections[0], collections[1], pre_sleep_sec=0.1, cancel=cancel):
+            return "Cancelled"
         if not _sleep_sec(CAMERA_ALIGN_UI_GAP_SEC, cancel):
             return "Cancelled"
     else:
@@ -190,7 +204,8 @@ def align_camera_look_down(
 
     if exit_collections and (exit_collections[0] > 0 or exit_collections[1] > 0):
         print(f"[camera align] click exit collections at {exit_collections[0]},{exit_collections[1]}")
-        github_original_click_at(exit_collections[0], exit_collections[1], pre_sleep_sec=0.12)
+        if not click_at_settled(exit_collections[0], exit_collections[1], pre_sleep_sec=0.1, cancel=cancel):
+            return "Cancelled"
         if not _sleep_sec(CAMERA_ALIGN_UI_GAP_SEC, cancel):
             return "Cancelled"
     else:
@@ -281,7 +296,7 @@ def reset_input_state(*, reason: str = "", cancel: threading.Event | None = None
 
 
 def reset_character_in_game(*, reason: str = "character reset", cancel: threading.Event | None = None) -> bool:
-    """Roblox character reset: Esc, R, Enter, then wait 2 seconds."""
+    """Roblox character reset: Esc, R, Enter, then a short settle."""
     print(f"[macro reset] {reason}: Esc → R → Enter")
     if not release_stuck_inputs(cancel=cancel):
         return False
@@ -423,6 +438,33 @@ def github_original_click_at(
     if _cancelled(cancel):
         return False
     autoit.mouse_click("left", int(x), int(y), int(click), speed=3)
+    return True
+
+
+def click_at_settled(
+    x: int,
+    y: int,
+    *,
+    click: int = 1,
+    pre_sleep_sec: float = 0.1,
+    cancel: threading.Event | None = None,
+) -> bool:
+    """Jump to (x, y), settle, then click in place — no click while moving there."""
+    if _cancelled(cancel):
+        return False
+    instant_move(int(x), int(y))
+    delay = max(PRE_CLICK_SETTLE_SEC, float(pre_sleep_sec))
+    if not _sleep_sec(delay, cancel):
+        return False
+    for i in range(max(1, int(click))):
+        if _cancelled(cancel):
+            return False
+        mouse_button("left", down=True)
+        if not _sleep_sec(CLICK_HOLD_SEC, cancel):
+            return False
+        mouse_button("left", down=False)
+        if i + 1 < click and not _sleep_sec(0.04, cancel):
+            return False
     return True
 
 

@@ -1,3 +1,19 @@
+# Blossom 2.2.3
+
+## Macro
+- Merchant auto-buy now presses your calibrated Set Max button and then Purchase, instead of clicking the amount field and typing a quantity. Calibrate Set Max in the merchant calibrations to use it (merchants that never use Max, like Rin, still fall back to a typed amount).
+- Merchant runs faster: shorter gaps between interact presses, dialogue clicks, shop open, and purchase, and a quicker default inventory click delay.
+- Character reset after camera align is faster (about 1.35s settle instead of 2s).
+- Inventory and other UI clicks (merchant, daily quests, BR/SC, biome selector, glitched buffs) are about 15% snappier. Potion crafting and fishing timings are unchanged.
+- Collections menu clicks during camera align and fishing prep jump to the button first, settle, then click in place so Roblox does not register a click while the cursor is still moving.
+- char_align.json and fishing.json ship in paths/ — char_align replay is keys-only (no mouse movement); fishing mode replays your recorded fishing.json route when present.
+
+## Improved
+- Path actions are steadier: obby, fishing, and other recorded paths now play char_align first and wait about 2 seconds after it so your character settles before walking. Eden is excluded because it uses its own entry alignment.
+
+## Licensing & updates
+- Launchers always match the version published on the source: on every start they sync to the newest release for their channel, including a deliberate rollback, rather than only upgrading when the number goes up. Keep your `Blossom.exe` / `Blossom-beta.exe` shortcut — it stays current on its own.
+
 # Blossom 2.2.2
 
 ## Fixed

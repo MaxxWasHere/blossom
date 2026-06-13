@@ -32,7 +32,7 @@ from blossom_updater import (
     download_file,
     fetch_latest_beta_release,
     fetch_latest_stable_release,
-    version_gt,
+    parse_version,
     versioned_exe_name,
 )
 
@@ -121,9 +121,11 @@ def _local_payload_path(channel: str, exe_name: str) -> Path:
 
 
 def _fetch_release(channel: str) -> dict[str, Any] | None:
+    # prefer=False -> always take the source's newest published payload, never
+    # the version baked into this launcher, so the install tracks the source.
     if channel == "beta":
-        return fetch_latest_beta_release()
-    return fetch_latest_stable_release()
+        return fetch_latest_beta_release(prefer=False)
+    return fetch_latest_stable_release(prefer=False)
 
 
 def _needs_app_update(channel: str, release: dict[str, Any]) -> bool:
@@ -134,7 +136,11 @@ def _needs_app_update(channel: str, release: dict[str, Any]) -> bool:
     local_version = str(current.get("version") or "").strip()
     if not local_version:
         return True
-    return version_gt(remote_version, local_version)
+    # Always converge to whatever the source publishes. The release fetch is
+    # source-authoritative (prefer=False -> highest-versioned payload on the
+    # release), so any mismatch — newer build or a deliberate rollback — means
+    # the installed copy no longer matches the source and must be re-synced.
+    return parse_version(remote_version) != parse_version(local_version)
 
 
 def _make_progress_cb(

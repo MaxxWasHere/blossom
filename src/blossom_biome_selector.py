@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from typing import Callable
 
-from macro_engine import _sleep_sec, github_original_click_at
+from macro_engine import _sleep_sec, github_original_click_at, inventory_click_delay_sec
 
 import blossom_ocr
 from blossom_runtime_deps import winocr_status
@@ -143,12 +143,7 @@ def layout_slot_preview(config: dict, get_point: GetPoint) -> list[dict]:
 
 
 def _click_delay_sec(config: dict) -> float:
-    raw = config.get("inventory_click_delay", 650)
-    try:
-        ms = float(raw)
-    except (TypeError, ValueError):
-        ms = 650.0
-    return max(0.05, ms / 1000.0)
+    return inventory_click_delay_sec(config, default_ms=650)
 
 
 def _resolve_point(get_point: GetPoint, key: str, fallback: str | None = None) -> CalibrationPoint:

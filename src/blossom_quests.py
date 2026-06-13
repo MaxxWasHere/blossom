@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from typing import Callable
 
-from macro_engine import _sleep_sec, github_original_click_at
+from macro_engine import _sleep_sec, github_original_click_at, UI_CLICK_SPEED_MULTIPLIER
 
 CalibrationPoint = tuple[int, int] | None
 GetPoint = Callable[[str], CalibrationPoint]
 ConfigEnabled = Callable[[dict, str], bool]
 
-QUEST_CLICK_DELAY = 0.16
-QUEST_MENU_SETTLE_SEC = 0.45
+QUEST_CLICK_DELAY = 0.16 * UI_CLICK_SPEED_MULTIPLIER
+QUEST_MENU_SETTLE_SEC = 0.45 * UI_CLICK_SPEED_MULTIPLIER
 QUEST_SLOT_KEYS = ("quest1_button", "quest2_button", "quest3_button")
 CLAIM_PASSES = 2
 

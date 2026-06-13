@@ -1,0 +1,14 @@
+{
+  "id": "fishing",
+  "filename": "fishing.json",
+  "label": "fishing",
+  "task": "",
+  "recorded_at": "2026-06-13T21:39:47.384353+00:00",
+  "event_count": 211,
+  "screen": {
+    "w": 1920,
+    "h": 1080
+  },
+  "keys_only": true,
+  "validation_issues": []
+}

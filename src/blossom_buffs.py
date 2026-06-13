@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Callable
 
-from macro_engine import _sleep_sec, github_original_click_at
+from macro_engine import _sleep_sec, github_original_click_at, inventory_click_delay_sec
 
 CalibrationPoint = tuple[int, int] | None
 GetPoint = Callable[[str], CalibrationPoint]
@@ -26,12 +26,7 @@ _BUFF_CALIBRATION_SPECS: tuple[tuple[str, str | None], ...] = (
 
 
 def _click_delay_sec(config: dict) -> float:
-    raw = config.get("inventory_click_delay", 650)
-    try:
-        ms = float(raw)
-    except (TypeError, ValueError):
-        ms = 650.0
-    return max(0.05, ms / 1000.0)
+    return inventory_click_delay_sec(config, default_ms=650)
 
 
 def _resolve_point(get_point: GetPoint, key: str, fallback: str | None = None) -> CalibrationPoint:

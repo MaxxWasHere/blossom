@@ -12,8 +12,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 # Latest version numbers (bump when shipping each channel).
-STABLE_VERSION = "2.2.2"
-BETA_VERSION = "2.2.0-beta.2"
+STABLE_VERSION = "2.2.3"
+BETA_VERSION = "2.2.3-beta.1"
 
 try:
     import blossom_build_info as _build_info
@@ -263,11 +263,13 @@ def parse_reinstall_required(body: str | None) -> bool:
 NETWORK_ERRORS = (HTTPError, URLError, RuntimeError, json.JSONDecodeError, TimeoutError, OSError)
 
 
-def _fetch_latest_stable_release_raw() -> dict[str, Any] | None:
+def _fetch_latest_stable_release_raw(*, prefer: bool = True) -> dict[str, Any] | None:
     data = _github_request(RELEASE_API_LATEST)
     if not isinstance(data, dict):
         return None
-    asset = _pick_release_asset(data, "stable", prefer_version=STABLE_VERSION)
+    asset = _pick_release_asset(
+        data, "stable", prefer_version=STABLE_VERSION if prefer else None
+    )
     version = _release_version(data, asset)
     if version and asset:
         return {
@@ -280,14 +282,16 @@ def _fetch_latest_stable_release_raw() -> dict[str, Any] | None:
     return None
 
 
-def _fetch_latest_beta_release_raw() -> dict[str, Any] | None:
+def _fetch_latest_beta_release_raw(*, prefer: bool = True) -> dict[str, Any] | None:
     releases = _github_request(RELEASES_API_BETA)
     if not isinstance(releases, list):
         return None
     for release in releases:
         if not isinstance(release, dict):
             continue
-        asset = _pick_release_asset(release, "beta", prefer_version=BETA_VERSION)
+        asset = _pick_release_asset(
+            release, "beta", prefer_version=BETA_VERSION if prefer else None
+        )
         version = _release_version(release, asset)
         if version and asset:
             return {
@@ -300,27 +304,32 @@ def _fetch_latest_beta_release_raw() -> dict[str, Any] | None:
     return None
 
 
-def fetch_latest_stable_release() -> dict[str, Any] | None:
-    """Latest non-prerelease GitHub release with a Blossom-*.exe (or legacy BlossomMacro.exe)."""
+def fetch_latest_stable_release(*, prefer: bool = True) -> dict[str, Any] | None:
+    """Latest non-prerelease GitHub release with a Blossom-*.exe (or legacy BlossomMacro.exe).
+
+    prefer=False ignores the version baked into the running build and always
+    returns the highest-versioned payload the source publishes, so a managed
+    launcher tracks the source exactly (upgrade or deliberate rollback).
+    """
     try:
-        return _fetch_latest_stable_release_raw()
+        return _fetch_latest_stable_release_raw(prefer=prefer)
     except NETWORK_ERRORS:
         return None
 
 
-def fetch_latest_beta_release() -> dict[str, Any] | None:
+def fetch_latest_beta_release(*, prefer: bool = True) -> dict[str, Any] | None:
     """Latest beta release on blossombeta with Blossom-*beta*.exe."""
     try:
-        return _fetch_latest_beta_release_raw()
+        return _fetch_latest_beta_release_raw(prefer=prefer)
     except NETWORK_ERRORS:
         return None
 
 
-def fetch_latest_release(channel: str | None = None) -> dict[str, Any] | None:
+def fetch_latest_release(channel: str | None = None, *, prefer: bool = True) -> dict[str, Any] | None:
     ch = (channel or build_channel()).lower()
     if ch == "beta":
-        return fetch_latest_beta_release()
-    return fetch_latest_stable_release()
+        return fetch_latest_beta_release(prefer=prefer)
+    return fetch_latest_stable_release(prefer=prefer)
 
 
 def check_newer_than_local(channel: str | None = None) -> dict[str, Any] | None:

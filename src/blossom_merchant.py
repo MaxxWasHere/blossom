@@ -21,6 +21,7 @@ import blossom_ocr
 from macro_engine import (
     _sleep_sec,
     github_original_click_at,
+    inventory_click_delay_sec,
     replay_key_action,
 )
 from macro_hotkeys import is_unbound_hotkey, normalize_hotkey
@@ -47,20 +48,20 @@ MERCHANT_COOLDOWN_SEC = 190.0
 MERCHANT_SLOT_X_OFFSET = 193
 MERCHANT_SLOT_COUNT = 5
 MERCHANT_INTERACT_PRESSES = 6
-MERCHANT_INTERACT_PRESS_GAP = 0.55
-MERCHANT_POST_INTERACT_SETTLE_SEC = 0.65
+MERCHANT_INTERACT_PRESS_GAP = 0.38
+MERCHANT_POST_INTERACT_SETTLE_SEC = 0.5
 MERCHANT_DIALOGUE_CLICKS = 8
-MERCHANT_DIALOGUE_CLICK_GAP = 0.55
+MERCHANT_DIALOGUE_CLICK_GAP = 0.35
 MERCHANT_NAME_OCR_TRIES = 4
 MERCHANT_NAME_OCR_GAP = 0.08
-MERCHANT_OPEN_WAIT_SEC = 7.0
+MERCHANT_OPEN_WAIT_SEC = 5.0
 MERCHANT_PURCHASE_BUTTON_CLICKS = 3
 MERCHANT_FOUND_WEBHOOK_THROTTLE_SEC = 45.0
 MERCHANT_SLOT_CLICK_COUNT = 2
-MERCHANT_SLOT_SETTLE_SEC = 0.15
-MERCHANT_PURCHASE_TYPE_GAP_SEC = 0.23
-MERCHANT_PURCHASE_SETTLE_SEC = 3.67
-MERCHANT_POST_TELEPORT_SETTLE_SEC = 1.3
+MERCHANT_SLOT_SETTLE_SEC = 0.12
+MERCHANT_PURCHASE_TYPE_GAP_SEC = 0.18
+MERCHANT_PURCHASE_SETTLE_SEC = 2.0
+MERCHANT_POST_TELEPORT_SETTLE_SEC = 1.1
 
 # Per-slot calibration keys (preferred over the +178 offset when all set).
 _MERCHANT_SLOT_KEYS = tuple(f"merchant_slot_{i}_pos" for i in range(1, MERCHANT_SLOT_COUNT + 1))
@@ -169,12 +170,7 @@ def merchant_cooldown_remaining() -> float:
 
 
 def _click_delay_sec(config: dict) -> float:
-    raw = config.get("inventory_click_delay", 650)
-    try:
-        ms = float(raw)
-    except (TypeError, ValueError):
-        ms = 650.0
-    return max(0.05, ms / 1000.0)
+    return inventory_click_delay_sec(config, default_ms=350)
 
 
 def _resolve_point(get_point: GetPoint, key: str, fallback: str | None = None) -> CalibrationPoint:
@@ -433,7 +429,8 @@ def _buy_item(
     click_delay: float,
     merchant_name: str = "",
 ) -> bool:
-    """Buy flow from the original macro: amount field → Max (or typed qty) → triple purchase."""
+    """Buy flow: when a Max button is calibrated, press Max → Purchase (no amount
+    typing). Otherwise fall back to the amount field + typed quantity → Purchase."""
     purchase_amount = get_point("purchase_amount_button")
     purchase = get_point("purchase_button")
     if purchase is None:
@@ -442,18 +439,11 @@ def _buy_item(
 
     set_max = _resolve_merchant_max_button(get_point, merchant_name)
     if set_max is not None:
-        if purchase_amount is None:
-            print("[main macro] merchant: missing purchase_amount_button — cannot use Max buy")
-            return False
-        if not github_original_click_at(
-            *purchase_amount, click=1, pre_sleep_sec=click_delay, cancel=cancel_event
-        ):
-            return False
-        if not _sleep_sec(0.15 + click_delay, cancel_event):
-            return False
+        # User-requested flow: instead of pressing the amount field and typing a
+        # number, just press the calibrated Max button, then Purchase.
         if not github_original_click_at(*set_max, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
             return False
-        if not _sleep_sec(MERCHANT_PURCHASE_TYPE_GAP_SEC, cancel_event):
+        if not _sleep_sec(MERCHANT_PURCHASE_TYPE_GAP_SEC + click_delay, cancel_event):
             return False
     elif purchase_amount is not None:
         if not github_original_click_at(*purchase_amount, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
