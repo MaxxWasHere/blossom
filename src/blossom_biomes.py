@@ -196,6 +196,10 @@ class BiomeWatcher:
                     self._current_aura = aura
                     self._fire_aura(aura)
 
+    def current_biome(self) -> str | None:
+        """Latest biome name from Roblox logs (uppercase), or None."""
+        return self._current_biome
+
     def _resolve_log_file(self) -> str | None:
         """Cheap log-file resolver: reuse the cached newest log and only re-glob
         the logs directory every few seconds, or when the cached file is gone."""

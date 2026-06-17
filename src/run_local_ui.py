@@ -45,6 +45,7 @@ from potion_craft_rules import (
 from discord_webhooks import (
     DEFAULT_RARE_MENTION_MODE,
     REMOVED_BIOMES,
+    is_rare_biome,
     migrate_biome_webhook_config,
     normalize_webhook_urls,
     send_aura_webhook,
@@ -144,6 +145,12 @@ from blossom_buffs import (
     run_auto_pop_buffs,
 )
 from blossom_biomes import GLITCHED_BIOME, BiomeWatcher
+from blossom_reconnect import (
+    DisconnectLogWatcher,
+    ReconnectManager,
+    roblox_processes_running,
+    terminate_roblox_processes,
+)
 import blossom_license
 from blossom_fishing import close_roblox_chat_from_config, run_fishing_loop
 from blossom_macro_session import MacroSessionGate
@@ -662,7 +669,16 @@ class LocalUiApi:
             "fish_caught_since_merchant": 0,
             "fish_caught_since_merchant_ocr": 0,
             "fish_caught_since_br_sc": 0,
+            "rejoin_in_progress": False,
+            "force_sell_on_next_cycle": False,
+            "merchant_requires_reset": False,
         }
+        self._reconnect_manager = ReconnectManager(status_cb=self._on_reconnect_status)
+        self._disconnect_watcher = DisconnectLogWatcher()
+        self._disconnect_watcher_stop = Event()
+        self._disconnect_watcher_thread: Thread | None = None
+        self._disconnect_watcher_lock = Lock()
+        self._pending_fishing_failsafe_rejoin = False
         # Serializes the explicit in-app OpenCV ("fishing vision") installer so a
         # second click can't kick off a concurrent download/extract.
         self._opencv_install_lock = Lock()
@@ -1788,6 +1804,10 @@ class LocalUiApi:
         owner = self._macro_session_gate.owner()
         if owner is not None and not str(owner).startswith("fishing:"):
             return False
+        if self._reconnect_manager.reconnecting:
+            self._fishing_runtime_state["rejoin_in_progress"] = True
+            return False
+        self._fishing_runtime_state["rejoin_in_progress"] = False
         return True
 
     def _fishing_config_provider(self) -> dict:
@@ -1812,11 +1832,103 @@ class LocalUiApi:
                 missing.append(key)
         return missing
 
-    def _on_fishing_failsafe_timeout(self) -> None:
-        print(
-            "[FishingMode] Failsafe: no minigame for 60s — "
-            "enable Auto Reconnect + fishing failsafe rejoin in settings (rejoin handler pending)."
+    def _on_reconnect_status(self, message: str) -> None:
+        self._send_status_notif("reconnect", detail=message)
+
+    def _request_reconnect(self, *, reason: str) -> None:
+        self._reload_config_from_disk()
+        if self._reconnect_manager.reconnecting:
+            return
+        if not config_enabled(self._config, "auto_reconnect"):
+            print(f"[reconnect] {reason} — auto_reconnect off; terminating Roblox")
+            terminate_roblox_processes()
+            self._send_status_notif(
+                "error",
+                detail=f"{reason} — Auto Reconnect is off; closed Roblox",
+            )
+            return
+
+        def _on_complete(ok: bool) -> None:
+            if ok:
+                self._fishing_runtime_state["force_sell_on_next_cycle"] = True
+                self._disconnect_watcher.reset_handled()
+                self._send_status_notif(
+                    "resumed",
+                    detail="Reconnected — selling inventory on next fishing cycle",
+                )
+            else:
+                err = self._reconnect_manager.last_error or "Reconnect failed"
+                self._send_status_notif("error", detail=err)
+
+        started = self._reconnect_manager.request_reconnect(
+            self._config,
+            reason=reason,
+            on_complete=_on_complete,
         )
+        if started:
+            self._send_status_notif("reconnect", detail=reason)
+
+    def _on_fishing_failsafe_timeout(self) -> None:
+        self._reload_config_from_disk()
+        biome: str | None = None
+        if self._biome_watcher is not None:
+            biome = self._biome_watcher.current_biome()
+        if biome and is_rare_biome(str(biome)):
+            print(f"[FishingMode] failsafe rejoin deferred — rare biome {biome}")
+            self._pending_fishing_failsafe_rejoin = True
+            self._send_status_notif(
+                "reconnect",
+                detail=f"Failsafe rejoin deferred — rare biome {biome}",
+            )
+            return
+        self._request_reconnect(reason="fishing failsafe timeout")
+
+    def _start_disconnect_watcher(self) -> None:
+        with self._disconnect_watcher_lock:
+            if self._disconnect_watcher_thread and self._disconnect_watcher_thread.is_alive():
+                return
+            self._disconnect_watcher_stop.clear()
+
+            def _loop() -> None:
+                while not self._disconnect_watcher_stop.wait(2.0):
+                    if not self._macro_running or self._macro_stop.is_set():
+                        continue
+                    self._reload_config_from_disk()
+                    if not config_enabled(self._config, "auto_reconnect"):
+                        continue
+                    if self._reconnect_manager.reconnecting:
+                        continue
+                    proc_dead = not roblox_processes_running()
+                    log_disconnect = self._disconnect_watcher.poll()
+                    if not proc_dead and not log_disconnect:
+                        continue
+                    reason = (
+                        "Roblox closed"
+                        if proc_dead
+                        else "disconnect detected in Roblox logs"
+                    )
+                    print(f"[reconnect] {reason} — requesting reconnect")
+                    self._request_reconnect(reason=reason)
+
+            self._disconnect_watcher_thread = Thread(
+                target=_loop,
+                name="BlossomDisconnectWatcher",
+                daemon=True,
+            )
+            self._disconnect_watcher_thread.start()
+
+    def _stop_disconnect_watcher(self) -> None:
+        with self._disconnect_watcher_lock:
+            self._disconnect_watcher_stop.set()
+            thread = self._disconnect_watcher_thread
+            if (
+                thread is not None
+                and thread.is_alive()
+                and thread is not threading.current_thread()
+            ):
+                thread.join(timeout=2.0)
+            if thread is None or not thread.is_alive():
+                self._disconnect_watcher_thread = None
 
     def _fishing_close_chat(self) -> None:
         self._reload_config_from_disk()
@@ -2676,6 +2788,11 @@ class LocalUiApi:
         if upper == GLITCHED_BIOME and self._buffs_enabled():
             self._buff_pop_requested.set()
 
+        if self._pending_fishing_failsafe_rejoin and not is_rare_biome(upper):
+            self._pending_fishing_failsafe_rejoin = False
+            print(f"[FishingMode] rare biome ended ({upper}) — deferred failsafe rejoin")
+            self._request_reconnect(reason="deferred fishing failsafe after rare biome")
+
         notifier = self._config.get("biome_notifier") or {}
         if not biome_notify_enabled(notifier, upper):
             print(f"[biome] {upper} detected but its notifier toggle is off — not sending")
@@ -3051,6 +3168,7 @@ class LocalUiApi:
                 print(f"[AutoEden] missing calibrations: {', '.join(eden_missing)}")
             self._sync_eden_worker()
         self._start_biome_watcher()
+        self._start_disconnect_watcher()
         next_obby_at = 0.0
         next_potion_at = 0.0
         next_merchant_at = 0.0
@@ -3205,6 +3323,7 @@ class LocalUiApi:
                 if "next_biome_selector_at" in timer_updates:
                     next_biome_selector_at = timer_updates["next_biome_selector_at"]
         finally:
+            self._stop_disconnect_watcher()
             self._stop_fishing_worker()
             self._stop_eden_worker()
             self._stop_biome_watcher()
@@ -3222,6 +3341,7 @@ class LocalUiApi:
         self._replayer.cancel()
         self._stop_fishing_worker()
         self._stop_eden_worker()
+        self._stop_disconnect_watcher()
         thread = self._macro_thread
         if (
             thread is not None
@@ -3260,6 +3380,7 @@ class LocalUiApi:
             self._buff_pop_requested.clear()
             self._macro_session_gate.force_release()
             self._fishing_busy = False
+            self._pending_fishing_failsafe_rejoin = False
             self._macro_running = True
             self._macro_started_at = time.time()
             self._macro_thread = Thread(target=self._macro_loop, daemon=True)

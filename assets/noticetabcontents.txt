@@ -1,3 +1,18 @@
+# Blossom 2.2.4
+
+## Fixed
+- Merchant teleporter now returns you to Limbo after shopping — when the teleporter round-trip finishes, Blossom uses Portable Crack from your inventory (search "crack", amount 1, Use). Turn it off under Merchant → Return to Limbo after merchant teleporter.
+- Fishing no longer spams the Roblox chat window — close-chat clicks are debounced, the redundant prep-loop close was removed, and the dock failsafe closes chat after its UI-nav key sequence (with proper delays between keys).
+
+## Macro
+- Fishing failsafe rejoin — when you are stuck at the dock with no bite for 60 seconds, Blossom retries the in-game UI path (backslash, S, A, Enter) once, then reconnects if it still cannot fish. Requires Auto Reconnect and Fishing failsafe rejoin in Misc settings.
+- Prep-phase stuck recovery — if collections, walking, or other pre-fishing steps hang for 90 seconds without progress, the same failsafe rejoin path runs so you are not left AFK in a menu overnight.
+- Auto Reconnect — when Roblox closes or disconnects mid-macro, Blossom terminates the client, joins your private server via your saved link, clicks your calibrated Reconnect Start button, and verifies you are in-game from Roblox logs. Calibrate Reconnect Start under Movements and set your Private Server link in Misc.
+- Forced sell after reconnect — a successful reconnect sets the next fishing cycle to run your sell trip first, so a disconnect with a full inventory does not leave you fishing without selling.
+
+## UI
+- Merchant tab layout — a three-step flow banner (Teleporter → Shop → Portable Crack), two-column settings grid, and a toggle for returning to Limbo after the teleporter run.
+
 # Blossom 2.2.3
 
 ## Macro

@@ -26,6 +26,8 @@ from macro_engine import (
 )
 from macro_hotkeys import is_unbound_hotkey, normalize_hotkey
 
+from blossom_brsc import run_use_item
+
 try:
     from discord_webhooks import (
         normalize_webhook_urls,
@@ -62,6 +64,7 @@ MERCHANT_SLOT_SETTLE_SEC = 0.12
 MERCHANT_PURCHASE_TYPE_GAP_SEC = 0.18
 MERCHANT_PURCHASE_SETTLE_SEC = 2.0
 MERCHANT_POST_TELEPORT_SETTLE_SEC = 1.1
+PORTABLE_CRACK_SEARCH = "crack"
 
 # Per-slot calibration keys (preferred over the +178 offset when all set).
 _MERCHANT_SLOT_KEYS = tuple(f"merchant_slot_{i}_pos" for i in range(1, MERCHANT_SLOT_COUNT + 1))
@@ -813,6 +816,36 @@ def _close_merchant(
     print(f"[main macro] merchant: closed shop (X) at {close_btn}")
 
 
+def merchant_return_to_limbo_enabled(config: dict) -> bool:
+    """After merchant teleporter + shop, use Portable Crack from inventory to return to Limbo."""
+    raw = config.get("merchant_return_to_limbo")
+    if raw is None:
+        return True
+    if isinstance(raw, str):
+        return raw.strip().lower() in ("1", "true", "yes", "on")
+    return bool(raw)
+
+
+def return_to_limbo_via_portable_crack(
+    *,
+    config: dict,
+    get_point: GetPoint,
+    focus_roblox: Callable[[], bool],
+    cancel_event,
+    reason: str,
+) -> str:
+    """Inventory flow: search crack → use Portable Crack → return to Limbo."""
+    print(f"[main macro] portable crack return to limbo ({reason})")
+    return run_use_item(
+        PORTABLE_CRACK_SEARCH,
+        config=config,
+        get_point=get_point,
+        focus_roblox=focus_roblox,
+        cancel_event=cancel_event,
+        reason=reason,
+    )
+
+
 # --------------------------------------------------------------------------- #
 # Public entry points (Blossom API)
 # --------------------------------------------------------------------------- #
@@ -910,6 +943,27 @@ def run_merchant_teleporter(
 
     if handler_result.startswith("Error") or handler_result == "Cancelled":
         return handler_result
+
+    if merchant_return_to_limbo_enabled(config):
+        if not _sleep_sec(0.6 + click_delay, cancel_event):
+            return "Cancelled"
+        crack_result = return_to_limbo_via_portable_crack(
+            config=config,
+            get_point=get_point,
+            focus_roblox=focus_roblox,
+            cancel_event=cancel_event,
+            reason=f"after teleporter ({reason})",
+        )
+        if crack_result.startswith("Error") or crack_result == "Cancelled":
+            return (
+                f"OK: merchant teleporter — {handler_result}; "
+                f"limbo return failed: {crack_result}"
+            )
+        print(f"[main macro] merchant teleporter: {crack_result}")
+        if not _sleep_sec(MERCHANT_POST_TELEPORT_SETTLE_SEC, cancel_event):
+            return "Cancelled"
+        return f"OK: merchant teleporter — {handler_result}; {crack_result}"
+
     return f"OK: merchant teleporter — {handler_result}"
 
 

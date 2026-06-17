@@ -97,9 +97,17 @@ AUTOIT_KEY_MAP = {
     "down": "DOWN",
 }
 
+_CHAT_CLOSE_DEBOUNCE_SEC = 2.0
+_last_chat_close_at = 0.0
+
+
 def close_roblox_chat_from_config(raw_config: dict[str, Any] | None) -> None:
-    """Click chat close if calibrated (Movements → Close chat)."""
+    """Click chat close if calibrated (Movements → Close chat). Debounced."""
+    global _last_chat_close_at
     if not isinstance(raw_config, dict):
+        return
+    now = time.monotonic()
+    if now - _last_chat_close_at < _CHAT_CLOSE_DEBOUNCE_SEC:
         return
     raw = raw_config.get("chat_close_button")
     if not isinstance(raw, (list, tuple)) or len(raw) < 2:
@@ -111,7 +119,8 @@ def close_roblox_chat_from_config(raw_config: dict[str, Any] | None) -> None:
     if x <= 0 and y <= 0:
         return
     try:
-        autoit.mouse_click("left", x, y, speed=3)
+        click_at_settled(x, y)
+        _last_chat_close_at = now
     except Exception:
         pass
 
@@ -361,6 +370,9 @@ def _autoit_key_tap(key: str) -> None:
     else:
         autoit.send(f"{{{token}}}")
 
+
+FAILSAFE_TIMEOUT_SEC = 60.0
+PREP_STUCK_TIMEOUT_SEC = 90.0
 
 # NON-VIP MULTIPLIER
 NON_VIP_WALK_SPEED_MULTIPLIER = 1.22
@@ -834,6 +846,10 @@ def run_fishing_loop(
         except Exception:
             pass
 
+    def _touch_progress() -> None:
+        nonlocal last_progress_at
+        last_progress_at = time.monotonic()
+
     def _run_br_sc_sequence() -> bool:
         if run_br_sc_sequence_cb is None:
             return False
@@ -945,6 +961,8 @@ def run_fishing_loop(
     _persist_runtime_counters()
 
     last_start_fishing_click_at: float | None = None
+    last_progress_at = time.monotonic()
+    ui_nav_attempted = False
     sct = None
     if mss is not None:
         try:
@@ -974,16 +992,28 @@ def run_fishing_loop(
                 _set_busy(False)
                 was_runnable = False
                 last_start_fishing_click_at = None
+                ui_nav_attempted = False
                 time.sleep(0.05)
+                continue
+
+            if (
+                not was_runnable
+                and bool(cfg.get("fishing_failsafe_rejoin", False))
+                and (time.monotonic() - last_progress_at) >= PREP_STUCK_TIMEOUT_SEC
+            ):
+                print(
+                    f"{log_prefix} prep-phase stuck watchdog: no progress for "
+                    f">={int(PREP_STUCK_TIMEOUT_SEC)}s"
+                )
+                _notify_failsafe_timeout()
+                was_runnable = False
+                ui_nav_attempted = False
+                last_start_fishing_click_at = None
+                _touch_progress()
                 continue
 
             if not was_runnable:
                 _set_busy(True)
-                if close_chat_fn is not None:
-                    try:
-                        close_chat_fn()
-                    except Exception as e:
-                        print(f"{log_prefix} close_chat_fn error on resume: {e}")
 
                 if _state_flag("force_sell_on_next_cycle"):
                     _set_state_flag("force_sell_on_next_cycle", False)
@@ -1143,6 +1173,7 @@ def run_fishing_loop(
                     egg_ocr_check_cb=egg_ocr_check_cb,
                 ):
                     continue
+                _touch_progress()
                 if not _run_equip_aura_before_movement(
                     cfg=cfg,
                     sleep_interruptible=_sleep_interruptible,
@@ -1150,6 +1181,7 @@ def run_fishing_loop(
                     can_run=_can_run,
                 ):
                     continue
+                _touch_progress()
                 _non_vip = bool(cfg.get("non_vip_movement_path", False))
                 _walk_multiplier = NON_VIP_WALK_SPEED_MULTIPLIER if _non_vip else 1.0
                 _playback_mult = float(cfg.get("fishing_playback_multiplier", 1.0))
@@ -1162,7 +1194,7 @@ def run_fishing_loop(
                     replay_movement_path_cb=replay_movement_path_cb,
                 ):
                     continue
-                
+                _touch_progress()
                 close_x, close_y = cfg["fishing_close_button_pos"]
                 for _ in range(3):
                     autoit.mouse_click("left", close_x, close_y, speed=3)
@@ -1174,17 +1206,60 @@ def run_fishing_loop(
                 last_start_fishing_click_at = time.monotonic()
                 if not _sleep_interruptible(0.25): continue
                 was_runnable = True
+                ui_nav_attempted = False
+                _touch_progress()
                 _set_busy(False)
 
             if (
                 was_runnable
                 and bool(cfg.get("fishing_failsafe_rejoin", False))
                 and last_start_fishing_click_at is not None
-                and (time.monotonic() - float(last_start_fishing_click_at)) >= 60.0
+                and (time.monotonic() - float(last_start_fishing_click_at)) >= FAILSAFE_TIMEOUT_SEC
             ):
-                print(f"{log_prefix} failsafe triggered: no minigame detected for >=60s. Closing Roblox.")
+                if not ui_nav_attempted:
+                    print(f"{log_prefix} failsafe stage 1: UI nav retry (backslash, S, A, Enter)")
+                    ui_nav_attempted = True
+                    try:
+                        _autoit_key_tap("\\")
+                        if not _sleep_interruptible(1.5):
+                            continue
+                        _autoit_key_tap("s")
+                        if not _sleep_interruptible(1.5):
+                            continue
+                        _autoit_key_tap("a")
+                        if not _sleep_interruptible(1.5):
+                            continue
+                        _autoit_key_tap("enter")
+                        if not _sleep_interruptible(1.5):
+                            continue
+                        _autoit_key_tap("\\")
+                        if not _sleep_interruptible(1.0):
+                            continue
+                    except Exception as error:
+                        print(f"{log_prefix} UI nav failsafe error: {error}")
+                    if close_chat_fn is not None:
+                        try:
+                            close_chat_fn()
+                        except Exception as error:
+                            print(f"{log_prefix} close_chat_fn after UI nav failsafe: {error}")
+                    try:
+                        click_x, click_y = cfg["fishing_click_position"]
+                        autoit.mouse_click("left", click_x, click_y, speed=3)
+                        if not _sleep_interruptible(0.3):
+                            continue
+                        print(f"{log_prefix} UI nav failsafe: clicked fish button")
+                    except Exception as error:
+                        print(f"{log_prefix} UI nav failsafe: failed to click fish button: {error}")
+                    last_start_fishing_click_at = time.monotonic()
+                    _touch_progress()
+                    continue
+                print(
+                    f"{log_prefix} failsafe stage 2: no minigame for "
+                    f">={int(FAILSAFE_TIMEOUT_SEC)}s after UI nav retry"
+                )
                 _notify_failsafe_timeout()
                 was_runnable = False
+                ui_nav_attempted = False
                 last_start_fishing_click_at = None
                 continue
 
@@ -1195,9 +1270,11 @@ def run_fishing_loop(
                 continue
 
             _set_busy(True)
+            ui_nav_attempted = False
             click_x, click_y = cfg["fishing_click_position"]
             autoit.mouse_click("left", click_x, click_y, speed=3)
             last_start_fishing_click_at = time.monotonic()
+            _touch_progress()
             if not _sleep_interruptible(float(cfg.get("fishing_pre_reel_wait", 0.18))):
                 continue
 
@@ -1229,7 +1306,7 @@ def run_fishing_loop(
             if not _should_continue() or not _can_run():
                 continue
 
-            if not _sleep_interruptible(1.0):
+            if not _sleep_interruptible(0.55):
                 continue
 
             close_x, close_y = cfg["fishing_close_button_pos"]
@@ -1243,6 +1320,7 @@ def run_fishing_loop(
             fish_caught_since_merchant_ocr += 1
             fish_caught_since_br_sc += 1
             _persist_runtime_counters()
+            _touch_progress()
 
             _set_busy(False)
             if not _sleep_interruptible(0.42): continue
