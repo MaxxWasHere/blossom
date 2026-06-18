@@ -194,8 +194,8 @@ POTION_CRAFT_SLOWDOWN = 1.0
 POTION_CRAFT_STEP_GAP_SEC = 0.0
 POTION_CLICK_PRE_SLEEP_SEC = 0.14
 POTION_LOOP_SLOWDOWN = 1.2
-# Brief pause between potions when rotating (not another switch interval).
-POTION_SWITCH_GAP_SEC = 0.0
+# Brief pause between potions when rotating (lets other due UI tasks run).
+POTION_SWITCH_GAP_SEC = 0.4
 QUEST_AFTER_MERCHANT_SETTLE_SEC = 0.4
 UI_BETWEEN_TASKS_SETTLE_SEC = 0.75
 # How long start/stop waits for the previous macro worker thread to finish a

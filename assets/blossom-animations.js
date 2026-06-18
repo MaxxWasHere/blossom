@@ -40,11 +40,13 @@
   };
 
   let lastPage = "";
+  let lastStaggerKey = "";
 
   const onPageChange = () => {
     const title = pageHeaderTitle?.() || "";
     if (!title || title === lastPage) return;
     lastPage = title;
+    lastStaggerKey = "";
     runPageEnter(mainEl());
   };
 
@@ -60,7 +62,12 @@
     onPageChange();
     tagNativeCalFields();
     const main = mainEl();
-    if (main) setStagger(main);
+    if (!main) return;
+    const key = `${lastPage}:${pageItems(main).length}`;
+    if (key !== lastStaggerKey) {
+      lastStaggerKey = key;
+      setStagger(main);
+    }
   };
 
   if (observeMain) observeMain(tick, 0);

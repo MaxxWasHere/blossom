@@ -1,0 +1,301 @@
+/* Blossom — Material 3 Expressive motion + surfaces (motion-on only) */
+
+:root,
+[data-theme] {
+  /* M3 motion tokens */
+  --m3e-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --m3e-ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --m3e-ease-emphasized-decel: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --m3e-ease-emphasized-accel: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --m3e-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --m3e-duration-short: 150ms;
+  --m3e-duration-medium: 300ms;
+  --m3e-duration-long: 500ms;
+
+  /* State layers (tonal overlays) */
+  --m3e-state-hover: 0.08;
+  --m3e-state-pressed: 0.12;
+  --m3e-state-focus: 0.12;
+  --m3e-surface-tint: color-mix(in srgb, var(--accent, #e891a8) 5%, var(--bg-card, #161014));
+  --m3e-surface-tint-high: color-mix(in srgb, var(--accent, #e891a8) 9%, var(--bg-card-hover, #1c1519));
+}
+
+/* Expressive shape scale — larger radii when motion is enabled */
+html.blsm-expressive-on:not(.blsm-reduce-motion) {
+  --m3e-r-sm: calc(var(--r-sm, 8px) + 2px);
+  --m3e-r-md: calc(var(--r-md, 12px) + 4px);
+  --m3e-r-lg: calc(var(--r-lg, 16px) + 4px);
+  --m3e-r-xl: calc(var(--r-xl, 20px) + 4px);
+}
+
+/* ——— Keyframes ——— */
+@keyframes m3e-fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes m3e-nav-select {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  45% {
+    transform: translateX(6px) scale(1.03);
+  }
+  100% {
+    transform: translateX(4px) scale(1);
+  }
+}
+
+@keyframes m3e-ripple {
+  from {
+    transform: scale(0);
+    opacity: 0.42;
+  }
+  to {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes m3e-dropdown-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.92);
+    transform-origin: top center;
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes m3e-macro-pulse-start {
+  0%,
+  100% {
+    box-shadow: 0 2px 8px color-mix(in srgb, var(--success, #22c55e) 22%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--success, #22c55e) 35%, transparent),
+      0 8px 22px color-mix(in srgb, var(--success, #22c55e) 38%, transparent);
+  }
+}
+
+@keyframes m3e-macro-pulse-stop {
+  0%,
+  100% {
+    box-shadow: 0 6px 16px color-mix(in srgb, var(--danger, #ef4444) 30%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px color-mix(in srgb, var(--danger, #ef4444) 40%, transparent),
+      0 10px 24px color-mix(in srgb, var(--danger, #ef4444) 42%, transparent);
+  }
+}
+
+@keyframes m3e-toggle-thumb-on {
+  0% {
+    transform: translateX(0) scale(1);
+  }
+  60% {
+    transform: translateX(var(--m3e-thumb-travel, 18px)) scale(1.12);
+  }
+  100% {
+    transform: translateX(var(--m3e-thumb-travel, 18px)) scale(1);
+  }
+}
+
+/* ——— Surfaces: tonal elevation + state layers ——— */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .page-content .card,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .main-content .card {
+  border-radius: var(--m3e-r-md, var(--r-md)) !important;
+  background: linear-gradient(
+    165deg,
+    var(--m3e-surface-tint-high),
+    var(--m3e-surface-tint)
+  ) !important;
+  transition:
+    border-color var(--m3e-duration-short) var(--m3e-ease-standard),
+    box-shadow var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel),
+    transform var(--m3e-duration-short) var(--m3e-ease-emphasized-decel) !important;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .page-content .card:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .main-content .card:hover {
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 8px 24px color-mix(in srgb, var(--accent, #e891a8) 12%, transparent) !important;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-trigger,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--m3e-r-sm, var(--r-sm)) !important;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-trigger::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--accent, #e891a8);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--m3e-duration-short) var(--m3e-ease-standard);
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn:hover::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn:hover::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-trigger:hover::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item:hover::after {
+  opacity: var(--m3e-state-hover);
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn:active::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn:active::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-trigger:active::after,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item:active::after {
+  opacity: var(--m3e-state-pressed);
+}
+
+.blsm-m3e-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent, #e891a8) 28%, transparent);
+  pointer-events: none;
+  transform: scale(0);
+  animation: m3e-ripple var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel) forwards;
+  z-index: 1;
+}
+
+/* ——— Card enter (page transition) ——— */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .card,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .changelog-item,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > #blsm-cal-hub,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-mouse-cal-card {
+  animation: m3e-fade-rise var(--m3e-duration-long) var(--m3e-ease-emphasized-decel) both;
+  animation-delay: calc(var(--blsm-stagger, 0) * 70ms + 50ms);
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .page-header {
+  animation: blsm-fade-down var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel) both;
+}
+
+/* ——— Sidebar nav selection ——— */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item.blsm-m3e-nav-enter {
+  animation: m3e-nav-select var(--m3e-duration-medium) var(--m3e-ease-spring) both;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item.active,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item.is-active {
+  transform: translateX(4px) !important;
+  box-shadow:
+    inset 3px 0 0 var(--accent),
+    0 4px 14px color-mix(in srgb, var(--accent, #e891a8) 14%, transparent) !important;
+}
+
+/* ——— Toggle switches: thumb overshoot ——— */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .toggle-switch input:checked + .toggle-slider::before {
+  animation: m3e-toggle-thumb-on var(--m3e-duration-medium) var(--m3e-ease-spring) forwards;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .toggle-slider::before {
+  transition: transform var(--m3e-duration-medium) var(--m3e-ease-spring) !important;
+}
+
+/* ——— Buttons ——— */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn {
+  transition:
+    transform var(--m3e-duration-short) var(--m3e-ease-spring),
+    background var(--m3e-duration-short) var(--m3e-ease-standard),
+    border-color var(--m3e-duration-short) var(--m3e-ease-standard),
+    box-shadow var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel) !important;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn:active,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn:active {
+  transform: scale(0.97) !important;
+}
+
+/* ——— Start / Stop macro buttons ——— */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .header-bar .btn-start {
+  transition:
+    background var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel),
+    box-shadow var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel),
+    transform var(--m3e-duration-short) var(--m3e-ease-spring) !important;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .header-bar .btn-stop {
+  transition:
+    background var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel),
+    box-shadow var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel),
+    transform var(--m3e-duration-short) var(--m3e-ease-spring) !important;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .header-bar .btn-start.blsm-m3e-macro-morph {
+  animation: m3e-macro-pulse-start 0.65s var(--m3e-ease-emphasized-decel);
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .header-bar .btn-stop.blsm-m3e-macro-morph {
+  animation: m3e-macro-pulse-stop 0.65s var(--m3e-ease-emphasized-decel);
+}
+
+/* ——— Dropdown container transform ——— */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-menu--portal.blsm-m3e-menu-open {
+  animation: m3e-dropdown-reveal var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel) both;
+  transform-origin: top center;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-menu--portal[data-placement="up"].blsm-m3e-menu-open {
+  transform-origin: bottom center;
+  animation-name: m3e-dropdown-reveal;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-chevron {
+  transition: transform var(--m3e-duration-medium) var(--m3e-ease-spring) !important;
+}
+
+/* ——— Injected Blossom panels ——— */
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-cal-hub,
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-biome-webhooks-hub,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-appearance-card {
+  border-radius: var(--m3e-r-lg, var(--r-lg)) !important;
+}
+
+/* Respect reduce-motion (class + media query) */
+html.blsm-reduce-motion .blsm-m3e-ripple,
+html.blsm-reduce-motion .blsm-m3e-nav-enter,
+html.blsm-reduce-motion .blsm-m3e-macro-morph,
+html.blsm-reduce-motion .blsm-m3e-menu-open {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.blsm-expressive-on .blsm-m3e-ripple,
+  html.blsm-expressive-on .blsm-m3e-nav-enter,
+  html.blsm-expressive-on .blsm-m3e-macro-morph,
+  html.blsm-expressive-on .blsm-m3e-menu-open,
+  html.blsm-expressive-on .blsm-page-enter > * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
