@@ -1,24 +1,3 @@
-# Blossom 2.4.0
-
-## Improved
-- Diagnostic logging — session logs are written under %LOCALAPPDATA%\Blossom\logs\ (logs.txt for INFO and above, errors.log for errors only). Files rotate automatically when they grow large; uncaught exceptions and console output are captured in the same format.
-- Settings & extras → **Logs & diagnostics** — shows your log folder and file sizes, opens the folder in File Explorer, or copies the last ~300 lines to the clipboard for support.
-- Appearance before first paint — saved theme, accent, UI zoom, and reduce-motion load from config and local cache in a tiny early script so the main window and bootstrap launcher no longer flash the wrong theme on cold start.
-- Macro schedule runner polish — timeline drag ghosts, edge auto-scroll while dragging, and horizontal pan with Ctrl+scroll (or Shift+scroll) on the schedule track are handled by a shared scroll helper across the app.
-
-## Fixed
-- Macro Schedule drag — palette chips and timeline blocks keep a single full-opacity ghost under the cursor (no stacked faint copies in the corner).
-- Macro Schedule tab routing — the virtual schedule page stays visible when opened from the sidebar; switching tabs no longer leaves two active nav items.
-
-## UI
-- Material 3 Expressive pass — Google Sans Flex and JetBrains Mono, Pink Blush / Midnight Rose theme refresh, sidebar category lanes, soft scrollbars, expressive loading and progress bars, and macro tab layout updates ship together in this stable build (see 2.3.0 notes below for the full list).
-
-## Macro
-- Macro Schedule (W.I.P.) — profiles, horizontal timeline editing, and an experimental **Use schedule when macro runs** mode are included for preview; UI labels warn that automation may not behave correctly until the feature stabilizes.
-
-## Licensing & updates
-- Stable **2.4.0** — the built-in updater on the stable channel offers this release; beta builds stay on their own track.
-
 # Blossom 2.3.0
 
 ## New
