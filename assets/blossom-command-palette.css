@@ -29,10 +29,10 @@
   max-height: 64vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-card, #161014);
-  border: 1px solid var(--border, #241a1e);
-  border-radius: var(--radius-lg, 10px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  background: var(--md-sys-color-surface-container-high, var(--bg-card, #161014));
+  border: 1px solid var(--md-sys-color-outline-variant, var(--border, #241a1e));
+  border-radius: var(--m3-shape-corner-lg, var(--radius-lg, 16px));
+  box-shadow: var(--m3-elevation-3, 0 20px 60px rgba(0, 0, 0, 0.5));
   overflow: hidden;
   animation: blsm-cmdk-in 0.13s ease both;
 }
@@ -89,14 +89,20 @@
   align-items: center;
   gap: 11px;
   padding: 9px 11px;
-  border-radius: var(--radius-md, 6px);
+  border-radius: var(--m3-shape-corner-sm, var(--r-md, 12px));
   cursor: pointer;
   color: var(--text-secondary, #a8a0a4);
+  transition: background 0.15s var(--m3e-ease-standard, ease), color 0.15s ease;
+}
+
+#blsm-cmdk .blsm-cmdk-item:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface, #fff) 5%, transparent);
+  color: var(--md-sys-color-on-surface, var(--text-primary, #ece8ea));
 }
 
 #blsm-cmdk .blsm-cmdk-item.is-active {
-  background: var(--accent-glow, rgba(232, 145, 168, 0.15));
-  color: var(--accent-text, #f5c6d4);
+  background: color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 14%, var(--md-sys-color-surface-container-high, transparent));
+  color: var(--md-sys-color-on-surface, var(--accent-text, #f5c6d4));
 }
 
 #blsm-cmdk .blsm-cmdk-ico {

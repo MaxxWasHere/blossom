@@ -1,0 +1,149 @@
+/* Blossom — Material 3 Expressive design tokens (maps Blossom palette → md-sys roles) */
+
+:root,
+[data-theme] {
+  /* ——— Color roles (derived from --accent / --bg-* / --text-*) ——— */
+  --md-sys-color-primary: var(--accent, #e891a8);
+  --md-sys-color-on-primary: var(--text-on-accent, #ffffff);
+  --md-sys-color-primary-container: color-mix(in srgb, var(--accent, #e891a8) 18%, var(--bg-card, #161014));
+  --md-sys-color-on-primary-container: var(--accent-text, var(--text-primary, #ece8ea));
+
+  --md-sys-color-secondary: var(--accent-dim, #c46d88);
+  --md-sys-color-on-secondary: var(--text-on-accent, #ffffff);
+  --md-sys-color-secondary-container: color-mix(in srgb, var(--accent-dim, #c46d88) 14%, var(--bg-card, #161014));
+  --md-sys-color-on-secondary-container: var(--text-secondary, #a8a0a4);
+
+  --md-sys-color-surface: var(--bg-main, #0d090b);
+  --md-sys-color-surface-dim: var(--bg-root, #0a0809);
+  --md-sys-color-surface-bright: var(--bg-card-hover, #1c1519);
+  --md-sys-color-surface-container-lowest: var(--bg-root, #0a0809);
+  --md-sys-color-surface-container-low: var(--bg-sidebar, #100c0e);
+  --md-sys-color-surface-container: var(--bg-card, #161014);
+  --md-sys-color-surface-container-high: var(--bg-card-hover, #1c1519);
+  --md-sys-color-surface-container-highest: var(--bg-input-focus, #1a1418);
+
+  --md-sys-color-on-surface: var(--text-primary, #ece8ea);
+  --md-sys-color-on-surface-variant: var(--text-secondary, #a8a0a4);
+  --md-sys-color-outline: var(--border-hover, #32242a);
+  --md-sys-color-outline-variant: var(--border, #241a1e);
+
+  --md-sys-color-error: var(--danger, #ef4444);
+  --md-sys-color-on-error: #ffffff;
+  --md-sys-color-error-container: color-mix(in srgb, var(--danger, #ef4444) 16%, var(--bg-card, #161014));
+  --md-sys-color-on-error-container: #fecaca;
+
+  /* Legacy md-* aliases → md-sys */
+  --md-primary: var(--md-sys-color-primary);
+  --md-primary-container: var(--md-sys-color-primary-container);
+  --md-surface: var(--md-sys-color-surface-container);
+  --md-surface-dim: var(--md-sys-color-surface-container-low);
+  --md-surface-high: var(--md-sys-color-surface-container-high);
+  --md-outline: var(--md-sys-color-outline-variant);
+  --md-outline-strong: var(--md-sys-color-outline);
+  --md-on-surface: var(--md-sys-color-on-surface);
+  --md-on-surface-variant: var(--md-sys-color-on-surface-variant);
+
+  /* ——— Expressive shape ——— */
+  --m3-shape-corner-none: 0;
+  --m3-shape-corner-xs: 4px;
+  --m3-shape-corner-sm: 12px;
+  --m3-shape-corner-md: 16px;
+  --m3-shape-corner-lg: 24px;
+  --m3-shape-corner-xl: 28px;
+  --m3-shape-corner-full: 9999px;
+
+  --r-sm: var(--radius-sm, var(--m3-shape-corner-xs));
+  --r-md: var(--radius-md, var(--m3-shape-corner-sm));
+  --r-lg: var(--radius-lg, var(--m3-shape-corner-md));
+  --r-xl: var(--radius-xl, var(--m3-shape-corner-lg));
+
+  --md-radius-sm: var(--r-sm);
+  --md-radius-md: var(--r-md);
+  --md-radius-lg: var(--r-lg);
+
+  /* ——— Elevation ——— */
+  --m3-elevation-0: none;
+  --m3-elevation-1: 0 1px 2px rgba(0, 0, 0, 0.24), 0 1px 3px rgba(0, 0, 0, 0.12);
+  --m3-elevation-2: 0 2px 6px rgba(0, 0, 0, 0.22), 0 4px 12px rgba(0, 0, 0, 0.14);
+  --m3-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.28), 0 12px 40px rgba(0, 0, 0, 0.16);
+  --md-elevation-1: var(--m3-elevation-1);
+  --md-elevation-menu: var(--m3-elevation-2);
+
+  /* ——— Schedule editor accents (overridable per theme) ——— */
+  --blsm-schedule-px-per-min: 1.35;
+  --blsm-schedule-track: color-mix(in srgb, var(--md-sys-color-surface-container-low, #100c0e) 92%, var(--md-sys-color-primary, #e891a8) 8%);
+  --blsm-schedule-surface: var(--md-sys-color-surface-container, var(--bg-card, #161014));
+  --blsm-schedule-block: var(--md-sys-color-surface-container-high, var(--bg-card-hover, #1c1519));
+  --blsm-schedule-block-live: color-mix(in srgb, var(--md-sys-color-primary-container, #3d2430) 22%, var(--md-sys-color-surface-container-high, #1c1519));
+  --blsm-schedule-profile-card: color-mix(in srgb, var(--md-sys-color-surface-container-high, #1c1519) 88%, var(--md-sys-color-primary, #e891a8) 12%);
+  --blsm-schedule-profile-card-active: color-mix(in srgb, var(--md-sys-color-primary-container, #3d2430) 28%, var(--md-sys-color-surface-container-high, #1c1519));
+  --blsm-schedule-profile-add: color-mix(in srgb, var(--md-sys-color-surface-container, #161014) 92%, transparent);
+
+  /* ——— Overlay surfaces (loading, toasts) ——— */
+  --blsm-overlay-backdrop: var(--md-sys-color-surface-dim, var(--bg-root, #0a0809));
+  --blsm-overlay-card: var(--md-sys-color-surface-container-high, var(--bg-card-hover, #1c1519));
+  --blsm-overlay-accent-glow: color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 16%, transparent);
+  --blsm-toast-surface: var(--md-sys-color-surface-container-high, var(--bg-card, #1a1216));
+  --blsm-toast-border: var(--md-sys-color-outline-variant, var(--border, #241a1e));
+
+  /* ——— M3 typography scale (Google Sans Flex) ——— */
+  --m3-type-display-sm-size: 2.25rem;
+  --m3-type-display-sm-weight: 400;
+  --m3-type-display-sm-line: 2.75rem;
+
+  --m3-type-headline-md-size: 1.75rem;
+  --m3-type-headline-md-weight: 500;
+  --m3-type-headline-md-line: 2.25rem;
+
+  --m3-type-title-md-size: 1rem;
+  --m3-type-title-md-weight: 600;
+  --m3-type-title-md-line: 1.5rem;
+
+  --m3-type-body-md-size: 0.875rem;
+  --m3-type-body-md-weight: 400;
+  --m3-type-body-md-line: 1.25rem;
+
+  --m3-type-label-md-size: 0.75rem;
+  --m3-type-label-md-weight: 600;
+  --m3-type-label-md-line: 1rem;
+  --m3-type-label-md-tracking: 0.04em;
+}
+
+.m3-type-display-sm {
+  font-family: var(--font-display, var(--font-body));
+  font-size: var(--m3-type-display-sm-size);
+  font-weight: var(--m3-type-display-sm-weight);
+  line-height: var(--m3-type-display-sm-line);
+  letter-spacing: -0.02em;
+}
+
+.m3-type-headline-md {
+  font-family: var(--font-display, var(--font-body));
+  font-size: var(--m3-type-headline-md-size);
+  font-weight: var(--m3-type-headline-md-weight);
+  line-height: var(--m3-type-headline-md-line);
+  letter-spacing: -0.015em;
+}
+
+.m3-type-title-md {
+  font-family: var(--font-body);
+  font-size: var(--m3-type-title-md-size);
+  font-weight: var(--m3-type-title-md-weight);
+  line-height: var(--m3-type-title-md-line);
+}
+
+.m3-type-body-md {
+  font-family: var(--font-body);
+  font-size: var(--m3-type-body-md-size);
+  font-weight: var(--m3-type-body-md-weight);
+  line-height: var(--m3-type-body-md-line);
+}
+
+.m3-type-label-md {
+  font-family: var(--font-body);
+  font-size: var(--m3-type-label-md-size);
+  font-weight: var(--m3-type-label-md-weight);
+  line-height: var(--m3-type-label-md-line);
+  letter-spacing: var(--m3-type-label-md-tracking);
+  text-transform: uppercase;
+}

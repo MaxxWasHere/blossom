@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blossom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="blossom-themes.css">
+  <link rel="stylesheet" href="blossom-m3-tokens.css">
+  <link rel="stylesheet" href="blossom-loading.css">
+  <link rel="stylesheet" href="bootstrap-splash.css">
+  <link rel="stylesheet" href="blossom-fonts.css">
+  <script src="blossom-theme-boot.js"></script>
+</head>
+<body>
+  <div class="window-frame bootstrap-window">
+    <header class="titlebar blsm-titlebar" aria-label="Window title bar">
+      <div class="titlebar-drag-region" aria-hidden="true"></div>
+      <div class="titlebar-brand">
+        <img class="titlebar-icon" src="blossom.png" alt="" width="16" height="16">
+        <span class="titlebar-title" data-blsm-title>Blossom</span>
+      </div>
+      <div class="titlebar-spacer" aria-hidden="true"></div>
+      <div class="titlebar-controls">
+        <button type="button" class="titlebar-btn minimize" data-blsm-minimize aria-label="Minimize">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><rect x="1" y="4.5" width="8" height="1" fill="currentColor"/></svg>
+        </button>
+        <button type="button" class="titlebar-btn close" data-blsm-close aria-label="Close">
+          <svg viewBox="0 0 10 10" aria-hidden="true"><path d="M1.2 1.2 8.8 8.8M8.8 1.2 1.2 8.8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="bootstrap-splash-root" role="status" aria-live="polite" aria-busy="true">
+      <div class="blossom-loading-aurora a1" aria-hidden="true"></div>
+      <div class="blossom-loading-aurora a2" aria-hidden="true"></div>
+
+      <div class="bootstrap-splash-content">
+        <div class="blossom-loading-card bootstrap-card">
+          <img class="blossom-loading-logo" src="blossom.png" alt="" width="72" height="72">
+          <h2 class="blossom-loading-brand" data-blsm-brand>Blossom</h2>
+
+          <div class="bootstrap-phases" aria-hidden="true">
+            <span class="bootstrap-phase" data-blsm-phase="starting">Start</span>
+            <span class="bootstrap-phase" data-blsm-phase="update">Update</span>
+            <span class="bootstrap-phase" data-blsm-phase="runtime">Runtime</span>
+            <span class="bootstrap-phase" data-blsm-phase="launch">Launch</span>
+          </div>
+
+          <p class="blossom-loading-message">Starting Blossom…</p>
+          <div class="bootstrap-error" data-blsm-error hidden></div>
+
+          <div class="blossom-loading-indicator" data-blsm-spinner aria-hidden="true"></div>
+          <div class="blossom-loading-progress" data-blsm-progress hidden>
+            <div class="blossom-loading-progress-track">
+              <div class="blossom-loading-progress-fill"></div>
+            </div>
+            <div class="blossom-loading-progress-meta">
+              <span class="blsm-loading-pct">Starting…</span>
+              <span class="blsm-loading-bytes"></span>
+            </div>
+          </div>
+
+          <p class="blossom-loading-version" data-blsm-version></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="blossom-m3-loading.js"></script>
+  <script src="blossom-m3-progress.js"></script>
+  <script src="bootstrap-splash.js"></script>
+</body>
+</html>

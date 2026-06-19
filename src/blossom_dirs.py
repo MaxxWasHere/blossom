@@ -8,6 +8,7 @@ from pathlib import Path
 
 LEGACY_COTEAB_DIR = Path(os.environ.get("LOCALAPPDATA", "")) / "CoteabMacro"
 APP_DATA_DIR = Path(os.environ.get("LOCALAPPDATA", "")) / "Blossom"
+LOGS_DIR = APP_DATA_DIR / "logs"
 APP_CONFIG_PATH = APP_DATA_DIR / "config.json"
 POTION_DIR = APP_DATA_DIR / "crafting_files_do_not_open"
 OBBY_PATHS_DIR = APP_DATA_DIR / "paths"
@@ -39,6 +40,7 @@ def install_adjacent_blossom(install_root: Path) -> Path:
 
 def ensure_app_data_dirs() -> None:
     APP_DATA_DIR.mkdir(parents=True, exist_ok=True)
+    LOGS_DIR.mkdir(parents=True, exist_ok=True)
     POTION_DIR.mkdir(parents=True, exist_ok=True)
     OBBY_PATHS_DIR.mkdir(parents=True, exist_ok=True)
     THEMES_DIR.mkdir(parents=True, exist_ok=True)

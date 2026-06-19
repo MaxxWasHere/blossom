@@ -9,7 +9,7 @@
   <title>Blossom</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./blossom-ui-motion.css" />
   <link rel="stylesheet" href="./blossom-polish.css" />
   <link rel="stylesheet" href="./blossom-material.css" />
@@ -17,6 +17,8 @@
   <link rel="stylesheet" href="./blossom-animations.css" />
   <script>document.documentElement.classList.add("blsm-motion-on");</script>
   <link rel="stylesheet" href="./blossom-merchant-ui.css" />
+  <link rel="stylesheet" href="./blossom-macro-ui.css" />
+  <link rel="stylesheet" href="./blossom-schedule-track.css" />
   <link rel="stylesheet" href="./blossom-sidebar.css" />
   <link rel="stylesheet" href="./blossom-credits.css" />
   <link rel="stylesheet" href="./blossom-calibrations-hub.css" />
@@ -135,12 +137,16 @@
   <link rel="stylesheet" href="./blossom-update.css" />
   <link rel="stylesheet" href="./blossom-biome-webhooks.css" />
   <link rel="stylesheet" href="./blossom-themes.css" />
+  <link rel="stylesheet" href="./blossom-m3-tokens.css" />
+  <link rel="stylesheet" href="./blossom-scroll.css" />
   <link rel="stylesheet" href="./blossom-light-theme.css" />
   <link rel="stylesheet" href="./blossom-appearance.css" />
   <link rel="stylesheet" href="./blossom-icons.css" />
   <link rel="stylesheet" href="./blossom-command-palette.css" />
   <link rel="stylesheet" href="./blossom-runtime.css" />
   <link rel="stylesheet" href="./blossom-loading.css" />
+  <script src="./blossom-theme-boot.js"></script>
+  <script src="./blossom-scroll.js"></script>
   <style>
     /* Critical paint for launch overlay before external CSS finishes loading. */
     #blossom-loading-overlay {
@@ -149,8 +155,9 @@
       z-index: 99990;
       align-items: center;
       justify-content: center;
-      background: #0a0809;
-      color: #ece8ea;
+      background: radial-gradient(1100px 520px at 50% -8%, rgba(232, 124, 192, 0.16), transparent 58%),
+        var(--bg-root, #0a0809);
+      color: var(--text-primary, #ece8ea);
     }
     #blossom-loading-overlay.is-active {
       display: flex;
@@ -159,91 +166,6 @@
       display: none;
     }
   </style>
-  <script>
-    /* Apply saved appearance before first paint (pairs with blossom-appearance.js). */
-    (function () {
-      var LS = "blossom-appearance";
-      var ACC = ["--accent","--accent-dim","--accent-text","--accent-glow","--border-accent","--shadow-glow"];
-      var ZOOM = { compact: "0.9", normal: "", large: "1.1", xlarge: "1.2" };
-      var LEGACY = { blush: "pink", solar: "pink", ocean: "dark", arctic: "light" };
-      var VALID = ["system", "pink", "dark", "light", "oled", "sakura", "midnight", "forest"];
-      var LIGHT = { light: 1, sakura: 1 };
-      var isLightTheme = function (key) {
-        if (LIGHT[key]) return true;
-        if (key === "system") {
-          try { return window.matchMedia("(prefers-color-scheme: light)").matches; } catch (e) { return false; }
-        }
-        return false;
-      };
-      var read = function () {
-        try { return JSON.parse(localStorage.getItem(LS) || "{}") || {}; } catch (e) { return {}; }
-      };
-      var normTheme = function (v) {
-        var k = String(v || "system").toLowerCase();
-        if (VALID.indexOf(k) >= 0) return k;
-        return LEGACY[k] || "system";
-      };
-      var hex = function (v) {
-        var m = /^#?([0-9a-f]{6})$/i.exec(String(v || "").trim());
-        if (!m) return null;
-        var n = parseInt(m[1], 16);
-        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-      };
-      var apply = function () {
-        var s = read();
-        var root = document.documentElement;
-        if (s.motion) root.classList.add("blsm-reduce-motion");
-        var body = document.body;
-        if (!body) return;
-        var hasCustomCss = !!(s.customCss || s.customCssText);
-        body.setAttribute("data-theme", hasCustomCss ? "custom" : normTheme(s.theme));
-        body.classList.remove("blsm-json-theme");
-        document.getElementById("blsm-json-theme-style")?.remove();
-        root.classList.toggle("blsm-custom-ui-active", hasCustomCss);
-        root.classList.toggle("blsm-light-ui", isLightTheme(hasCustomCss ? "custom" : normTheme(s.theme)));
-        ACC.forEach(function (p) { body.style.removeProperty(p); root.style.removeProperty(p); });
-        if (!hasCustomCss && s.accent && s.accent !== "default") {
-          var rgb = hex(s.accent);
-          if (rgb) {
-            var h = function (c) { return ("0" + Math.max(0, Math.min(255, Math.round(c))).toString(16)).slice(-2); };
-            var to = "#" + h(rgb[0]) + h(rgb[1]) + h(rgb[2]);
-            var dk = function (c) { return c * 0.82; };
-            var lt = function (c) { return c + (255 - c) * 0.55; };
-            var themeKey = normTheme(s.theme);
-            body.style.setProperty("--accent", to);
-            body.style.setProperty("--accent-dim", "#" + h(dk(rgb[0])) + h(dk(rgb[1])) + h(dk(rgb[2])));
-            body.style.setProperty(
-              "--accent-text",
-              isLightTheme(themeKey) ? ("#" + h(dk(rgb[0])) + h(dk(rgb[1])) + h(dk(rgb[2]))) : ("#" + h(lt(rgb[0])) + h(lt(rgb[1])) + h(lt(rgb[2])))
-            );
-            body.style.setProperty("--text-on-accent", "#ffffff");
-            body.style.setProperty("--accent-glow", "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ",0.15)");
-            body.style.setProperty("--border-accent", "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ",0.3)");
-            body.style.setProperty("--shadow-glow", "0 0 20px rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + ",0.08)");
-          }
-        }
-        var z = ZOOM[s.scale] || "";
-        var frame = document.querySelector(".window-frame");
-        if (frame) frame.style.zoom = z;
-        if (s.customCssText) {
-          var customEl = document.getElementById("blsm-custom-ui");
-          if (!customEl) {
-            customEl = document.createElement("style");
-            customEl.id = "blsm-custom-ui";
-            document.head.appendChild(customEl);
-          }
-          customEl.textContent = s.customCssText;
-        } else {
-          document.getElementById("blsm-custom-ui")?.remove();
-        }
-      };
-      apply();
-      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", apply);
-    })();
-  </script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Sarpanch:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     /* Paint guard: keep legacy/bundled duplicates hidden until the Blossom
        hubs replace them. Keyed on the route classes the head script sets
@@ -317,7 +239,7 @@ Please record an obby path first using the obby recorder above.`);return}}catch(
       --radius-xl: 14px;
       --shadow-card: 0 1px 2px rgba(0, 0, 0, .24);
       --transition: .15s ease;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--font-body, "Google Sans Flex"), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     html,
@@ -394,7 +316,7 @@ Please record an obby path first using the obby recorder above.`);return}}catch(
       transform: none;
       margin-left: 2px;
       color: var(--text-muted);
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--font-body, "Google Sans Flex"), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 12px;
       font-weight: 500;
       letter-spacing: 0;
@@ -494,7 +416,7 @@ Please record an obby path first using the obby recorder above.`);return}}catch(
     }
 
     .sidebar-brand h1 {
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--font-body, "Google Sans Flex"), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 18px;
       font-weight: 700;
       letter-spacing: -.02em;
@@ -587,7 +509,7 @@ Please record an obby path first using the obby recorder above.`);return}}catch(
     .page-header h2,
     .card-header h3,
     .stat-card .stat-value {
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: var(--font-body, "Google Sans Flex"), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     .page-header h2 {
@@ -729,22 +651,17 @@ Please record an obby path first using the obby recorder above.`);return}}catch(
       border-radius: var(--radius-md);
     }
 
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-hover);
-      border-radius: 999px;
-    }
+    /* Scrollbars: assets/blossom-scroll.css */
 
     /* Polish + dropdowns: assets/blossom-ui-motion.css */
   </style>
     <link rel="stylesheet" href="./blossom-revamp.css" />
     <link rel="stylesheet" href="./blossom-expressive.css" />
+    <link rel="stylesheet" href="./blossom-fonts.css" />
     <link rel="stylesheet" href="./blossom-window.css" />
     <link rel="stylesheet" href="./blossom-license.css" />
+  <link rel="stylesheet" href="./blossom-intro.css" />
+  <link rel="stylesheet" href="./blossom-schedule-tour.css" />
 </head>
 
 <body>
@@ -755,7 +672,7 @@ Please record an obby path first using the obby recorder above.`);return}}catch(
       <img class="blossom-loading-logo" src="./blossom.png" alt="" width="72" height="72" />
       <h2 class="blossom-loading-brand">Blossom</h2>
       <p class="blossom-loading-message">Starting Blossom…</p>
-      <div class="blossom-loading-spinner" data-blsm-spinner aria-hidden="true"></div>
+      <div class="blossom-loading-indicator" data-blsm-spinner aria-hidden="true"></div>
       <div class="blossom-loading-progress" data-blsm-progress hidden>
         <div class="blossom-loading-progress-track">
           <div class="blossom-loading-progress-fill"></div>
@@ -769,6 +686,8 @@ Please record an obby path first using the obby recorder above.`);return}}catch(
     </div>
   </div>
   <div id="root"></div>
+  <script src="./blossom-m3-loading.js"></script>
+  <script src="./blossom-m3-progress.js"></script>
   <script src="./blossom-loading.js"></script>
   <script id="material-titlebar-enhancement">
     (() => {
@@ -1058,17 +977,23 @@ Please record an obby path first using the obby recorder above.`);return}}catch(
     <script src="./blossom-calibrations.js"></script>
     <script src="./blossom-mouse-cal-requirements.js"></script>
   <script src="./blossom-settings.js"></script>
+  <script src="./blossom-logs.js"></script>
   <script src="./blossom-runtime.js"></script>
   <script src="./blossom-appearance.js"></script>
   <script src="./blossom-potions.js"></script>
   <script src="./blossom-credits.js"></script>
   <script src="./blossom-update.js"></script>
   <script src="./blossom-merchant-ui.js"></script>
+  <script src="./blossom-easter-strip.js"></script>
+  <script src="./blossom-macro-schedule.js"></script>
+  <script src="./blossom-schedule-tab.js"></script>
+  <script src="./blossom-macro-ui.js"></script>
   <script src="./blossom-qol.js"></script>
   <script src="./blossom-biome-selector.js"></script>
   <script src="./blossom-biome-webhooks.js"></script>
-    <script src="./blossom-intro.js"></script>
     <script src="./blossom-license.js"></script>
+    <script src="./blossom-intro.js"></script>
+    <script src="./blossom-schedule-tour.js"></script>
 </body>
 
 </html>

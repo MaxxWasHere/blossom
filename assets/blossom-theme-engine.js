@@ -379,7 +379,7 @@
 
     if (t.font.family) {
       decls.push(
-        "font-family: " + t.font.family + ', Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;'
+        "font-family: " + t.font.family + ', "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;'
       );
     }
     if (t.font.size) decls.push("font-size: " + t.font.size + "px;");

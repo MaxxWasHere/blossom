@@ -99,6 +99,11 @@
   const goToTab = (label) => {
     const needle = String(label || "").trim().toLowerCase();
     if (!needle) return false;
+    if (needle.includes("schedule") && window.BlossomScheduleTab?.open) {
+      window.BlossomScheduleTab.open();
+      return true;
+    }
+    window.BlossomScheduleTab?.teardown?.();
     const items = document.querySelectorAll(".sidebar-item");
     for (const item of items) {
       const text = (item.textContent || "").trim().toLowerCase();

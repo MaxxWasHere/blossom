@@ -65,6 +65,14 @@
     person: { p: '<path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>' },
     location: { p: '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>' },
     keyboard: { p: '<path d="M10 8h.01"/><path d="M12 12h.01"/><path d="M14 8h.01"/><path d="M16 12h.01"/><path d="M18 8h.01"/><path d="M6 8h.01"/><path d="M7 16h10"/><path d="M8 12h.01"/><rect width="20" height="16" x="2" y="4" rx="2"/>' },
+    calendar: { p: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>' },
+    pause: { p: '<rect x="14" y="4" width="4" height="16" rx="1"/><rect x="6" y="4" width="4" height="16" rx="1"/>' },
+    "grip-vertical": { p: '<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>' },
+    "grip-horizontal": { p: '<circle cx="12" cy="9" r="1"/><circle cx="5" cy="9" r="1"/><circle cx="19" cy="9" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="5" cy="15" r="1"/><circle cx="19" cy="15" r="1"/>' },
+    plus: { p: '<path d="M5 12h14"/><path d="M12 5v14"/>' },
+    minus: { p: '<path d="M5 12h14"/>' },
+    trash: { p: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>' },
+    layers: { p: '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/>' },
   };
 
   // Emoji glyph -> icon name. Variation selectors are stripped before lookup.
@@ -80,7 +88,7 @@
     "🕹": "gamepad", "🏃": "run", "💡": "bulb", "🏆": "trophy", "⚠": "warning",
     "✅": "check", "❌": "close", "✕": "close", "✖": "close", "📺": "monitor",
     "🗣": "megaphone", "🪟": "window", "🛠": "wrench", "👤": "person", "📍": "location",
-    "⌨": "keyboard",
+    "⌨": "keyboard", "📅": "calendar", "⏸": "pause",
   };
 
   const stripVs = (s) => String(s || "").replace(/[\uFE00-\uFE0F\u200D]/g, "").trim();

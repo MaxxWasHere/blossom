@@ -41,7 +41,7 @@ Default shipped theme is **`midnight`** (pink-dark palette in `index.html`, not 
 | Radii | `blossom-revamp.css` `--r-*` (not theme `0px` zeros) | `--r-sm` … `--r-xl` + `--radius-*` aliases |
 | Depth | revamp `--blsm-accent-soft/faint`, card gradient + shadow | same helpers in `site.css` |
 | Sidebar width | 212px (`blossom-revamp.css`) | `--sidebar-w: 212px` |
-| Fonts | App: `Sarpanch, Inter, …` (macro UI) | Docs: `--font-display`, `--font-body` = Google Sans Flex; `--font-mono` = JetBrainsMono Nerd Font |
+| Fonts | `assets/blossom-fonts.css` — `--font-body` / `--font-display` = Google Sans Flex; `--font-mono` = JetBrainsMono Nerd Font + JetBrains Mono | Docs: same tokens in `site.css` |
 
 Revamp rounded corners replace legacy zero-radius corner brackets unless a page explicitly uses `.cornered`.
 

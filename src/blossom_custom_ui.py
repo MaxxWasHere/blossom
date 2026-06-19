@@ -101,6 +101,7 @@ body[data-theme="custom"] {
   --warning: #f59e0b;
 
   /* Text */
+  /* M3 Expressive roles (see assets/blossom-m3-tokens.css) map --accent/--bg-* → --md-sys-color-* */
   --text-primary: #ece8ea;
   --text-secondary: #a8a0a4;
   --text-muted: #6e6468;
@@ -119,7 +120,7 @@ body[data-theme="custom"] {
 
   color: var(--text-primary);
   background: var(--bg-root);
-  font-family: Sarpanch, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-body, "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
 }
 
 /* html.blsm-custom-ui-active — set while Custom UI is active (Appearance card dims) */
@@ -148,8 +149,9 @@ body[data-theme="custom"] {
    §3  LAUNCH / DOWNLOAD OVERLAY — shown at startup and during runtime sync
    Selectors: #blossom-loading-overlay, .blossom-loading-overlay,
               .blossom-loading-card, .blossom-loading-brand,
-              .blossom-loading-message, .blossom-loading-spinner,
-              .blossom-loading-progress, .blossom-loading-aurora
+              .blossom-loading-message, .blossom-loading-indicator,
+              .blossom-m3-loading-canvas, .blossom-loading-progress,
+              .blossom-loading-aurora
    ═══════════════════════════════════════════════════════════════════════════ */
 #blossom-loading-overlay,
 .blossom-loading-overlay {

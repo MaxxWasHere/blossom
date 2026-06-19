@@ -3,6 +3,7 @@
 :root {
   /* Below license gate (99999); above main UI chrome */
   --blossom-z-loading: 99990;
+  --blsm-loading-indicator-size: 48px;
 }
 
 .blossom-loading-overlay {
@@ -14,10 +15,10 @@
   justify-content: center;
   padding: 28px;
   overflow: hidden;
-  font-family: Sarpanch, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  color: var(--text-primary, #ece8ea);
-  background: radial-gradient(1100px 520px at 50% -8%, rgba(232, 124, 192, 0.16), transparent 58%),
-    var(--bg-root, #0a0809);
+  font-family: var(--font-body, "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif);
+  color: var(--md-sys-color-on-surface, var(--text-primary, #ece8ea));
+  background: radial-gradient(1100px 520px at 50% -8%, var(--blsm-overlay-accent-glow, rgba(232, 124, 192, 0.16)), transparent 58%),
+    var(--blsm-overlay-backdrop, var(--bg-root, #0a0809));
   -webkit-app-region: no-drag;
   animation: blsm-loading-fade 0.28s ease both;
 }
@@ -91,9 +92,14 @@
   width: min(420px, 92vw);
   padding: 34px 30px 28px;
   text-align: center;
-  border: 1px solid color-mix(in srgb, var(--border-accent, rgba(232, 145, 168, 0.3)) 55%, transparent);
-  background: linear-gradient(165deg, rgba(22, 16, 20, 0.97), rgba(13, 9, 11, 0.98));
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), var(--shadow-glow, 0 0 20px rgba(232, 145, 168, 0.08));
+  border-radius: var(--m3-shape-corner-lg, var(--r-lg, 16px));
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-primary, var(--border-accent, rgba(232, 145, 168, 0.3))) 55%, transparent);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--blsm-overlay-card, #161014) 97%, transparent),
+    color-mix(in srgb, var(--md-sys-color-surface-dim, #0d090b) 98%, transparent)
+  );
+  box-shadow: var(--m3-elevation-3, 0 24px 70px rgba(0, 0, 0, 0.5)), var(--shadow-glow, 0 0 20px var(--blsm-overlay-accent-glow, rgba(232, 145, 168, 0.08)));
 }
 
 .blossom-loading-logo {
@@ -110,32 +116,38 @@
   font-size: 1.35rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: var(--accent-text, #f5c6d4);
+  color: var(--md-sys-color-primary, var(--accent-text, #f5c6d4));
 }
 
 .blossom-loading-message {
   margin: 0 0 22px;
   font-size: 13.5px;
   line-height: 1.5;
-  color: var(--text-secondary, #a8a0a4);
+  color: var(--md-sys-color-on-surface-variant, var(--text-secondary, #a8a0a4));
   min-height: 1.5em;
 }
 
+/* M3 Expressive morphing indicator host */
+.blossom-loading-indicator,
 .blossom-loading-spinner {
-  width: 42px;
-  height: 42px;
+  width: var(--blsm-loading-indicator-size);
+  height: var(--blsm-loading-indicator-size);
   margin: 0 auto 18px;
-  border-radius: 50%;
-  border: 3px solid rgba(255, 255, 255, 0.08);
-  border-top-color: var(--accent, #e891a8);
-  border-right-color: color-mix(in srgb, var(--accent, #e891a8) 45%, transparent);
-  animation: blsm-loading-spin 0.85s linear infinite;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@keyframes blsm-loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
+.blossom-loading-indicator[hidden],
+.blossom-loading-spinner[hidden] {
+  display: none !important;
+}
+
+.blossom-m3-loading-canvas {
+  display: block;
+  width: var(--blsm-loading-indicator-size);
+  height: var(--blsm-loading-indicator-size);
 }
 
 .blossom-loading-progress {
@@ -149,33 +161,129 @@
 .blossom-loading-progress-track {
   position: relative;
   width: 100%;
-  height: 10px;
-  overflow: hidden;
-  background: var(--bg-input, rgba(0, 0, 0, 0.35));
-  border: 1px solid var(--border, #241a1e);
+  height: 24px;
+  overflow: visible;
+  background: transparent;
+  border: none;
 }
 
+/* Legacy fill node — replaced by blossom-m3-progress.js */
 .blossom-loading-progress-fill {
-  width: 0%;
+  display: none !important;
+}
+
+/* M3 Expressive linear progress (blossom-m3-progress.js) */
+.blossom-m3-progress-host {
+  --blsm-m3-progress-accent: var(--accent, #e891a8);
+  --blsm-m3-progress-accent-dim: var(--accent-dim, #c46d88);
+  --blsm-m3-progress-track: var(--text-muted, #6e6468);
+  display: block;
+  width: 100%;
+  height: 24px;
+  padding: 0 clamp(10px, 4.5vw, 14px);
+  box-sizing: border-box;
+}
+
+.blossom-m3-progress {
+  position: relative;
+  width: 100%;
   height: 100%;
-  background: var(--accent, #e891a8);
-  box-shadow: 0 0 12px var(--accent-glow, rgba(232, 145, 168, 0.15));
-  transition: width 0.15s linear;
+  display: flex;
+  align-items: center;
 }
 
-.blossom-loading-progress[data-state="indeterminate"] .blossom-loading-progress-fill {
-  width: 38% !important;
-  transition: none;
-  animation: blsm-loading-sweep 1.1s ease-in-out infinite;
+.blossom-m3-progress-rail {
+  position: relative;
+  width: 100%;
+  height: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--blsm-m3-progress-track) 38%, transparent);
+  overflow: hidden;
 }
 
-@keyframes blsm-loading-sweep {
+.blossom-m3-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--blsm-m3-progress-accent-dim) 88%, transparent),
+    var(--blsm-m3-progress-accent)
+  );
+  box-shadow:
+    0 0 10px color-mix(in srgb, var(--blsm-m3-progress-accent) 50%, transparent),
+    0 0 22px color-mix(in srgb, var(--blsm-m3-progress-accent) 22%, transparent);
+  overflow: hidden;
+  will-change: width;
+}
+
+.blossom-m3-progress-shimmer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    105deg,
+    transparent 32%,
+    color-mix(in srgb, #fff 28%, transparent) 50%,
+    transparent 68%
+  );
+  opacity: 0.55;
+  animation: blsm-m3-progress-shimmer 2.4s ease-in-out infinite;
+}
+
+@keyframes blsm-m3-progress-shimmer {
+  0%,
+  100% {
+    transform: translateX(-120%);
+  }
+  50% {
+    transform: translateX(120%);
+  }
+}
+
+.blossom-m3-progress-indet {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.blossom-m3-progress-indet-seg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 34%;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--blsm-m3-progress-accent-dim) 88%, transparent),
+    var(--blsm-m3-progress-accent)
+  );
+  box-shadow: 0 0 12px color-mix(in srgb, var(--blsm-m3-progress-accent) 45%, transparent);
+  animation: blsm-m3-indet-sweep 1.75s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes blsm-m3-indet-sweep {
   0% {
-    transform: translateX(-110%);
+    transform: translateX(-105%);
   }
   100% {
-    transform: translateX(320%);
+    transform: translateX(310%);
   }
+}
+
+.blossom-m3-progress-host.blsm-reduce-motion .blossom-m3-progress-shimmer,
+.blossom-m3-progress-host.blsm-reduce-motion .blossom-m3-progress-indet-seg {
+  animation: none !important;
+}
+
+.blossom-m3-progress-host.blsm-reduce-motion .blossom-m3-progress-indet-seg {
+  transform: translateX(96%);
 }
 
 .blossom-loading-progress-meta {
@@ -202,9 +310,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .blossom-loading-overlay,
-  .blossom-loading-spinner,
   .blossom-loading-aurora,
-  .blossom-loading-progress[data-state="indeterminate"] .blossom-loading-progress-fill {
+  .blossom-m3-progress-shimmer,
+  .blossom-m3-progress-indet-seg {
     animation: none !important;
+  }
+
+  .blossom-m3-progress-indet-seg {
+    transform: translateX(96%);
   }
 }

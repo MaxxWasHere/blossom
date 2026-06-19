@@ -79,6 +79,19 @@
     if (subEl && sub != null) subEl.innerHTML = sub;
   };
 
+  const syncProgress = (track, indeterminate, percent, reset) => {
+    if (!track || !window.BlossomM3Progress) return;
+    if (indeterminate) {
+      window.BlossomM3Progress.update(track, { indeterminate: true, reset: !!reset });
+      return;
+    }
+    window.BlossomM3Progress.update(track, {
+      indeterminate: false,
+      percent: Math.max(0, Math.min(100, Number(percent) || 0)),
+      reset: !!reset,
+    });
+  };
+
   const updateProgress = (percent, downloaded, total) => {
     window.BlossomLoading?.setProgress?.(percent, downloaded, total);
     // Ignore stray progress frames if the overlay isn't showing a download view.
@@ -86,21 +99,24 @@
     if (!document.querySelector(".blossom-progress")) buildProgressView();
     const wrap = document.querySelector(".blossom-progress");
     if (!wrap) return;
-    const fill = wrap.querySelector(".blossom-progress-fill");
+    const track = wrap.querySelector(".blossom-progress-track");
     const pctEl = wrap.querySelector(".blossom-progress-percent");
     const bytesEl = wrap.querySelector(".blossom-progress-bytes");
     const pct = Number(percent);
     const totalN = Number(total) || 0;
-    if (!Number.isFinite(pct) || pct < 0 || totalN <= 0) {
+    const determinate =
+      window.BlossomM3Progress?.isDeterminate?.(pct, totalN) ??
+      (Number.isFinite(pct) && pct >= 0 && (totalN > 0 || pct >= 100));
+    if (!determinate) {
       wrap.setAttribute("data-state", "indeterminate");
-      if (fill) fill.style.width = "";
+      syncProgress(track, true);
       if (pctEl) pctEl.textContent = downloaded > 0 ? formatBytes(downloaded) : "Starting…";
       if (bytesEl) bytesEl.textContent = "";
       return;
     }
     const clamped = Math.max(0, Math.min(100, pct));
     wrap.setAttribute("data-state", "determinate");
-    if (fill) fill.style.width = clamped + "%";
+    syncProgress(track, false, clamped);
     if (pctEl) pctEl.textContent = clamped.toFixed(0) + "%";
     if (bytesEl) bytesEl.textContent = `${formatBytes(downloaded)} / ${formatBytes(totalN)}`;
   };
@@ -109,8 +125,8 @@
     const wrap = document.querySelector(".blossom-progress");
     if (wrap) {
       wrap.setAttribute("data-state", "determinate");
-      const fill = wrap.querySelector(".blossom-progress-fill");
-      if (fill) fill.style.width = "100%";
+      const track = wrap.querySelector(".blossom-progress-track");
+      syncProgress(track, false, 100);
       const pctEl = wrap.querySelector(".blossom-progress-percent");
       if (pctEl) pctEl.textContent = "100%";
     }
@@ -122,8 +138,8 @@
     const wrap = document.querySelector(".blossom-progress");
     if (wrap) {
       wrap.setAttribute("data-state", "determinate");
-      const fill = wrap.querySelector(".blossom-progress-fill");
-      if (fill) fill.style.width = "100%";
+      const track = wrap.querySelector(".blossom-progress-track");
+      syncProgress(track, false, 100);
       const pctEl = wrap.querySelector(".blossom-progress-percent");
       if (pctEl) pctEl.textContent = "Ready";
     }
@@ -139,8 +155,8 @@
     const wrap = document.querySelector(".blossom-progress");
     if (wrap) {
       wrap.setAttribute("data-state", "determinate");
-      const fill = wrap.querySelector(".blossom-progress-fill");
-      if (fill) fill.style.width = "100%";
+      const track = wrap.querySelector(".blossom-progress-track");
+      syncProgress(track, false, 100);
       const pctEl = wrap.querySelector(".blossom-progress-percent");
       if (pctEl) pctEl.textContent = "Downloaded";
     }
@@ -182,6 +198,8 @@
     removeEsc();
     buildProgressView();
     updateProgress(-1, 0, 0);
+    const track = document.querySelector(".blossom-progress-track");
+    syncProgress(track, true, 0, true);
     try {
       await api.apply_update(pending.url, pending.version);
     } catch (error) {

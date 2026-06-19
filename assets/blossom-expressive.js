@@ -2,7 +2,9 @@
   const { observeMain } = window.Blossom || {};
   const docEl = document.documentElement;
   const RIPPLE_SEL =
-    ".btn, .calibration-btn, .blossom-dropdown-trigger, .sidebar-item:not(.active):not(.is-active)";
+    ".btn, .calibration-btn, .blossom-dropdown-trigger, .sidebar-item, " +
+    ".page-content .card, .main-content .card, .blsm-macro-flow-step, .blsm-macro-chip, " +
+    ".blsm-license-btn, .blsm-license-discord";
   const NAV_SEL = ".sidebar-item.active, .sidebar-item.is-active";
 
   const motionAllowed = () =>
@@ -43,20 +45,43 @@
     );
   };
 
+  const playNavExit = (el) => {
+    if (!el || !motionAllowed()) return;
+    el.classList.remove("blsm-m3e-nav-enter");
+    el.classList.add("blsm-m3e-nav-exit");
+    el.addEventListener(
+      "animationend",
+      () => el.classList.remove("blsm-m3e-nav-exit"),
+      { once: true }
+    );
+  };
+
+  const playNavEnter = (el) => {
+    if (!el || !motionAllowed()) return;
+    el.classList.remove("blsm-m3e-nav-exit");
+    el.classList.remove("blsm-m3e-nav-enter");
+    void el.offsetWidth;
+    el.classList.add("blsm-m3e-nav-enter");
+    el.addEventListener(
+      "animationend",
+      () => el.classList.remove("blsm-m3e-nav-enter"),
+      { once: true }
+    );
+  };
+
   let lastActiveNav = null;
   const pulseNavSelection = () => {
     if (!motionAllowed()) return;
     const active = document.querySelector(NAV_SEL);
-    if (!active || active === lastActiveNav) return;
-    lastActiveNav = active;
-    active.classList.remove("blsm-m3e-nav-enter");
-    void active.offsetWidth;
-    active.classList.add("blsm-m3e-nav-enter");
-    active.addEventListener(
-      "animationend",
-      () => active.classList.remove("blsm-m3e-nav-enter"),
-      { once: true }
-    );
+    if (active === lastActiveNav) return;
+
+    if (lastActiveNav && lastActiveNav.isConnected && lastActiveNav !== active) {
+      playNavExit(lastActiveNav);
+    }
+
+    if (active) playNavEnter(active);
+
+    lastActiveNav = active || null;
   };
 
   let lastMacroBtn = null;

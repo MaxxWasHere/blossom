@@ -17,6 +17,10 @@
   color: var(--accent-text, var(--accent));
 }
 
+.blsm-rt-card[data-state="installing"] .blsm-rt-status {
+  color: var(--accent-text, var(--accent));
+}
+
 .blsm-rt-detail {
   margin: 0;
   font-size: 12px;
@@ -40,34 +44,18 @@
 .blsm-rt-progress-track {
   position: relative;
   width: 100%;
-  height: 8px;
-  border-radius: 999px;
-  background: var(--bg-input, rgba(255, 255, 255, 0.08));
-  overflow: hidden;
+  height: 24px;
+  overflow: visible;
+  background: transparent;
+  border: none;
+}
+
+.blsm-rt-progress[hidden] {
+  display: none !important;
 }
 
 .blsm-rt-progress-fill {
-  height: 100%;
-  width: 0%;
-  border-radius: 999px;
-  background: var(--accent);
-  transition: width 0.18s ease;
-}
-
-/* Indeterminate: a sliding sliver when the total size is unknown. */
-.blsm-rt-progress.is-indeterminate .blsm-rt-progress-fill {
-  width: 35%;
-  transition: none;
-  animation: blsm-rt-slide 1.1s ease-in-out infinite;
-}
-
-@keyframes blsm-rt-slide {
-  0% {
-    transform: translateX(-120%);
-  }
-  100% {
-    transform: translateX(320%);
-  }
+  display: none !important;
 }
 
 .blsm-rt-progress-text {
@@ -98,17 +86,3 @@
   cursor: default;
 }
 
-/* Reduced motion: drop the sliding/transition animations. */
-.blsm-reduce-motion .blsm-rt-progress.is-indeterminate .blsm-rt-progress-fill,
-.blsm-reduce-motion .blsm-rt-progress-fill {
-  animation: none;
-  transition: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .blsm-rt-progress.is-indeterminate .blsm-rt-progress-fill,
-  .blsm-rt-progress-fill {
-    animation: none;
-    transition: none;
-  }
-}

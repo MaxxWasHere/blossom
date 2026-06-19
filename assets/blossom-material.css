@@ -37,7 +37,7 @@
 }
 
 .page-header h2 {
-  font-family: Inter, system-ui, sans-serif !important;
+  font-family: var(--font-body, "Google Sans Flex", system-ui, sans-serif) !important;
   font-size: 1.25rem !important;
   font-weight: 600 !important;
   letter-spacing: -0.02em !important;
@@ -119,7 +119,7 @@
 
 .page-content .card-header h3,
 .main-content .card-header h3 {
-  font-family: Inter, system-ui, sans-serif !important;
+  font-family: var(--font-body, "Google Sans Flex", system-ui, sans-serif) !important;
   font-size: 13px !important;
   font-weight: 600 !important;
   line-height: 1.25 !important;
@@ -229,7 +229,7 @@
 }
 
 #blsm-cal-hub .blsm-cal-hub-top h3 {
-  font-family: Inter, system-ui, sans-serif !important;
+  font-family: var(--font-body, "Google Sans Flex", system-ui, sans-serif) !important;
   font-size: 13px !important;
   font-weight: 600 !important;
 }
@@ -261,7 +261,7 @@
   border-radius: var(--md-radius-sm);
   background: transparent;
   color: var(--md-on-surface-variant);
-  font: 600 11px/1.2 Inter, system-ui, sans-serif;
+  font: 600 11px/1.2 var(--font-body, "Google Sans Flex"), system-ui, sans-serif;
   cursor: pointer;
   white-space: nowrap;
   transition: background 0.16s var(--md-ease), color 0.16s ease, border-color 0.16s ease;
@@ -362,7 +362,7 @@ textarea.form-input,
   min-height: 34px !important;
   padding: 7px 14px !important;
   border-radius: var(--md-radius-sm) !important;
-  font-family: Inter, system-ui, sans-serif !important;
+  font-family: var(--font-body, "Google Sans Flex", system-ui, sans-serif) !important;
   font-size: 12px !important;
   font-weight: 600 !important;
   letter-spacing: 0.01em;

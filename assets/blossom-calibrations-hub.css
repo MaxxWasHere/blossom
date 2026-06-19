@@ -3,6 +3,9 @@
 #blsm-cal-hub {
   --blsm-cal-ease: var(--md-ease, cubic-bezier(0.2, 0, 0, 1));
   margin-bottom: 8px;
+  border-radius: var(--m3-shape-corner-md, 16px);
+  background: var(--md-sys-color-surface-container, var(--bg-card));
+  border-color: var(--md-sys-color-outline-variant, var(--border, #1f1f2e));
 }
 
 #blsm-cal-hub .blsm-cal-hub-top {
@@ -16,7 +19,7 @@
 
 #blsm-cal-hub .blsm-cal-hub-top h3 {
   margin: 0;
-  font: 700 15px/1.2 Sarpanch, system-ui, sans-serif;
+  font: 700 15px/1.2 var(--font-display, "Google Sans Flex"), system-ui, sans-serif;
 }
 
 #blsm-cal-hub .blsm-cal-hub-top p {
@@ -175,7 +178,7 @@ html.blsm-page-macro-calibrations .page-content > .fade-in > .info-banner:not(.b
 
 :is(#blsm-cal-hub, .blsm-mouse-cal-card) .blsm-cal-section-text strong {
   display: block;
-  font: 600 12px/1.2 Sarpanch, system-ui, sans-serif;
+  font: 600 12px/1.2 var(--font-display, "Google Sans Flex"), system-ui, sans-serif;
   color: var(--blsm-cal-tone, var(--text-primary, #e4e4e7));
 }
 
@@ -245,7 +248,7 @@ html.blsm-page-macro-calibrations .page-content > .fade-in > .info-banner:not(.b
   margin-bottom: -1px;
   background: transparent;
   color: var(--text-muted, #9ca3af);
-  font: 600 11px/1.2 Sarpanch, system-ui, sans-serif;
+  font: 600 11px/1.2 var(--font-display, "Google Sans Flex"), system-ui, sans-serif;
   cursor: pointer;
   transition:
     background 0.18s,
@@ -294,7 +297,7 @@ html.blsm-page-macro-calibrations .page-content > .fade-in > .info-banner:not(.b
 
 #blsm-cal-hub .blsm-cal-mark-label {
   grid-column: 1;
-  font: 600 11px/1.3 Sarpanch, system-ui, sans-serif;
+  font: 600 11px/1.3 var(--font-display, "Google Sans Flex"), system-ui, sans-serif;
   color: var(--text-primary, #e4e4e7);
 }
 

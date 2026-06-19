@@ -80,6 +80,7 @@ from blossom_auras import should_ping_aura
 from blossom_dirs import (
     APP_CONFIG_PATH,
     APP_DATA_DIR,
+    LOGS_DIR,
     OBBY_PATHS_DIR,
     POTION_DIR,
     dev_repo_root,
@@ -87,6 +88,14 @@ from blossom_dirs import (
     is_managed_install,
     managed_channel,
     migrate_all_user_data,
+)
+from blossom_logging import (
+    get_logger,
+    log_bridge_error,
+    log_paths,
+    open_logs_folder,
+    read_recent_logs,
+    setup_logging,
 )
 from blossom_runtime_deps import abi_key, cv2_status, ensure_opencv, sync_runtime_manifest, winocr_status
 from blossom_custom_ui import (
@@ -154,12 +163,18 @@ from blossom_reconnect import (
 import blossom_license
 from blossom_fishing import close_roblox_chat_from_config, run_fishing_loop
 from blossom_macro_session import MacroSessionGate
-from blossom_ui_scheduler import (
-    MacroUiTask,
-    ScheduledUiTask,
-    pick_task,
-    schedule,
-    startup_order,
+from blossom_macro_schedule import (
+    SCHEDULE_CONTROLLED_KEYS,
+    merge_schedule_payload,
+    merge_schedule_profiles_payload,
+    migrate_schedule_profiles,
+    normalize_macro_schedule,
+    normalize_macro_schedule_profiles,
+    schedule_activity_patch,
+    schedule_status,
+    schedule_step_duration_sec,
+    strip_legacy_seasonal_keys,
+    sync_legacy_schedule_keys,
 )
 
 def _bundle_root() -> Path:
@@ -679,6 +694,10 @@ class LocalUiApi:
         self._disconnect_watcher_thread: Thread | None = None
         self._disconnect_watcher_lock = Lock()
         self._pending_fishing_failsafe_rejoin = False
+        self._schedule_active = False
+        self._schedule_step_index = 0
+        self._schedule_step_started_at = 0.0
+        self._schedule_base_toggles: dict[str, object] | None = None
         # Serializes the explicit in-app OpenCV ("fishing vision") installer so a
         # second click can't kick off a concurrent download/extract.
         self._opencv_install_lock = Lock()
@@ -698,6 +717,11 @@ class LocalUiApi:
             fallback = load_json(LOCAL_CONFIG_PATH, {})
             config = {**fallback, **primary} if primary else fallback
         migrate_biome_webhook_config(config)
+        seasonal_patch = strip_legacy_seasonal_keys(config)
+        if seasonal_patch:
+            for key, value in seasonal_patch.items():
+                if value is None:
+                    config.pop(key, None)
         return config
 
     def _config_file_mtime(self) -> float | None:
@@ -817,11 +841,134 @@ class LocalUiApi:
     def _macro_potion_tasks_enabled(self) -> bool:
         return self._potion_crafting_enabled()
 
+    def _macro_schedule_armed(self) -> bool:
+        schedule = normalize_macro_schedule(self._config)
+        return bool(schedule["enabled"] and schedule["steps"])
+
+    def _snapshot_schedule_base_toggles(self) -> dict[str, object]:
+        return {key: self._config.get(key) for key in SCHEDULE_CONTROLLED_KEYS}
+
+    def _apply_schedule_step(self, index: int, *, reason: str) -> None:
+        schedule = normalize_macro_schedule(self._config)
+        steps = schedule["steps"]
+        if not steps:
+            return
+        index = max(0, min(int(index), len(steps) - 1))
+        step = steps[index]
+        patch = schedule_activity_patch(step["activity"])
+        for key, value in patch.items():
+            self._config[key] = value
+        self._sync_potion_switching_with_craft(persist=False)
+        try:
+            self._config_path.parent.mkdir(parents=True, exist_ok=True)
+            self._config_path.write_text(
+                json.dumps(self._config, indent=2),
+                encoding="utf-8",
+            )
+            self._config_mtime = self._config_file_mtime()
+        except OSError as error:
+            print(f"[macro schedule] could not persist step toggles: {error}")
+        self._schedule_step_index = index
+        self._schedule_step_started_at = time.monotonic()
+        duration_min = schedule_step_duration_sec(step) / 60.0
+        print(
+            f"[macro schedule] {reason}: step {index + 1}/{len(steps)} "
+            f"({step['activity']} for {duration_min:.0f} min)"
+        )
+
+    def _begin_macro_schedule(self) -> None:
+        if not self._macro_schedule_armed():
+            self._schedule_active = False
+            self._schedule_base_toggles = None
+            return
+        self._schedule_active = True
+        self._schedule_base_toggles = self._snapshot_schedule_base_toggles()
+        self._apply_schedule_step(0, reason="start")
+
+    def _restore_schedule_base_toggles(self) -> None:
+        if not self._schedule_base_toggles:
+            self._schedule_active = False
+            return
+        for key, value in self._schedule_base_toggles.items():
+            self._config[key] = value
+        self._sync_potion_switching_with_craft(persist=False)
+        try:
+            self._config_path.parent.mkdir(parents=True, exist_ok=True)
+            self._config_path.write_text(
+                json.dumps(self._config, indent=2),
+                encoding="utf-8",
+            )
+            self._config_mtime = self._config_file_mtime()
+        except OSError as error:
+            print(f"[macro schedule] could not restore base toggles: {error}")
+        self._schedule_active = False
+        self._schedule_base_toggles = None
+        self._schedule_step_index = 0
+        self._schedule_step_started_at = 0.0
+
+    def _advance_macro_schedule_if_due(self) -> bool:
+        """Advance to the next schedule step when its duration elapses.
+
+        Returns True when the macro should stop (non-looping schedule finished).
+        """
+        if not self._schedule_active or not self._macro_schedule_armed():
+            return False
+        schedule = normalize_macro_schedule(self._config)
+        steps = schedule["steps"]
+        if not steps:
+            return False
+        step = steps[self._schedule_step_index]
+        elapsed = time.monotonic() - self._schedule_step_started_at
+        if elapsed < schedule_step_duration_sec(step):
+            return False
+
+        next_index = self._schedule_step_index + 1
+        if next_index >= len(steps):
+            if schedule["loop"]:
+                next_index = 0
+            else:
+                print("[macro schedule] finished — stopping macro")
+                self._hotkey_main_stop()
+                return True
+        self._apply_schedule_step(next_index, reason="advance")
+        return False
+
+    def _maybe_migrate_schedule_profiles(self) -> bool:
+        migrated_config, migrated = migrate_schedule_profiles(self._config)
+        if not migrated:
+            return False
+        self._config = sync_legacy_schedule_keys(migrated_config)
+        self.save_config(self._config)
+        return True
+
+    def get_macro_schedule(self) -> dict:
+        self._reload_config_from_disk()
+        self._maybe_migrate_schedule_profiles()
+        return {"ok": True, **normalize_macro_schedule(self._config)}
+
+    def get_macro_schedule_profiles(self) -> dict:
+        self._reload_config_from_disk()
+        self._maybe_migrate_schedule_profiles()
+        return {"ok": True, **normalize_macro_schedule_profiles(self._config)}
+
+    def save_macro_schedule(self, payload: dict) -> dict:
+        self._reload_config_from_disk()
+        self._config = merge_schedule_payload(self._config, payload or {})
+        self.save_config(self._config)
+        return {"ok": True, **normalize_macro_schedule(self._config)}
+
+    def save_macro_schedule_profiles(self, payload: dict) -> dict:
+        self._reload_config_from_disk()
+        self._config = merge_schedule_profiles_payload(self._config, payload or {})
+        self.save_config(self._config)
+        return {"ok": True, **normalize_macro_schedule_profiles(self._config)}
+
     @property
     def _window(self) -> webview.Window:
         return webview.windows[0]
 
     def get_config(self):
+        self._reload_config_from_disk()
         cfg = deepcopy(self._config)
         migrate_biome_webhook_config(cfg)
         return cfg
@@ -830,6 +977,10 @@ class LocalUiApi:
         previous_keys = self._macro_hotkey_pair()
         self._config = dict(config or {})
         migrate_biome_webhook_config(self._config)
+        seasonal_patch = strip_legacy_seasonal_keys(self._config)
+        for key, value in seasonal_patch.items():
+            if value is None:
+                self._config.pop(key, None)
         self._sync_potion_switching_with_craft(persist=False)
         if config_enabled(self._config, "enable_potion_crafting"):
             self._remove_currency_screenshot_file()
@@ -880,6 +1031,20 @@ class LocalUiApi:
             )
         except Exception as error:
             print(f"[macro hotkeys] UI notify failed: {error}")
+
+    def _notify_macro_ui_running(self, running: bool) -> None:
+        """Sync React header Start/Stop with backend macro state."""
+        try:
+            status = "RUNNING" if running else "STOPPED"
+            self._window.evaluate_js(
+                "(() => {"
+                f"const status = {json.dumps(status)};"
+                "if (window.onMacroStatus) window.onMacroStatus(status);"
+                f"if (window.onShortcutEvent) window.onShortcutEvent({json.dumps('START' if running else 'STOP')});"
+                "})();"
+            )
+        except Exception as error:
+            print(f"[macro] UI running-state notify failed: {error}")
 
     def _valid_calibration_key(self, key) -> str | None:
         cleaned = str(key or "").strip()
@@ -938,6 +1103,7 @@ class LocalUiApi:
         if patch:
             self._config.update(patch)
         self.save_config(self._config)
+        self._reload_config_from_disk()
         self._calibration_capture_seq += 1
         self._calibration_capture_state = {
             "seq": self._calibration_capture_seq,
@@ -1226,13 +1392,13 @@ class LocalUiApi:
             modules["Auto Pop Biomes"] = {"enabled": True, "active": self._macro_running}
 
         incompatibilities: list[str] = []
-        if self._is_fishing_mode_enabled():
+        if self._fishing_monopolizes_main_loop():
             incompatibilities.append(
                 "Fishing mode is active — merchant, quests, potion craft, obby, BR/SC, and biome selector are paused; fishing runs on its own thread."
             )
-        if self._potion_crafting_enabled() and self._is_fishing_mode_enabled():
+        elif self._is_fishing_mode_enabled() and self._potion_crafting_enabled():
             incompatibilities.append(
-                "Potion Crafting is enabled: it takes priority over Fishing Mode, so fishing will not run until crafting is off."
+                "Fishing Mode and Auto Potion Craft are both on — fishing is paused so potion craft can run. Turn one off, or use Macro Schedule to alternate them."
             )
         if self._config.get("teleport_portable_crack") and (
             self._config.get("fishing_mode")
@@ -1240,8 +1406,7 @@ class LocalUiApi:
             or self._auto_obby_enabled()
         ):
             incompatibilities.append(
-                "Portable Crack teleport only works when fishing mode, potion crafting, auto obby, "
-                "and auto egg pathing are OFF."
+                "Portable Crack teleport only works when fishing mode, potion crafting, and auto obby are OFF."
             )
 
         return {"modules": modules, "incompatibilities": incompatibilities}
@@ -1265,6 +1430,13 @@ class LocalUiApi:
             "active_modules": active,
             "total_modules": len(modules),
             "always_on_top": config_enabled(self._config, "always_on_top"),
+            "schedule": schedule_status(
+                config=self._config,
+                step_index=self._schedule_step_index,
+                step_started_at=self._schedule_step_started_at,
+                now=time.monotonic(),
+                active=self._schedule_active and running,
+            ),
         }
 
     def get_update_available(self):
@@ -1772,8 +1944,8 @@ class LocalUiApi:
     def _hotkey_main_start(self) -> None:
         start_key, _ = self._macro_hotkey_pair()
         print(f"[main macro] {start_key} pressed")
-        self.set_biome_detection(True)
-        self._notify_shortcut("START")
+        if self.set_biome_detection(True):
+            self._notify_shortcut("START")
 
     def _emergency_stop(self) -> None:
         """Stop hotkey: cancel everything immediately (safe to call repeatedly)."""
@@ -1791,6 +1963,18 @@ class LocalUiApi:
         if config_enabled(self._config, "enable_idle_mode"):
             return False
         return config_enabled(self._config, "fishing_mode")
+
+    def _fishing_monopolizes_main_loop(self) -> bool:
+        """When True, interval tasks (merchant, potion, obby, …) defer to fishing.
+
+        Fishing Mode + Auto Potion Craft cannot run together: the fishing worker
+        refuses to start while potion craft is on, so the main loop must not spin
+        idle on `continue` or the macro appears dead."""
+        if not self._is_fishing_mode_enabled():
+            return False
+        if self._potion_crafting_enabled():
+            return False
+        return True
 
     def _fishing_can_run(self) -> bool:
         if not self._macro_running or self._macro_stop.is_set():
@@ -3144,6 +3328,12 @@ class LocalUiApi:
         if switching_enabled:
             self._sync_potion_rotation_index()
         fishing_enabled = self._is_fishing_mode_enabled()
+        if fishing_enabled and self._potion_crafting_enabled():
+            print(
+                "[main macro] warning: Fishing Mode and Auto Potion Craft are both enabled — "
+                "fishing is paused; potion craft and other interval tasks will run instead. "
+                "Use Macro Schedule to alternate fishing and crafting, or turn one off."
+            )
         print(
             f"[main macro] enabled tasks: fishing={fishing_enabled}, "
             f"auto_obby={obby_enabled}, "
@@ -3222,9 +3412,11 @@ class LocalUiApi:
 
             while not self._macro_stop.wait(0.15):
                 self._reload_config_from_disk()
+                if self._advance_macro_schedule_if_due():
+                    break
                 self._sync_fishing_worker()
                 self._sync_eden_worker()
-                if self._is_fishing_mode_enabled():
+                if self._fishing_monopolizes_main_loop():
                     continue
                 now = time.monotonic()
                 obby_enabled = self._auto_obby_enabled()
@@ -3327,6 +3519,7 @@ class LocalUiApi:
             self._stop_fishing_worker()
             self._stop_eden_worker()
             self._stop_biome_watcher()
+            self._restore_schedule_base_toggles()
             self._macro_running = False
             print("[main macro] worker stopped")
 
@@ -3354,17 +3547,17 @@ class LocalUiApi:
         if thread is None or not thread.is_alive():
             self._macro_thread = None
 
-    def _start_local_macro(self) -> None:
+    def _start_local_macro(self) -> bool:
         with self._macro_lifecycle_lock:
             if self._macro_running:
                 print("[main macro] already running")
-                return
+                return True
 
             if blossom_license.licensing_required() and not blossom_license.is_licensed():
                 print("[main macro] blocked: build not activated")
                 status = blossom_license.get_status(refresh=False)
                 self._push_license_status(status)
-                return
+                return False
 
             # Fully tear down any previous run before starting fresh. A quick
             # stop->start (hotkey or UI) can otherwise leave the old loop thread
@@ -3381,12 +3574,14 @@ class LocalUiApi:
             self._macro_session_gate.force_release()
             self._fishing_busy = False
             self._pending_fishing_failsafe_rejoin = False
+            self._begin_macro_schedule()
             self._macro_running = True
             self._macro_started_at = time.time()
             self._macro_thread = Thread(target=self._macro_loop, daemon=True)
             self._macro_thread.start()
             print("[main macro] started")
             self._send_status_notif("started")
+            return True
 
     def _stop_local_macro(self) -> None:
         print("[main macro] stopping")
@@ -3933,19 +4128,55 @@ class LocalUiApi:
             os.startfile(str(folder))  # noqa: S606 — local folder open by user action
             return {"ok": True, "path": str(folder)}
         except Exception as error:
+            log_bridge_error("open_themes_folder", error)
+            return {"ok": False, "error": str(error)}
+
+    def get_log_info(self) -> dict:
+        """Paths and sizes for the Settings diagnostics card."""
+        paths = log_paths()
+        info: dict[str, object] = {
+            "ok": True,
+            "folder": str(paths["folder"]),
+            "main_log": str(paths["main"]),
+            "errors_log": str(paths["errors"]),
+            "main_exists": paths["main"].is_file(),
+            "errors_exists": paths["errors"].is_file(),
+        }
+        for key, path in (("main_log", paths["main"]), ("errors_log", paths["errors"])):
+            if path.is_file():
+                try:
+                    info[f"{key}_bytes"] = path.stat().st_size
+                except OSError:
+                    pass
+        return info
+
+    def open_logs_folder(self):
+        return open_logs_folder()
+
+    def copy_recent_logs(self, max_lines: int = 300) -> dict:
+        try:
+            text = read_recent_logs(max_lines=int(max_lines or 300))
+            return {"ok": True, "text": text, "folder": str(LOGS_DIR)}
+        except Exception as error:
+            log_bridge_error("copy_recent_logs", error)
             return {"ok": False, "error": str(error)}
 
     def set_biome_detection(self, enabled):
         enabled = bool(enabled)
-        self._config["enable_biome_detection"] = enabled
         if enabled:
             self._reload_config_from_disk()
             print("[main macro] START requested")
             self._hotkeys.focus_roblox()
-            self._start_local_macro()
-        else:
-            print("[main macro] STOP requested")
-            self._emergency_stop()
+            started = self._start_local_macro()
+            if started:
+                self._config["enable_biome_detection"] = True
+            else:
+                self._config["enable_biome_detection"] = False
+                self._notify_macro_ui_running(False)
+            return started
+        self._config["enable_biome_detection"] = False
+        print("[main macro] STOP requested")
+        self._emergency_stop()
         return True
 
     def open_url(self, url):
@@ -4032,23 +4263,28 @@ class LocalUiApi:
 def main() -> int:
     global _SERVER_BASE
 
+    setup_logging("ui")
+    _log = get_logger("ui")
+
     blossom_license.guard_startup()
 
     if not INDEX_HTML.exists():
-        print(f"UI file not found: {INDEX_HTML}")
+        _log.error("UI file not found: %s", INDEX_HTML)
         return 1
 
     _SERVER_BASE = start_asset_server(ROOT)
-    print(f"Serving UI from {_SERVER_BASE}")
+    _log.info("Serving UI from %s", _SERVER_BASE)
 
     ensure_app_data_dirs()
     migrate_all_user_data(INSTALL_ROOT)
 
     config_path = resolve_config_path()
-    print(f"Data folder: {APP_DATA_DIR}")
-    print(f"Using config: {config_path}")
+    _log.info("Data folder: %s", APP_DATA_DIR)
+    _log.info("Using config: %s", config_path)
     if config_path == LOCAL_CONFIG_PATH and not APP_CONFIG_PATH.exists():
-        print("No config in AppData yet — using config.json beside the app until you save settings.")
+        _log.info(
+            "No config in AppData yet — using config.json beside the app until you save settings."
+        )
 
     api = LocalUiApi()
     init_w, init_h = _resolve_initial_window_size(api._config)

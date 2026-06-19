@@ -9,7 +9,8 @@
     "runtime-install": 300000,
   };
 
-  const phases = new Map();
+  let phases = new Map();
+  const PROGRESS_PHASES = new Set(["update", "runtime-install", "runtime-sync"]);
   let hideTimer = null;
   let progress = { percent: null, downloaded: 0, total: 0 };
   let displayMessage = DEFAULT_MESSAGE;
@@ -50,6 +51,7 @@
     (phases.has("update") || phases.has("runtime-install") || phases.has("runtime-sync"));
 
   const ensureOverlay = () => {
+    window.BlossomThemeBoot?.applyFromLocal?.();
     let el = overlay();
     if (el) return el;
 
@@ -66,7 +68,7 @@
         <img class="blossom-loading-logo" src="./blossom.png" alt="" width="72" height="72" />
         <h2 class="blossom-loading-brand">Blossom</h2>
         <p class="blossom-loading-message">${DEFAULT_MESSAGE}</p>
-        <div class="blossom-loading-spinner" data-blsm-spinner aria-hidden="true"></div>
+        <div class="blossom-loading-indicator" data-blsm-spinner aria-hidden="true"></div>
         <div class="blossom-loading-progress" data-blsm-progress hidden>
           <div class="blossom-loading-progress-track">
             <div class="blossom-loading-progress-fill"></div>
@@ -85,6 +87,8 @@
   const dismissOverlay = () => {
     const el = overlay();
     if (!el) return;
+    const spinner = el.querySelector("[data-blsm-spinner]");
+    if (spinner && window.BlossomM3Loading) window.BlossomM3Loading.unmount(spinner);
     el.classList.add("is-hiding");
     el.classList.remove("is-active");
     el.setAttribute("aria-busy", "false");
@@ -129,16 +133,25 @@
     if (spinner) spinner.hidden = showBar;
     if (bar) bar.hidden = !showBar;
 
+    if (window.BlossomM3Loading) {
+      window.BlossomM3Loading.sync(spinner, !showBar);
+    }
+
     if (showBar && bar) {
-      const fill = bar.querySelector(".blossom-loading-progress-fill");
+      const track = bar.querySelector(".blossom-loading-progress-track");
       const pctEl = bar.querySelector(".blsm-loading-pct");
       const bytesEl = bar.querySelector(".blsm-loading-bytes");
       const pct = Number(progress.percent);
       const totalN = Number(progress.total) || 0;
+      const determinate =
+        window.BlossomM3Progress?.isDeterminate?.(pct, totalN) ??
+        (Number.isFinite(pct) && pct >= 0 && (totalN > 0 || pct >= 100));
 
-      if (!Number.isFinite(pct) || pct < 0 || totalN <= 0) {
+      if (!determinate) {
         bar.setAttribute("data-state", "indeterminate");
-        if (fill) fill.style.width = "";
+        if (window.BlossomM3Progress && track) {
+          window.BlossomM3Progress.update(track, { indeterminate: true });
+        }
         if (pctEl) {
           pctEl.textContent = progress.downloaded > 0 ? formatBytes(progress.downloaded) : "Downloading…";
         }
@@ -146,13 +159,24 @@
       } else {
         const clamped = Math.max(0, Math.min(100, pct));
         bar.setAttribute("data-state", "determinate");
-        if (fill) fill.style.width = clamped + "%";
+        if (window.BlossomM3Progress && track) {
+          window.BlossomM3Progress.update(track, { indeterminate: false, percent: clamped });
+        }
         if (pctEl) pctEl.textContent = clamped.toFixed(0) + "%";
         if (bytesEl) {
-          bytesEl.textContent = `${formatBytes(progress.downloaded)} / ${formatBytes(totalN)}`;
+          bytesEl.textContent =
+            totalN > 0
+              ? `${formatBytes(progress.downloaded)} / ${formatBytes(totalN)}`
+              : progress.downloaded > 0
+                ? formatBytes(progress.downloaded)
+                : "";
         }
       }
     } else {
+      const track = overlay()?.querySelector(".blossom-loading-progress-track");
+      if (track && window.BlossomM3Progress) {
+        window.BlossomM3Progress.unmount(track);
+      }
       progress = { percent: null, downloaded: 0, total: 0 };
     }
   };
@@ -183,6 +207,13 @@
     } else {
       entry = { ref: 1, message: msg || "" };
       phases.set(key, entry);
+      if (PROGRESS_PHASES.has(key)) {
+        progress = { percent: null, downloaded: 0, total: 0 };
+        const track = overlay()?.querySelector(".blossom-loading-progress-track");
+        if (track && window.BlossomM3Progress) {
+          window.BlossomM3Progress.unmount(track);
+        }
+      }
     }
     if (msg) displayMessage = msg;
     schedulePhaseTimeout(key, entry);
@@ -292,6 +323,11 @@
 
     if (bridge?.get_config) {
       Promise.resolve(bridge.get_config())
+        .then((cfg) => {
+          window.BlossomThemeBoot?.applyFromConfig?.(cfg);
+          const node = overlay()?.querySelector("[data-blsm-version]");
+          if (node && cfg?.app_version) node.textContent = String(cfg.app_version);
+        })
         .catch((err) => console.warn("[BlossomLoading] config preload failed", err))
         .finally(finishConfig);
     } else {

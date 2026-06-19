@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Blossom — loading / update / runtime preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./blossom-fonts.css" />
+  <link rel="stylesheet" href="./blossom-revamp.css" />
+  <link rel="stylesheet" href="./blossom-expressive.css" />
+  <link rel="stylesheet" href="./blossom-m3-tokens.css" />
+  <link rel="stylesheet" href="./blossom-material.css" />
+  <link rel="stylesheet" href="./blossom-macro-ui.css" />
+  <link rel="stylesheet" href="./blossom-license.css" />
+  <link rel="stylesheet" href="./blossom-schedule-track.css" />
+  <link rel="stylesheet" href="./blossom-schedule-tour.css" />
   <link rel="stylesheet" href="./blossom-loading.css" />
   <link rel="stylesheet" href="./blossom-update.css" />
   <link rel="stylesheet" href="./blossom-runtime.css" />
@@ -29,7 +41,7 @@
       --border-accent: rgba(232, 145, 168, 0.3);
       --shadow-glow: 0 0 20px rgba(232, 145, 168, 0.08);
       --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-      font-family: Sarpanch, Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: "Google Sans Flex", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
     * { box-sizing: border-box; }
@@ -218,7 +230,7 @@
     <nav class="preview-nav" aria-label="Screen picker">
       <h1>Blossom UI preview</h1>
       <p>Dev-only page. Same CSS/classes as production. Pick a screen to render it over a dim fake app background.</p>
-      <button type="button" data-screen="startup" class="is-active">1. Startup overlay (spinner)</button>
+      <button type="button" data-screen="startup" class="is-active">1. Startup overlay (M3 morphing loader)</button>
       <button type="button" data-screen="runtime-sync">2. Runtime sync (cv2 / winocr)</button>
       <button type="button" data-screen="update-prompt">3. Update available toast</button>
       <button type="button" data-screen="update-download">4. Update download progress</button>
@@ -227,12 +239,17 @@
       <button type="button" data-screen="update-manual">7. Manual reinstall</button>
       <button type="button" data-screen="update-failed">8. Update failed</button>
       <button type="button" data-screen="runtime-card">9. Settings — fishing vision card</button>
-      <button type="button" data-screen="runtime-install">10. Runtime install overlay + card</button>
+      <button type="button" data-screen="runtime-card-installing">10. Fishing vision — installing</button>
+      <button type="button" data-screen="runtime-install">11. Runtime install overlay + card</button>
+      <button type="button" data-screen="macro-automated">12. Macro — Automated Actions hub</button>
+      <button type="button" data-screen="license-gate">13. Beta activation gate</button>
+      <button type="button" data-screen="macro-schedule">14. Macro Schedule tab</button>
+      <button type="button" data-screen="schedule-tour">15. Schedule tour</button>
     </nav>
 
     <div class="preview-stage-wrap">
       <div class="preview-note" id="preview-note">
-        <strong>Startup overlay</strong> — full-screen pink aurora, centered card, Blossom logo, spinner, status text.
+        <strong>Startup overlay</strong> — full-screen pink aurora, centered card, Blossom logo, M3 morphing loader, status text.
       </div>
       <div class="preview-stage" id="preview-stage">
         <div class="preview-fake-app">
@@ -243,18 +260,25 @@
     </div>
   </div>
 
+  <script src="./blossom-m3-loading.js"></script>
+  <script src="./blossom-m3-progress.js"></script>
   <script>
     const NOTES = {
-      startup: "<strong>Startup overlay</strong> — full-screen dark pink aurora, centered card with logo, “Blossom”, message, spinning ring. Version line at bottom when bridge loads.",
-      "runtime-sync": "<strong>Runtime sync</strong> — same full overlay; message “Syncing runtime components…” with indeterminate or % progress bar (cv2 + winocr on first launch / after cache clear).",
+      startup: "<strong>Startup overlay</strong> — full-screen dark pink aurora, centered card with logo, “Blossom”, message, M3 morphing loading indicator (contained circle). Version line at bottom when bridge loads.",
+      "runtime-sync": "<strong>Runtime sync</strong> — same full overlay; message “Syncing runtime components…” with M3 expressive capsule bar at ~50% (thick rounded track, accent fill, soft glow).",
       "update-prompt": "<strong>Update toast</strong> — bottom-right card (~380px), non-blocking. Dismiss / Update buttons; Esc dismisses.",
-      "update-download": "<strong>Update download</strong> — toast switches to progress view: title, version, bar, bytes.",
+      "update-download": "<strong>Update download</strong> — toast switches to progress view: title, version, capsule bar, bytes.",
       "update-install": "<strong>Installing</strong> — bar at 100%, title “Installing”, sub “Blossom will restart…”.",
       "update-launcher": "<strong>Managed install</strong> — bar shows Ready; asks to reopen Blossom.exe.",
       "update-manual": "<strong>Manual reinstall</strong> — full installer staged; Explorer opened.",
       "update-failed": "<strong>Failed</strong> — warning status, Retry + Close.",
       "runtime-card": "<strong>Settings card</strong> — inline on Settings &amp; extras; optional OpenCV installer with its own mini bar.",
-      "runtime-install": "<strong>Runtime install</strong> — full overlay + Settings card installing state together (matches clicking Install)."
+      "runtime-card-installing": "<strong>Fishing vision installing</strong> — card shows Installing… with indeterminate capsule bar and status message.",
+      "runtime-install": "<strong>Runtime install</strong> — full overlay + Settings card installing state together (matches clicking Install).",
+      "macro-automated": "<strong>Macro hub</strong> — Automated Actions flow banner, quick chips, two-column grid, expressive toggle tiles (static mock).",
+      "license-gate": "<strong>Beta activation</strong> — M3 dialog with Discord beta-access CTA, key input, HWID copy, morphing loader while activating.",
+      "macro-schedule": "<strong>Macro Schedule tab</strong> — vertical timeline track, palette chips, enable/loop toggles, live status pill (static mock).",
+      "schedule-tour": "<strong>Schedule tour</strong> — four-slide M3 wizard on first Macro Schedule tab visit."
     };
 
     function clearStage() {
@@ -263,6 +287,16 @@
           <h2>Macro</h2>
           <p>Dimmed main UI behind the overlay (not shown in real app until startup finishes).</p>
         </div>`;
+    }
+
+    function mountProgress(track, opts) {
+      if (!track || !window.BlossomM3Progress) return;
+      const o = opts || {};
+      window.BlossomM3Progress.update(track, {
+        indeterminate: !!o.indeterminate,
+        percent: Number(o.percent) || 0,
+        reset: !!o.reset,
+      });
     }
 
     function mountStartup() {
@@ -276,7 +310,7 @@
           <img class="blossom-loading-logo" src="./blossom.png" alt="" width="72" height="72" onerror="this.style.display='none'" />
           <h2 class="blossom-loading-brand">Blossom</h2>
           <p class="blossom-loading-message">Loading interface…</p>
-          <div class="blossom-loading-spinner" data-blsm-spinner aria-hidden="true"></div>
+          <div class="blossom-loading-indicator" data-blsm-spinner aria-hidden="true"></div>
           <div class="blossom-loading-progress" data-blsm-progress hidden>
             <div class="blossom-loading-progress-track"><div class="blossom-loading-progress-fill"></div></div>
             <div class="blossom-loading-progress-meta">
@@ -284,9 +318,11 @@
               <span class="blsm-loading-bytes"></span>
             </div>
           </div>
-          <p class="blossom-loading-version" data-blsm-version>2.1.0-dev</p>
+          <p class="blossom-loading-version" data-blsm-version>2.3.0-dev</p>
         </div>`;
       document.getElementById("preview-stage").appendChild(el);
+      const spinner = el.querySelector("[data-blsm-spinner]");
+      if (spinner && window.BlossomM3Loading) window.BlossomM3Loading.mount(spinner);
     }
 
     function mountRuntimeSync() {
@@ -301,19 +337,25 @@
           <img class="blossom-loading-logo" src="./blossom.png" alt="" width="72" height="72" onerror="this.style.display='none'" />
           <h2 class="blossom-loading-brand">Blossom</h2>
           <p class="blossom-loading-message">Syncing runtime components…</p>
-          <div class="blossom-loading-spinner" data-blsm-spinner hidden aria-hidden="true"></div>
+          <div class="blossom-loading-indicator" data-blsm-spinner hidden aria-hidden="true"></div>
           <div class="blossom-loading-progress" data-blsm-progress data-state="determinate">
             <div class="blossom-loading-progress-track">
-              <div class="blossom-loading-progress-fill" style="width: 47%"></div>
+              <div class="blossom-loading-progress-fill"></div>
             </div>
             <div class="blossom-loading-progress-meta">
-              <span class="blsm-loading-pct">47%</span>
-              <span class="blsm-loading-bytes">18.2 MB / 38.7 MB</span>
+              <span class="blsm-loading-pct">50%</span>
+              <span class="blsm-loading-bytes">19.4 MB / 38.7 MB</span>
             </div>
           </div>
-          <p class="blossom-loading-version" data-blsm-version>2.1.0-dev</p>
+          <p class="blossom-loading-version" data-blsm-version>2.3.0-dev</p>
         </div>`;
       document.getElementById("preview-stage").appendChild(el);
+      const track = el.querySelector(".blossom-loading-progress-track");
+      const pctEl = el.querySelector(".blsm-loading-pct");
+      const bytesEl = el.querySelector(".blsm-loading-bytes");
+      if (track && window.BlossomM3Progress) {
+        window.BlossomM3Progress.update(track, { indeterminate: false, percent: 50, reset: true });
+      }
     }
 
     function mountUpdatePrompt() {
@@ -356,6 +398,7 @@
           <p class="blossom-update-status"></p>
         </div>`;
       document.getElementById("preview-stage").appendChild(overlay);
+      mountProgress(overlay.querySelector(".blossom-progress-track"), { percent: 62, reset: true });
     }
 
     function mountUpdateInstall() {
@@ -376,6 +419,7 @@
           <p class="blossom-update-status"></p>
         </div>`;
       document.getElementById("preview-stage").appendChild(overlay);
+      mountProgress(overlay.querySelector(".blossom-progress-track"), { percent: 100 });
     }
 
     function mountUpdateLauncher() {
@@ -399,6 +443,7 @@
           </div>
         </div>`;
       document.getElementById("preview-stage").appendChild(overlay);
+      mountProgress(overlay.querySelector(".blossom-progress-track"), { percent: 100 });
     }
 
     function mountUpdateManual() {
@@ -422,6 +467,7 @@
           </div>
         </div>`;
       document.getElementById("preview-stage").appendChild(overlay);
+      mountProgress(overlay.querySelector(".blossom-progress-track"), { percent: 100 });
     }
 
     function mountUpdateFailed() {
@@ -446,6 +492,7 @@
           </div>
         </div>`;
       document.getElementById("preview-stage").appendChild(overlay);
+      mountProgress(overlay.querySelector(".blossom-progress-track"), { indeterminate: true, reset: true });
     }
 
     function mountRuntimeCard(state) {
@@ -486,6 +533,9 @@
         </div>`;
       document.getElementById("preview-stage").innerHTML = "";
       document.getElementById("preview-stage").appendChild(page);
+      if (state === "installing") {
+        mountProgress(page.querySelector(".blsm-rt-progress-track"), { indeterminate: true, reset: true });
+      }
     }
 
     function mountRuntimeInstall() {
@@ -506,6 +556,163 @@
       document.getElementById("preview-stage").appendChild(page);
     }
 
+    function mountMacroAutomated() {
+      document.documentElement.classList.add("blsm-expressive-on", "blsm-macro-hub-active", "blsm-motion-on");
+      const page = document.createElement("div");
+      page.className = "preview-settings-page main-content";
+      page.setAttribute("data-blossom-page", "Automated Actions");
+      page.innerHTML = `
+        <div class="page-header blsm-page-enter">
+          <h2>Automated Actions</h2>
+          <p>Turn on the automations you want, then press Start in the header.</p>
+        </div>
+        <section class="blsm-macro-hub">
+          <div class="blsm-macro-flow">
+            <div class="blsm-macro-flow-step is-active" data-step="1"><strong>Calibrate UI</strong><span>Macro Calibrations for your resolution.</span></div>
+            <div class="blsm-macro-flow-step is-active" data-step="2"><strong>Enable modes</strong><span>Toggle merchant, quests, BR/SC, and more.</span></div>
+            <div class="blsm-macro-flow-step is-active" data-step="3"><strong>Start macro</strong><span>Green Start button or your hotkey.</span></div>
+          </div>
+          <div class="blsm-macro-quick">
+            <button type="button" class="blsm-macro-chip">📍 Calibrations</button>
+            <button type="button" class="blsm-macro-chip">⚙️ Hotkeys &amp; misc</button>
+            <span class="blsm-macro-hotkey-hint">Start <kbd>F1</kbd> · Stop <kbd>F2</kbd></span>
+          </div>
+        </section>
+        <div class="blsm-macro-grid blsm-macro-grid--auto">
+          <div class="blsm-macro-grid-col">
+            <div class="card">
+              <div class="card-header"><div class="card-icon">🛒</div><div><h3>Item Usage</h3><p>Merchant &amp; consumables</p></div></div>
+              <div style="padding:16px 18px">
+                <label class="toggle-row"><span>Auto Merchant Teleporter</span><span class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></span></label>
+                <label class="toggle-row"><span>Biome Randomizer</span><span class="toggle-switch"><input type="checkbox" /><span class="toggle-slider"></span></span></label>
+              </div>
+            </div>
+          </div>
+          <div class="blsm-macro-grid-col">
+            <div class="card">
+              <div class="card-header"><div class="card-icon">🌙</div><div><h3>Limbo Item Usage &amp; Eden Detection</h3></div></div>
+              <div style="padding:16px 18px">
+                <label class="toggle-row"><span>Strange Controller</span><span class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></span></label>
+              </div>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById("preview-stage").innerHTML = "";
+      document.getElementById("preview-stage").appendChild(page);
+    }
+
+    function mountLicenseGate() {
+      document.documentElement.classList.add("blsm-expressive-on", "blsm-motion-on");
+      const overlay = document.createElement("div");
+      overlay.id = "blossom-license-overlay";
+      overlay.className = "blossom-license-overlay";
+      overlay.innerHTML = `
+        <div class="blsm-license-bg"></div>
+        <div class="blsm-license-aurora a1"></div>
+        <div class="blsm-license-card">
+          <img class="blsm-license-logo" src="./blossom-logo.png" alt="" width="56" height="56" />
+          <h2 id="blsm-license-title">Activate Blossom Beta</h2>
+          <p class="blsm-license-msg">Enter your beta key to continue.</p>
+          <div class="blsm-license-discord-block">
+            <a class="btn btn-secondary blsm-license-discord" href="https://discord.gg/tv5T9uh2Ef" target="_blank" rel="noreferrer">Get beta access on Discord</a>
+            <p class="blsm-license-discord-hint">Beta keys are issued to Discord members with beta access.</p>
+          </div>
+          <div class="blsm-license-key-block">
+            <label class="blsm-license-label" for="blsm-license-key">Beta key</label>
+            <input id="blsm-license-key" type="text" class="blsm-license-input" placeholder="BLSM-XXXXX-XXXXX-XXXXX-XXXXX" />
+            <div class="blsm-license-actions">
+              <button type="button" class="btn btn-accent blsm-license-btn">Activate</button>
+              <button type="button" class="btn btn-secondary blsm-license-btn">Retry</button>
+            </div>
+          </div>
+          <div class="blsm-license-hwid">
+            <button type="button" class="blsm-license-hwid-toggle">Show full machine ID</button>
+            <code data-blsm-hwid-text">a1b2c3d4e5f6…</code>
+            <button type="button" class="blsm-license-hwid-copy">Copy</button>
+          </div>
+        </div>`;
+      document.getElementById("preview-stage").innerHTML = `
+        <div class="preview-fake-app"><h2>App behind gate</h2><p>Dimmed until licensed.</p></div>`;
+      document.getElementById("preview-stage").appendChild(overlay);
+    }
+
+    function mountMacroSchedule() {
+      document.documentElement.classList.add("blsm-expressive-on", "blsm-motion-on", "blsm-schedule-page-active");
+      document.getElementById("preview-stage").innerHTML = `
+        <div class="preview-fake-app page-content" style="padding:24px 32px;max-width:760px;margin:0 auto;">
+          <div class="page-header">
+            <h2>Macro Schedule</h2>
+            <p>Build a timed automation plan — one activity at a time, in order.</p>
+          </div>
+          <div class="blsm-schedule-root">
+            <div class="blsm-schedule-toolbar">
+              <label class="blsm-schedule-toggle"><input type="checkbox" checked /><span><b>Use schedule when macro runs</b><span>Overrides fishing / potion / merchant toggles per step.</span></span></label>
+              <label class="blsm-schedule-toggle"><input type="checkbox" checked /><span><b>Loop after last step</b><span>Return to step 1 when the last block ends.</span></span></label>
+            </div>
+            <div class="blsm-schedule-track-wrap">
+              <div class="blsm-schedule-track">
+                <div class="blsm-schedule-block is-live" data-index="0">
+                  <div class="blsm-schedule-block-icon">🎣</div>
+                  <div class="blsm-schedule-block-label">Fishing</div>
+                  <label class="blsm-schedule-duration"><input type="number" value="2" />h<input type="number" value="0" />m</label>
+                  <button type="button" class="blsm-schedule-grip">⋮</button>
+                </div>
+                <div class="blsm-schedule-block" data-index="1">
+                  <div class="blsm-schedule-block-icon">⚗️</div>
+                  <div class="blsm-schedule-block-label">Potion</div>
+                  <label class="blsm-schedule-duration"><input type="number" value="3" />h<input type="number" value="0" />m</label>
+                  <button type="button" class="blsm-schedule-grip">⋮</button>
+                </div>
+                <div class="blsm-schedule-dropzone">Add blocks here or drag from the palette below</div>
+              </div>
+            </div>
+            <div class="blsm-schedule-palette">
+              <div class="blsm-schedule-palette-label">Drag to add</div>
+              <span class="blsm-schedule-chip">🎣 Fishing</span>
+              <span class="blsm-schedule-chip">⚗️ Potion</span>
+              <span class="blsm-schedule-chip">🛒 Merchant</span>
+              <span class="blsm-schedule-chip">⏸ Idle</span>
+            </div>
+            <div class="blsm-schedule-live-pill is-running"><span class="dot"></span><span>Step 1/2: Fishing — ~118 min left</span></div>
+          </div>
+        </div>`;
+    }
+
+    function mountScheduleTour() {
+      document.documentElement.classList.add("blsm-expressive-on", "blsm-motion-on");
+      const overlay = document.createElement("div");
+      overlay.id = "blossom-schedule-tour-overlay";
+      overlay.style.top = "0";
+      overlay.innerHTML = `
+        <div class="blsm-st-bg"></div>
+        <div class="blsm-st-aurora a1"></div>
+        <div class="blsm-st-aurora a2"></div>
+        <div class="blsm-st-card">
+          <div class="blsm-st-progress">
+            <span class="blsm-st-dot is-active"></span>
+            <span class="blsm-st-dot"></span>
+            <span class="blsm-st-dot"></span>
+            <span class="blsm-st-dot"></span>
+          </div>
+          <div class="blsm-st-viewport">
+            <div class="blsm-st-slide is-active">
+              <h2>Timed automation blocks</h2>
+              <p class="blsm-st-lead">Macro Schedule runs one activity at a time in order — fish, craft potions, merchant, or idle.</p>
+            </div>
+          </div>
+          <div class="blsm-st-foot">
+            <button type="button" class="blsm-st-skip">Skip tour</button>
+            <div style="display:flex;gap:8px;">
+              <button type="button" class="blsm-st-btn blsm-st-ghost">Back</button>
+              <button type="button" class="blsm-st-btn blsm-st-primary">Next</button>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById("preview-stage").innerHTML = `
+        <div class="preview-fake-app"><h2>Macro Schedule</h2><p>Tab behind tour overlay.</p></div>`;
+      document.getElementById("preview-stage").appendChild(overlay);
+    }
+
     const MOUNTERS = {
       startup: mountStartup,
       "runtime-sync": mountRuntimeSync,
@@ -516,10 +723,16 @@
       "update-manual": mountUpdateManual,
       "update-failed": mountUpdateFailed,
       "runtime-card": () => mountRuntimeCard("not_installed"),
+      "runtime-card-installing": () => mountRuntimeCard("installing"),
       "runtime-install": mountRuntimeInstall,
+      "macro-automated": mountMacroAutomated,
+      "license-gate": mountLicenseGate,
+      "macro-schedule": mountMacroSchedule,
+      "schedule-tour": mountScheduleTour,
     };
 
     function showScreen(id) {
+      document.documentElement.classList.remove("blsm-expressive-on", "blsm-macro-hub-active");
       clearStage();
       (MOUNTERS[id] || mountStartup)();
       document.getElementById("preview-note").innerHTML = NOTES[id] || "";

@@ -111,7 +111,7 @@ html.blsm-window-maximized .window-frame {
   transform: none !important;
   text-transform: none !important;
   color: var(--text-secondary, #a1a1aa);
-  font-family: "Segoe UI", Inter, system-ui, sans-serif !important;
+  font-family: var(--font-body, "Google Sans Flex", system-ui, sans-serif) !important;
   font-size: 12px;
   font-weight: 400;
   letter-spacing: 0.01em;

@@ -374,7 +374,9 @@ def _save_license_file(data: dict) -> None:
         ensure_app_data_dirs()
         LICENSE_FILE.write_bytes(_encode_license_blob(data))
     except OSError as error:
-        print(f"[license] could not save license file: {error}")
+        from blossom_logging import get_logger
+
+        get_logger("license").error("Could not save license file: %s", error)
 
 
 def clear_license() -> None:
@@ -768,4 +770,14 @@ def activate(key: str) -> dict:
     state = "offline" if reason in _NETWORK_REASONS else "invalid"
     status = _status(state, reason=reason, key=key)
     _set_cached(status)
+    try:
+        from blossom_logging import get_logger
+
+        get_logger("license").warning(
+            "Activation failed — state=%s reason=%s",
+            state,
+            reason,
+        )
+    except Exception:
+        pass
     return status

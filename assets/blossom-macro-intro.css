@@ -1,0 +1,264 @@
+/* Macro first-run setup — blossom-macro-intro.js */
+#blossom-macro-intro-overlay {
+  --blsm-mi-top: 40px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: var(--blsm-mi-top, 40px);
+  z-index: 880;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 12px 0;
+  overflow-x: hidden;
+  overflow-y: auto;  font-family: var(--font-body, "Google Sans Flex", system-ui, sans-serif);
+  color: var(--md-sys-color-on-surface, #ece8ea);
+  animation: blsm-macro-intro-fade var(--m3e-duration-medium, 300ms) var(--m3e-ease-emphasized-decel) both;
+}
+
+@keyframes blsm-macro-intro-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+#blossom-macro-intro-overlay .blsm-mi-bg {
+  position: absolute;
+  inset: 0;
+  background: var(--md-sys-color-surface-dim, #0a0809);
+}
+
+#blossom-macro-intro-overlay .blsm-mi-aurora {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(72px);
+  opacity: 0.22;
+  mix-blend-mode: screen;
+  animation: blsm-mi-drift 24s ease-in-out infinite alternate;
+}
+
+#blossom-macro-intro-overlay .a1 {
+  width: 36vw;
+  height: 36vw;
+  left: -6vw;
+  top: -10vw;
+  background: radial-gradient(circle, var(--md-sys-color-primary, #e891a8), transparent 65%);
+}
+
+#blossom-macro-intro-overlay .a2 {
+  width: 32vw;
+  height: 32vw;
+  right: -8vw;
+  bottom: -12vw;
+  animation-duration: 28s;
+  opacity: 0.16;
+}
+
+@keyframes blsm-mi-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(2vw, -1vw) scale(1.08); }
+}
+
+#blossom-macro-intro-overlay .blsm-mi-card {
+  position: relative;
+  z-index: 2;
+  width: min(620px, 94vw);
+  max-height: min(calc(100vh - var(--blsm-mi-top, 40px) - 24px), 640px);
+  margin: auto 0;
+  background: var(--md-sys-color-surface-container-high, #1c1519);
+  border: 1px solid var(--md-sys-color-outline-variant, #241a1e);
+  border-radius: var(--m3-shape-corner-xl, 28px);
+  box-shadow: var(--m3-elevation-3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: m3e-container-enter var(--m3e-duration-long, 500ms) var(--m3e-ease-emphasized-decel) both;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-progress {
+  display: flex;
+  gap: 8px;
+  padding: 18px 26px 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+#blossom-macro-intro-overlay .blsm-mi-dot {
+  height: 6px;
+  width: 6px;
+  border-radius: var(--m3-shape-corner-full, 9999px);
+  background: color-mix(in srgb, var(--md-sys-color-on-surface, #fff) 18%, transparent);
+  transition: width 0.45s var(--m3e-ease-emphasized-decel), background 0.45s ease;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-dot.is-active {
+  width: 24px;
+  background: var(--md-sys-color-primary, #e891a8);
+}
+
+#blossom-macro-intro-overlay .blsm-mi-dot.is-done {
+  background: color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 55%, transparent);
+}
+
+#blossom-macro-intro-overlay .blsm-mi-viewport {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: min(300px, calc(100vh - var(--blsm-mi-top, 40px) - 200px));
+  overflow: hidden;
+}
+#blossom-macro-intro-overlay .blsm-mi-slide {
+  position: absolute;
+  inset: 0;
+  padding: 12px 28px 6px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  transform: translateX(36px);
+  pointer-events: none;
+  transition:
+    opacity 0.45s var(--m3e-ease-standard),
+    transform 0.55s var(--m3e-ease-emphasized-decel);
+  overflow-y: auto;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-slide.is-active {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-slide.is-prev {
+  transform: translateX(-36px);
+}
+
+#blossom-macro-intro-overlay .blsm-mi-slide h2 {
+  margin: 0 0 10px;
+  font-size: var(--m3-type-headline-sm-size, 1.5rem);
+  font-weight: 600;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-lead {
+  margin: 0 0 16px;
+  color: var(--md-sys-color-on-surface-variant, #a8a0a4);
+  font-size: var(--m3-type-body-md-size, 0.875rem);
+  line-height: 1.55;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-illus {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin: 8px 0 14px;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-tile {
+  border-radius: var(--m3-shape-corner-md, 16px);
+  border: 1px solid var(--md-sys-color-outline-variant, #241a1e);
+  background: var(--md-sys-color-surface-container, #161014);
+  padding: 14px 12px;
+  text-align: center;
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-tile .ico {
+  display: block;
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-schedule {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 10px 0 4px;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-schedule-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--m3-shape-corner-sm, 12px);
+  border: 1px solid var(--md-sys-color-outline-variant, #241a1e);
+  background: var(--md-sys-color-surface-container, #161014);
+  font-size: 0.82rem;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-schedule-row .dur {
+  margin-left: auto;
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+  font-size: 0.75rem;
+  color: var(--md-sys-color-primary, #e891a8);
+}
+
+#blossom-macro-intro-overlay .blsm-mi-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  padding: 8px 14px;
+  border-radius: var(--m3-shape-corner-full, 9999px);
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 40%, var(--md-sys-color-outline-variant, #241a1e));
+  background: color-mix(in srgb, var(--md-sys-color-surface-container, #161014) 88%, var(--md-sys-color-primary, #e891a8) 12%);
+  color: var(--md-sys-color-on-surface, #ece8ea);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-highlight {
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: var(--m3-shape-corner-md, 16px);
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 45%, var(--md-sys-color-outline-variant, #241a1e));
+  background: color-mix(in srgb, var(--md-sys-color-primary-container, #3d2430) 35%, var(--md-sys-color-surface-container, #161014));
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+#blossom-macro-intro-overlay .blsm-mi-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 24px 20px;
+  flex-shrink: 0;
+}
+#blossom-macro-intro-overlay .blsm-mi-btn {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 20px;
+  border-radius: var(--m3-shape-corner-full, 9999px);
+  transition: transform 0.14s var(--m3e-ease-spring);
+}
+
+#blossom-macro-intro-overlay .blsm-mi-primary {
+  background: var(--md-sys-color-primary, #e891a8);
+  color: var(--md-sys-color-on-primary, #2a0f23);
+}
+
+#blossom-macro-intro-overlay .blsm-mi-ghost {
+  background: var(--md-sys-color-surface-container-high, #1c1519);
+  color: var(--md-sys-color-on-surface, #ece8ea);
+  border: 1px solid var(--md-sys-color-outline-variant, #241a1e);
+}
+
+#blossom-macro-intro-overlay .blsm-mi-skip {
+  background: none;
+  border: none;
+  color: var(--md-sys-color-on-surface-variant, #a8a0a4);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 6px 8px;
+}
+
+html.blsm-reduce-motion #blossom-macro-intro-overlay *,
+html.blsm-reduce-motion #blossom-macro-intro-overlay *::after {
+  animation: none !important;
+  transition-duration: 0.01ms !important;
+}

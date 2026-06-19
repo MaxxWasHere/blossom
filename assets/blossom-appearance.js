@@ -907,7 +907,7 @@
           <header class="blsm-app-section-head">
             <h4>Built-in theme</h4>
             <p class="blsm-theme-fallback-note">Not applied while Custom UI is active — your saved choice is kept as fallback.</p>
-            <p>Eight looks, from true-black OLED to light Sakura — or Match system to follow Windows light/dark.</p>
+            <p>Eight looks, from true-black OLED to light Sakura — or Match system to follow Windows light/dark. Macro Schedule, loading overlay, and update toasts follow the same <code class="blsm-app-code">--md-sys-color-*</code> tokens; timeline zoom is saved per device on the Schedule tab.</p>
           </header>
           <div class="blsm-theme-grid">${themeCards}</div>
         </section>

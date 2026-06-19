@@ -189,12 +189,12 @@ html.blsm-motion-on .sidebar-item {
     padding-left 0.2s ease !important;
 }
 
-html.blsm-motion-on .sidebar-item:hover {
+html.blsm-motion-on .sidebar-nav > .sidebar-item:hover {
   transform: translateX(4px) !important;
 }
 
-html.blsm-motion-on .sidebar-item.active,
-html.blsm-motion-on .sidebar-item.is-active {
+html.blsm-motion-on .sidebar-nav > .sidebar-item.active,
+html.blsm-motion-on .sidebar-nav > .sidebar-item.is-active {
   animation: blsm-slide-in 0.35s var(--blsm-ease-out);
 }
 
@@ -356,11 +356,12 @@ html.blsm-motion-on .sidebar-item {
     transform 0.22s var(--blsm-ease-out) !important;
 }
 
-html.blsm-motion-on .sidebar-item:hover {
+html.blsm-motion-on .sidebar-nav > .sidebar-item:hover {
   transform: translateX(4px) !important;
 }
 
-html.blsm-motion-on .sidebar-item.active {
+html.blsm-motion-on .sidebar-nav > .sidebar-item.active,
+html.blsm-motion-on .sidebar-nav > .sidebar-item.is-active {
   animation: blsm-slide-in 0.38s var(--blsm-ease-out);
 }
 

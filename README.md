@@ -22,7 +22,15 @@ Windows only. If the window is blank, install [WebView2](https://developer.micro
 
 Keep the same launcher shortcut — it checks for updates on each run.
 
-More detail: [`docs/WHAT_IS_BLOSSOM.md`](docs/WHAT_IS_BLOSSOM.md).
+More detail: [What is Blossom?](https://maxxwashere.github.io/blossom.github.io/what-is-blossom.html).
+
+## Documentation
+
+Full guides and credits live on **GitHub Pages**: [maxxwashere.github.io/blossom.github.io](https://maxxwashere.github.io/blossom.github.io/)
+
+- [Getting Started](https://maxxwashere.github.io/blossom.github.io/getting-started.html) — install, calibrate, run
+- [Calibrations](https://maxxwashere.github.io/blossom.github.io/calibrations.html) · [Theming](https://maxxwashere.github.io/blossom.github.io/theming.html) · [Troubleshooting](https://maxxwashere.github.io/blossom.github.io/troubleshooting.html)
+- [Credits](https://maxxwashere.github.io/blossom.github.io/credits.html) — authors, upstream lineage, third-party licenses
 
 ## Common fixes
 
@@ -36,7 +44,7 @@ More detail: [`docs/WHAT_IS_BLOSSOM.md`](docs/WHAT_IS_BLOSSOM.md).
 
 ## Developers
 
-Build and release notes: [`docs/RELEASE_AND_BUILD.md`](docs/RELEASE_AND_BUILD.md), [`docs/UPDATE_RELEASE.md`](docs/UPDATE_RELEASE.md).
+Build and release notes: [Release & build](https://maxxwashere.github.io/blossom.github.io/dev.html) (also on [blossom.github.io](https://github.com/MaxxWasHere/blossom.github.io)).
 
 License worker (beta keys): [`license-server/README.md`](license-server/README.md).
 

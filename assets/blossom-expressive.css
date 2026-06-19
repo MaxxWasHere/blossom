@@ -16,8 +16,8 @@
   --m3e-state-hover: 0.08;
   --m3e-state-pressed: 0.12;
   --m3e-state-focus: 0.12;
-  --m3e-surface-tint: color-mix(in srgb, var(--accent, #e891a8) 5%, var(--bg-card, #161014));
-  --m3e-surface-tint-high: color-mix(in srgb, var(--accent, #e891a8) 9%, var(--bg-card-hover, #1c1519));
+  --m3e-surface-tint: color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 5%, var(--md-sys-color-surface-container, var(--bg-card, #161014)));
+  --m3e-surface-tint-high: color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 9%, var(--md-sys-color-surface-container-high, var(--bg-card-hover, #1c1519)));
 }
 
 /* Expressive shape scale — larger radii when motion is enabled */
@@ -45,10 +45,58 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) {
     transform: translateX(0) scale(1);
   }
   45% {
-    transform: translateX(6px) scale(1.03);
+    transform: translateX(5px) scale(1.03);
   }
   100% {
-    transform: translateX(4px) scale(1);
+    transform: translateX(2px) scale(1.01);
+  }
+}
+
+@keyframes m3e-nav-select-group {
+  0% {
+    transform: translateX(-4px) scale(0.96);
+    opacity: 0.84;
+  }
+  50% {
+    transform: translateX(3px) scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(2px) scale(1.01);
+    opacity: 1;
+  }
+}
+
+@keyframes m3e-nav-deselect {
+  0% {
+    transform: translateX(2px) scale(1.01);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 0.92;
+  }
+}
+
+@keyframes m3e-nav-deselect-group {
+  0% {
+    transform: translateX(2px) scale(1.01);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 14%, transparent);
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    box-shadow: none;
+  }
+}
+
+@keyframes blsm-sidebar-group-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -60,6 +108,40 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) {
   to {
     transform: scale(1);
     opacity: 0;
+  }
+}
+
+@keyframes m3e-shared-axis-forward {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes m3e-shared-axis-back {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes m3e-container-enter {
+  from {
+    opacity: 0;
+    transform: scaleY(0.92);
+    transform-origin: top center;
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -139,34 +221,44 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-trigger,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item {
   position: relative;
   overflow: hidden;
-  border-radius: var(--m3e-r-sm, var(--r-sm)) !important;
+  border-radius: var(--m3-shape-corner-sm, var(--m3e-r-md, var(--r-md, 12px))) !important;
 }
 
 html.blsm-expressive-on:not(.blsm-reduce-motion) .btn::after,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn::after,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-trigger::after,
-html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item::after {
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-nav > .sidebar-item::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: var(--accent, #e891a8);
+  background: var(--md-sys-color-primary, var(--accent, #e891a8));
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--m3e-duration-short) var(--m3e-ease-standard);
 }
 
+html.blsm-expressive-on .sidebar {
+  background: var(--md-sys-color-surface-container-low, var(--bg-sidebar, #100c0e));
+}
+
+html.blsm-expressive-on .sidebar-item.active,
+html.blsm-expressive-on .sidebar-item.is-active {
+  background: color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 14%, var(--md-sys-color-surface-container, transparent));
+  color: var(--md-sys-color-on-surface, var(--text-primary));
+}
+
 html.blsm-expressive-on:not(.blsm-reduce-motion) .btn:hover::after,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn:hover::after,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-trigger:hover::after,
-html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item:hover::after {
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-nav > .sidebar-item:hover::after {
   opacity: var(--m3e-state-hover);
 }
 
 html.blsm-expressive-on:not(.blsm-reduce-motion) .btn:active::after,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .calibration-btn:active::after,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-trigger:active::after,
-html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item:active::after {
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-nav > .sidebar-item:active::after {
   opacity: var(--m3e-state-pressed);
 }
 
@@ -180,8 +272,43 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item:active::after {
   z-index: 1;
 }
 
-/* ——— Card enter (page transition) ——— */
-html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .card,
+/* M3 focus rings */
+html.blsm-expressive-on .btn:focus-visible,
+html.blsm-expressive-on .calibration-btn:focus-visible,
+html.blsm-expressive-on .sidebar-item:focus-visible,
+html.blsm-expressive-on .blossom-dropdown-trigger:focus-visible,
+html.blsm-expressive-on .blsm-license-input:focus-visible,
+html.blsm-expressive-on .blsm-macro-chip:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary, var(--accent));
+  outline-offset: 2px;
+}
+
+/* Container transform for overlays */
+.m3e-container-enter {
+  animation: m3e-container-enter var(--m3e-duration-medium, 300ms) var(--m3e-ease-emphasized-decel) both;
+}
+
+/* Shared-axis page enter */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter.blsm-axis-forward > .page-header {
+  animation: m3e-shared-axis-forward var(--m3e-duration-long) var(--m3e-ease-emphasized-decel) both;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter.blsm-axis-back > .page-header {
+  animation: m3e-shared-axis-back var(--m3e-duration-long) var(--m3e-ease-emphasized-decel) both;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter.blsm-axis-forward > .card,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter.blsm-axis-forward > .blsm-macro-hub {
+  animation: m3e-shared-axis-forward var(--m3e-duration-long) var(--m3e-ease-emphasized-decel) both;
+  animation-delay: calc(var(--blsm-stagger, 0) * 55ms + 80ms);
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter.blsm-axis-back > .card,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter.blsm-axis-back > .blsm-macro-hub {
+  animation: m3e-shared-axis-back var(--m3e-duration-long) var(--m3e-ease-emphasized-decel) both;
+  animation-delay: calc(var(--blsm-stagger, 0) * 55ms + 80ms);
+}
+
 html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .changelog-item,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > #blsm-cal-hub,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-mouse-cal-card {
@@ -189,7 +316,8 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-mouse-
   animation-delay: calc(var(--blsm-stagger, 0) * 70ms + 50ms);
 }
 
-html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .page-header {
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .page-header,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-macro-hub {
   animation: blsm-fade-down var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel) both;
 }
 
@@ -198,12 +326,59 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item.blsm-m3e-nav-ente
   animation: m3e-nav-select var(--m3e-duration-medium) var(--m3e-ease-spring) both;
 }
 
-html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item.active,
-html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item.is-active {
-  transform: translateX(4px) !important;
-  box-shadow:
-    inset 3px 0 0 var(--accent),
-    0 4px 14px color-mix(in srgb, var(--accent, #e891a8) 14%, transparent) !important;
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item.blsm-m3e-nav-enter {
+  animation: m3e-nav-select-group var(--m3e-duration-medium) var(--m3e-ease-spring) both;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-item.blsm-m3e-nav-exit {
+  animation: m3e-nav-deselect var(--m3e-duration-short) var(--m3e-ease-emphasized-accel) both;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item.blsm-m3e-nav-exit {
+  animation: m3e-nav-deselect-group var(--m3e-duration-short) var(--m3e-ease-emphasized-accel) both;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-nav > .sidebar-group {
+  animation: blsm-sidebar-group-enter var(--m3e-duration-long) var(--m3e-ease-emphasized-decel) both;
+  animation-delay: calc(var(--blsm-nav-stagger, 0) * 70ms + 40ms);
+}
+
+/* Grouped nav: state layer on ::before; ::after reserved for selection rail */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--md-sys-color-primary, var(--accent, #e891a8));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--m3e-duration-short) var(--m3e-ease-standard);
+  z-index: 0;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item:hover::before {
+  opacity: var(--m3e-state-hover);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 10%, transparent),
+    transparent 62%
+  );
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item:active::before {
+  opacity: var(--m3e-state-pressed);
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item .icon,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item .blsm-sidebar-item-text,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item .blsm-sidebar-wip-badge {
+  position: relative;
+  z-index: 1;
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item.active,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .sidebar-group .sidebar-item.is-active {
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 14%, transparent) !important;
 }
 
 /* ——— Toggle switches: thumb overshoot ——— */
@@ -276,7 +451,9 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-chevron {
 /* ——— Injected Blossom panels ——— */
 html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-cal-hub,
 html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-biome-webhooks-hub,
-html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-appearance-card {
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-appearance-card,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-macro-hub,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-macro-flow-step {
   border-radius: var(--m3e-r-lg, var(--r-lg)) !important;
 }
 

@@ -29,6 +29,11 @@ and inherits from the original Noteab biome macro.
   Noteab / Coteab UI.
   <https://maxstellar.github.io/biome_thumb/>
 
+## Third-party software
+
+See [Credits](https://maxxwashere.github.io/blossom.github.io/credits.html) for Python dependencies, UI libraries,
+fonts, and build tools.
+
 ## Redistribution
 
 If you redistribute Blossom or a derivative, keep this upstream credit intact

@@ -5,10 +5,19 @@ from __future__ import annotations
 import queue
 import sys
 import threading
+import time
 import tkinter as tk
 import tkinter.font as tkfont
 from pathlib import Path
 from typing import Callable
+
+from blossom_m3_loading import (
+    M3LoadingAnimator,
+    draw_capsule,
+    indeterminate_progress_window,
+    polygon_points,
+    progress_layout,
+)
 
 _WINDOW_W = 400
 _WINDOW_H = 300
@@ -21,6 +30,7 @@ _BG_ROOT = "#0a0809"
 _BG_CARD = "#161014"
 _BG_TRACK = "#241a1e"
 _ACCENT = "#e891a8"
+_ACCENT_CONTAINER = "#241a1e"
 _ACCENT_DIM = "#c46d88"
 _TEXT = "#ece8ea"
 _TEXT_MUTED = "#6e6468"
@@ -74,6 +84,10 @@ class BootstrapUI:
         self._anim_phase = 0.0
         self._anim_job: str | None = None
         self._fade_job: str | None = None
+        self._m3_anim = M3LoadingAnimator()
+        self._indicator_canvas: tk.Canvas | None = None
+        self._indicator_wrap: tk.Frame | None = None
+        self._progress_wrap: tk.Frame | None = None
         self._drag_x = 0
         self._drag_y = 0
         self._logo_image: tk.PhotoImage | None = None
@@ -133,12 +147,17 @@ class BootstrapUI:
 
     def _set_progress_impl(self, downloaded: int, total: int) -> None:
         if total > 0:
+            was_indeterminate = self._indeterminate
             self._indeterminate = False
+            if was_indeterminate:
+                self._progress = 0.0
             self._progress = max(0.0, min(1.0, downloaded / total))
             self._bytes_text = f"{_fmt_bytes(downloaded)} / {_fmt_bytes(total)}"
         else:
             self._indeterminate = True
+            self._progress = 0.0
             self._bytes_text = _fmt_bytes(downloaded) if downloaded else ""
+        self._sync_indicator_visibility()
         self._redraw_progress()
 
     def _set_indeterminate_impl(self, active: bool) -> None:
@@ -146,6 +165,7 @@ class BootstrapUI:
         if self._indeterminate:
             self._progress = 0.0
             self._bytes_text = ""
+        self._sync_indicator_visibility()
         self._redraw_progress()
 
     def _show_error_impl(self, message: str) -> None:
@@ -154,6 +174,7 @@ class BootstrapUI:
         self._indeterminate = False
         self._error_var.set(message.strip())
         self._message_var.set("Something went wrong")
+        self._sync_indicator_visibility()
         self._redraw_progress()
 
     def _schedule_close_impl(self, delay_ms: int) -> None:
@@ -272,38 +293,65 @@ class BootstrapUI:
         btn.bind("<Leave>", lambda _e: btn.configure(bg=_BG_CARD, fg=_TEXT_MUTED))
         return btn
 
+    def _sync_indicator_visibility(self) -> None:
+        wrap = self._indicator_wrap
+        progress = self._progress_wrap
+        if wrap is None or progress is None:
+            return
+        has_error = bool(self._error_var is not None and self._error_var.get())
+        show = self._indeterminate and not has_error
+        if show:
+            if not wrap.winfo_ismapped():
+                wrap.pack(before=progress, pady=(0, 8))
+        else:
+            wrap.pack_forget()
+
+    def _redraw_indicator(self) -> None:
+        canvas = self._indicator_canvas
+        if canvas is None:
+            return
+        canvas.delete("all")
+        size = 48
+        cx = cy = size / 2
+        canvas.create_oval(1, 1, size - 1, size - 1, fill=_ACCENT_CONTAINER, outline="")
+        morph = self._m3_anim.morph if self._m3_anim.morph else 6.0
+        rotation = self._m3_anim.rotation
+        pts = polygon_points(morph, rotation, size=float(size))
+        flat = [coord for point in pts for coord in point]
+        if len(flat) >= 6:
+            canvas.create_polygon(flat, fill=_ACCENT, outline="")
+
     def _redraw_progress(self) -> None:
         canvas = getattr(self, "_progress_canvas", None)
         if canvas is None:
             return
         canvas.delete("all")
         width = max(canvas.winfo_width(), 2)
-        height = max(canvas.winfo_height(), 2)
-        pad = 1
-        track_y1 = pad
-        track_y2 = height - pad
-        canvas.create_rectangle(
-            0, track_y1, width, track_y2, fill=_BG_TRACK, outline=_BORDER, width=0
-        )
+        height = max(canvas.winfo_height(), 24)
+        geom = progress_layout(float(width), float(height))
+        track_x0 = geom["track_x0"]
+        track_x1 = geom["track_x1"]
+        track_y = geom["track_y"]
+        fill_h = geom["fill_h"]
+        padding_x = geom["padding_x"]
+        usable = geom["usable"]
 
         if self._error_var is not None and self._error_var.get():
             return
 
+        draw_capsule(canvas, track_x0, track_x1, track_y, fill_h, _TEXT_MUTED)
+
         if self._indeterminate:
-            span = max(36, int(width * 0.28))
-            offset = int((width + span) * self._anim_phase) - span
-            x1 = max(0, offset)
-            x2 = min(width, offset + span)
-            if x2 > x1:
-                canvas.create_rectangle(x1, track_y1, x2, track_y2, fill=_ACCENT, outline="")
-            if self._anim_job is None and not self._close_scheduled:
-                self._schedule_anim()
+            x0, x1 = indeterminate_progress_window(
+                float(width), self._anim_phase, padding_x=padding_x, usable=usable
+            )
+            if x1 > x0:
+                draw_capsule(canvas, x0, x1, track_y, fill_h, _ACCENT)
         else:
-            fill_w = max(0, int(width * self._progress))
-            if fill_w > 0:
-                canvas.create_rectangle(
-                    0, track_y1, fill_w, track_y2, fill=_ACCENT, outline=""
-                )
+            progress = max(0.0, min(1.0, self._progress))
+            if progress > 0.0005:
+                head_x = padding_x + usable * progress
+                draw_capsule(canvas, track_x0, head_x, track_y, fill_h, _ACCENT)
 
         meta = getattr(self, "_progress_meta", None)
         if meta is not None:
@@ -320,18 +368,25 @@ class BootstrapUI:
 
     def _schedule_anim(self) -> None:
         root = self._root
-        if root is None or self._closed.is_set() or not self._indeterminate:
+        if root is None or self._closed.is_set():
             return
 
         def _tick() -> None:
-            if self._closed.is_set() or not self._indeterminate:
+            if self._closed.is_set():
                 self._anim_job = None
                 return
-            self._anim_phase = (self._anim_phase + 0.04) % 1.0
-            self._redraw_progress()
-            self._anim_job = root.after(40, _tick)
+            now_ms = time.monotonic() * 1000.0
+            if self._indeterminate:
+                self._anim_phase = (self._anim_phase + 0.022) % 1.0
+                self._m3_anim.update(now_ms)
+                self._redraw_indicator()
+            has_error = bool(self._error_var is not None and self._error_var.get())
+            if not has_error:
+                self._redraw_progress()
+            self._anim_job = root.after(16, _tick)
 
-        self._anim_job = root.after(40, _tick)
+        if self._anim_job is None:
+            self._anim_job = root.after(16, _tick)
 
     def _build_ui(self) -> None:
         root = self._root
@@ -439,12 +494,24 @@ class BootstrapUI:
             justify="center",
         ).pack(pady=(0, 8))
 
+        self._indicator_wrap = tk.Frame(content, bg=_BG_ROOT)
+        self._indicator_canvas = tk.Canvas(
+            self._indicator_wrap,
+            width=48,
+            height=48,
+            bg=_BG_ROOT,
+            highlightthickness=0,
+            bd=0,
+        )
+        self._indicator_canvas.pack()
+
         progress_wrap = tk.Frame(content, bg=_BG_ROOT)
+        self._progress_wrap = progress_wrap
         progress_wrap.pack(fill="x", pady=(8, 4))
 
         self._progress_canvas = tk.Canvas(
             progress_wrap,
-            height=8,
+            height=24,
             bg=_BG_ROOT,
             highlightthickness=0,
             bd=0,
@@ -473,6 +540,8 @@ class BootstrapUI:
         if self._version:
             self._set_version_impl(self._version)
 
+        self._sync_indicator_visibility()
+        self._redraw_indicator()
         self._redraw_progress()
         self._schedule_anim()
 

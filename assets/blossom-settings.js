@@ -32,6 +32,7 @@
     { label: "Auras", tab: "Auras" },
     { label: "Automated Actions", tab: "Automated" },
     { label: "Macro Status", tab: "Macro Status" },
+    { label: "Schedule", tab: "Macro Schedule" },
     { label: "Movements", tab: "Movements" },
     { label: "Webhook", tab: "Webhook" },
   ];
@@ -57,7 +58,13 @@
       btn.type = "button";
       btn.className = item.primary ? "btn btn-accent" : "btn btn-secondary";
       btn.textContent = item.label;
-      btn.addEventListener("click", () => goToTab?.(item.tab));
+      btn.addEventListener("click", () => {
+        if (item.tab === "Macro Schedule" && window.BlossomScheduleTab?.open) {
+          window.BlossomScheduleTab.open();
+          return;
+        }
+        goToTab?.(item.tab);
+      });
       grid.appendChild(btn);
     }
     const { parent, before } = mountTarget;
@@ -156,16 +163,51 @@
     void loadState();
   };
 
+  const mountOnboardingReplay = (mountTarget) => {
+    if (!mountTarget || document.getElementById("blossom-onboarding-replay")) return;
+
+    const panel = document.createElement("div");
+    panel.id = "blossom-onboarding-replay";
+    panel.className = "card";
+    panel.style.marginBottom = "16px";
+    panel.innerHTML = `
+      <div class="card-header">
+        <div class="card-icon">🌸</div>
+        <div><h3>Onboarding setup</h3><p>Replay the first-run guides</p></div>
+      </div>
+      <div style="padding:16px 20px 20px;display:flex;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="btn btn-secondary" data-replay-intro>Replay welcome setup</button>
+        <button type="button" class="btn btn-secondary" data-replay-schedule-tour>Replay schedule setup</button>
+      </div>
+    `;
+
+    panel.querySelector("[data-replay-intro]")?.addEventListener("click", () => {
+      window.BlossomIntro?.open?.();
+    });
+    panel.querySelector("[data-replay-schedule-tour]")?.addEventListener("click", () => {
+      window.BlossomScheduleTab?.open?.();
+      setTimeout(() => window.BlossomScheduleTour?.open?.(), 120);
+    });
+
+    const { parent, before } = mountTarget;
+    const windowPanel = document.getElementById(WINDOW_PANEL_ID);
+    const insertBefore = windowPanel?.nextSibling || before;
+    if (insertBefore) parent.insertBefore(panel, insertBefore);
+    else parent.appendChild(panel);
+  };
+
   const sync = () => {
     if (!isSettingsPage()) {
       document.getElementById(PANEL_ID)?.remove();
       document.getElementById(WINDOW_PANEL_ID)?.remove();
+      document.getElementById("blossom-onboarding-replay")?.remove();
       return;
     }
     const target = findInsertTarget();
     if (!target) return;
     mountShortcuts(target);
     mountWindowSettings(target);
+    mountOnboardingReplay(target);
     document.getElementById(WINDOW_PANEL_ID)?._blossomLoadAot?.();
     window.BlossomHotkeys?.syncHotkeys?.();
   };

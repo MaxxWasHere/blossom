@@ -3,7 +3,7 @@
   const STYLE_ID = "blossom-intro-style";
   // Bump this whenever the intro changes — it re-shows for everyone (and self-heals
   // past dismissals where only the old boolean `intro_completed` was stored).
-  const INTRO_VERSION = 4;
+  const INTRO_VERSION = 5;
   const DONE_KEY = "intro_version";
 
   const api = () => window.pywebview?.api;
@@ -27,174 +27,15 @@
     return Math.max(0, Math.round(r.bottom));
   };
 
-  const injectStyles = () => {
-    if (document.getElementById(STYLE_ID)) return;
-    const s = document.createElement("style");
-    s.id = STYLE_ID;
-    s.textContent = `
-      #${OVERLAY_ID} {
-        position: fixed; left: 0; right: 0; bottom: 0; top: 40px;
-        z-index: 900; display: flex; align-items: center; justify-content: center;
-        overflow: hidden; font-family: Sarpanch, Inter, -apple-system, "Segoe UI", sans-serif;
-        color: var(--text-primary, #e7e3f1);
-        animation: blsm-in .35s ease both;
-      }
-      @keyframes blsm-in { from { opacity: 0 } to { opacity: 1 } }
-      #${OVERLAY_ID} .blsm-bg { position: absolute; inset: 0; background: var(--bg-root, #0a0a10); }
-      #${OVERLAY_ID} .blsm-aurora {
-        position: absolute; border-radius: 50%; filter: blur(80px); opacity: .26; mix-blend-mode: screen;
-        animation: blsm-drift 22s ease-in-out infinite alternate;
-      }
-      #${OVERLAY_ID} .a1 { width: 42vw; height: 42vw; left: -8vw; top: -14vw; background: radial-gradient(circle, #e87cc0, transparent 64%); }
-      #${OVERLAY_ID} .a2 { width: 38vw; height: 38vw; right: -10vw; top: 4vw; background: radial-gradient(circle, #e891a8, transparent 64%); animation-duration: 26s; }
-      #${OVERLAY_ID} .a3 { width: 34vw; height: 34vw; left: 22vw; bottom: -16vw; background: radial-gradient(circle, #5bd6f5, transparent 64%); animation-duration: 30s; opacity: .18; }
-      @keyframes blsm-drift {
-        0%   { transform: translate(0,0) scale(1); }
-        50%  { transform: translate(3vw,2vw) scale(1.12); }
-        100% { transform: translate(-2vw,-1vw) scale(.95); }
-      }
-      #${OVERLAY_ID} .blsm-petal { position: absolute; top: -8%; width: 11px; height: 11px; border-radius: 60% 0 60% 0;
-        background: linear-gradient(140deg, #ffd9ef, #e87cc0); opacity: .0; animation: blsm-fall linear infinite; }
-      @keyframes blsm-fall {
-        0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
-        12% { opacity: .8; }
-        100% { transform: translateY(112vh) rotate(540deg); opacity: 0; }
-      }
-
-      #${OVERLAY_ID} .blsm-card {
-        position: relative; z-index: 2; width: min(640px, 94vw);
-        background: linear-gradient(180deg, rgba(26,23,38,.95), rgba(17,15,26,.96));
-        border: 1px solid rgba(255,255,255,.10);
-        border-radius: 18px; box-shadow: 0 24px 64px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.04);
-        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
-        display: flex; flex-direction: column; overflow: hidden;
-        animation: blsm-pop .5s cubic-bezier(.16,1,.3,1) both;
-      }
-      @keyframes blsm-pop { from { opacity: 0; transform: translateY(20px) scale(.97); } to { opacity: 1; transform: none; } }
-
-      #${OVERLAY_ID} .blsm-progress { display: flex; gap: 7px; padding: 18px 24px 4px; align-items: center; }
-      #${OVERLAY_ID} .blsm-dot { height: 6px; width: 6px; border-radius: 999px; background: rgba(255,255,255,.18);
-        transition: width .45s cubic-bezier(.16,1,.3,1), background .45s ease; }
-      #${OVERLAY_ID} .blsm-dot.is-active { width: 26px; background: linear-gradient(90deg, #f3a9d8, #e07cc0); }
-      #${OVERLAY_ID} .blsm-dot.is-done { background: rgba(232,124,192,.5); }
-
-      #${OVERLAY_ID} .blsm-viewport { position: relative; min-height: 366px; }
-      #${OVERLAY_ID} .blsm-slide {
-        position: absolute; inset: 0; padding: 14px 30px 6px; display: flex; flex-direction: column;
-        opacity: 0; transform: translateX(46px) scale(.95); pointer-events: none;
-        transition: opacity .5s ease, transform .6s cubic-bezier(.16,1,.3,1); overflow-y: auto;
-      }
-      #${OVERLAY_ID} .blsm-slide.is-active { opacity: 1; transform: none; pointer-events: auto; }
-      #${OVERLAY_ID} .blsm-slide.is-prev { transform: translateX(-46px) scale(.95); }
-
-      #${OVERLAY_ID} .blsm-stagger { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .55s cubic-bezier(.16,1,.3,1); }
-      #${OVERLAY_ID} .is-active .blsm-stagger { opacity: 1; transform: none; }
-      #${OVERLAY_ID} .is-active .blsm-stagger:nth-child(1) { transition-delay: .08s; }
-      #${OVERLAY_ID} .is-active .blsm-stagger:nth-child(2) { transition-delay: .15s; }
-      #${OVERLAY_ID} .is-active .blsm-stagger:nth-child(3) { transition-delay: .22s; }
-      #${OVERLAY_ID} .is-active .blsm-stagger:nth-child(4) { transition-delay: .29s; }
-      #${OVERLAY_ID} .is-active .blsm-stagger:nth-child(5) { transition-delay: .36s; }
-      #${OVERLAY_ID} .is-active .blsm-stagger:nth-child(6) { transition-delay: .43s; }
-
-      #${OVERLAY_ID} .blsm-logo { width: 74px; height: 74px; border-radius: 20px; object-fit: cover; align-self: center;
-        box-shadow: 0 10px 24px rgba(0,0,0,.35); animation: blsm-float 5s ease-in-out infinite; }
-      @keyframes blsm-float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-9px) rotate(2deg); } }
-      #${OVERLAY_ID} .blsm-eyebrow { text-align: center; font-size: 11px; letter-spacing: .22em; text-transform: uppercase;
-        color: #e89bd0; font-weight: 700; margin-top: 14px; }
-      #${OVERLAY_ID} h1 { text-align: center; margin: 6px 0 6px; font-size: 30px; font-weight: 800; letter-spacing: .3px;
-        background: linear-gradient(90deg, #ffe3f3, #f3a9d8 55%, #c5a8ff); -webkit-background-clip: text; background-clip: text; color: transparent; }
-      #${OVERLAY_ID} h2 { margin: 2px 0 14px; font-size: 21px; font-weight: 800; }
-      #${OVERLAY_ID} .blsm-lead { text-align: center; color: var(--text-secondary, #b4adc4); font-size: 13.5px; line-height: 1.6; max-width: 460px; align-self: center; }
-      #${OVERLAY_ID} .blsm-icon { font-size: 26px; }
-      #${OVERLAY_ID} .blsm-slide-head { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-      #${OVERLAY_ID} .blsm-slide-head .ring { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center;
-        background: rgba(232,124,192,.12); border: 1px solid rgba(232,124,192,.3); }
-      #${OVERLAY_ID} .blsm-slide-head .sub { color: var(--text-secondary, #b4adc4); font-size: 12.5px; }
-
-      #${OVERLAY_ID} .blsm-field { margin-top: 16px; }
-      #${OVERLAY_ID} .blsm-field label { display: block; font-size: 12px; font-weight: 700; color: #ddd2ea; margin-bottom: 7px; }
-      #${OVERLAY_ID} input[type="text"] { width: 100%; box-sizing: border-box; padding: 12px 13px; font-size: 13px;
-        color: #f3f0f7; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; outline: none;
-        transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; font-family: inherit; }
-      #${OVERLAY_ID} input[type="text"]:focus { border-color: rgba(232,124,192,.6); background: rgba(255,255,255,.06);
-        box-shadow: 0 0 0 3px rgba(232,124,192,.12); }
-      #${OVERLAY_ID} .hint { margin-top: 7px; font-size: 11.5px; color: var(--text-muted, #8b85a0); line-height: 1.5; }
-      #${OVERLAY_ID} .blsm-inline { display: flex; gap: 9px; margin-top: 10px; }
-      #${OVERLAY_ID} .blsm-test { white-space: nowrap; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,.14);
-        background: rgba(255,255,255,.05); color: #ddd2ea; font-weight: 700; font-size: 12px; cursor: pointer; transition: all .15s ease; }
-      #${OVERLAY_ID} .blsm-test:hover { border-color: rgba(232,124,192,.5); color: #fff; }
-
-      #${OVERLAY_ID} .blsm-auto { display: grid; gap: 10px; margin-top: 14px; }
-      #${OVERLAY_ID} .blsm-row { display: flex; align-items: center; gap: 13px; padding: 13px 15px; cursor: pointer;
-        border: 1px solid rgba(255,255,255,.10); border-radius: 14px; background: rgba(255,255,255,.03);
-        transition: border-color .18s ease, background .18s ease, transform .18s ease; }
-      #${OVERLAY_ID} .blsm-row:hover { border-color: rgba(232,124,192,.4); transform: translateX(3px); }
-      #${OVERLAY_ID} .blsm-row .emoji { font-size: 20px; width: 26px; text-align: center; }
-      #${OVERLAY_ID} .blsm-row .txt { flex: 1; }
-      #${OVERLAY_ID} .blsm-row .txt b { display: block; font-size: 13.5px; }
-      #${OVERLAY_ID} .blsm-row .txt span { font-size: 11.5px; color: var(--text-muted, #8b85a0); }
-      #${OVERLAY_ID} .blsm-switch { position: relative; width: 42px; height: 24px; border-radius: 999px; flex-shrink: 0;
-        background: rgba(255,255,255,.14); transition: background .22s ease; }
-      #${OVERLAY_ID} .blsm-switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px;
-        border-radius: 50%; background: #fff; transition: transform .26s cubic-bezier(.16,1,.3,1); box-shadow: 0 2px 6px rgba(0,0,0,.4); }
-      #${OVERLAY_ID} .blsm-row.on .blsm-switch { background: linear-gradient(90deg, #f3a9d8, #e07cc0); }
-      #${OVERLAY_ID} .blsm-row.on .blsm-switch::after { transform: translateX(18px); }
-
-      #${OVERLAY_ID} .blsm-features { margin-top: 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-      #${OVERLAY_ID} .blsm-feature { display: flex; gap: 10px; padding: 11px 12px; border-radius: 13px;
-        background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08); }
-      #${OVERLAY_ID} .blsm-feature .fi { font-size: 19px; line-height: 1; }
-      #${OVERLAY_ID} .blsm-feature b { display: block; font-size: 12.5px; margin-bottom: 2px; }
-      #${OVERLAY_ID} .blsm-feature span { font-size: 11px; color: var(--text-muted, #8b85a0); line-height: 1.45; }
-
-      #${OVERLAY_ID} .blsm-themes { margin-top: 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
-      #${OVERLAY_ID} .blsm-theme { display: flex; align-items: center; gap: 9px; padding: 10px 11px; cursor: pointer;
-        border-radius: 12px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.03);
-        color: var(--text-secondary, #b4adc4); font: inherit; font-size: 12px; font-weight: 600; text-align: left;
-        transition: border-color .15s ease, background .15s ease, transform .14s var(--blsm-ease); }
-      #${OVERLAY_ID} .blsm-theme:hover { transform: translateY(-1px); border-color: rgba(232,124,192,.4); }
-      #${OVERLAY_ID} .blsm-theme .sw { width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
-        background: var(--sw, #e891a8); box-shadow: 0 0 0 2px rgba(255,255,255,.08); }
-      #${OVERLAY_ID} .blsm-theme.is-sel { border-color: var(--sw, #e87cc0); color: #fff;
-        background: color-mix(in srgb, var(--sw, #e87cc0) 16%, transparent); }
-
-      #${OVERLAY_ID} .blsm-tips { margin-top: 14px; display: grid; gap: 9px; }
-      #${OVERLAY_ID} .blsm-tip { display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; line-height: 1.5;
-        color: var(--text-secondary, #b4adc4); }
-      #${OVERLAY_ID} .blsm-tip .ti { color: #e89bd0; font-weight: 800; }
-
-      #${OVERLAY_ID} .blsm-summary { margin-top: 14px; display: grid; gap: 9px; }
-      #${OVERLAY_ID} .blsm-summary .item { display: flex; justify-content: space-between; gap: 12px; padding: 11px 14px;
-        border-radius: 12px; background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.08); font-size: 13px; }
-      #${OVERLAY_ID} .blsm-summary .item span:first-child { color: var(--text-secondary, #b4adc4); }
-      #${OVERLAY_ID} .blsm-summary .item b { color: #fff; text-align: right; max-width: 60%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-      #${OVERLAY_ID} .blsm-status { padding: 0 30px; min-height: 17px; font-size: 12px; color: #e89bd0; text-align: center; }
-      #${OVERLAY_ID} .blsm-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 24px 22px; }
-      #${OVERLAY_ID} .blsm-btn { border: none; cursor: pointer; font-family: inherit; font-weight: 700; font-size: 13px; padding: 11px 22px;
-        border-radius: 12px; transition: transform .14s ease, filter .18s ease, opacity .18s ease; }
-      #${OVERLAY_ID} .blsm-btn:hover { transform: translateY(-1px); }
-      #${OVERLAY_ID} .blsm-btn[disabled] { opacity: .4; cursor: default; transform: none; }
-      #${OVERLAY_ID} .blsm-ghost { background: rgba(255,255,255,.06); color: #ddd2ea; }
-      #${OVERLAY_ID} .blsm-ghost:hover { background: rgba(255,255,255,.1); }
-      #${OVERLAY_ID} .blsm-primary { background: linear-gradient(180deg, #f0a3d4, #d873b8); color: #2a0f23;
-        box-shadow: 0 6px 16px rgba(216,115,184,.28); }
-      #${OVERLAY_ID} .blsm-text-link { background: none; border: none; color: var(--text-muted, #8b85a0); cursor: pointer;
-        font-family: inherit; font-size: 12px; text-decoration: underline; padding: 6px; }
-      #${OVERLAY_ID} .blsm-text-link:hover { color: #ddd2ea; }
-      @media (prefers-reduced-motion: reduce) {
-        #${OVERLAY_ID} *, #${OVERLAY_ID} *::after { animation: none !important; transition-duration: .01ms !important; }
-      }
-    `;
-    document.head.appendChild(s);
-  };
+  const injectStyles = () => {};
 
   const close = () => {
     const o = document.getElementById(OVERLAY_ID);
     if (!o) return;
-    o.style.animation = "blsm-in .25s ease reverse both";
+    o.style.animation = "blsm-intro-fade 0.25s ease reverse both";
     setTimeout(() => o.remove(), 220);
     document.removeEventListener("keydown", onKey);
+    window.dispatchEvent(new CustomEvent("blossom-intro-done"));
   };
 
   let state = { idx: 0, count: 0, config: {} };
@@ -235,7 +76,7 @@
     const curTheme = normalizeIntroTheme(config.ui_theme || config.selected_theme);
     const themeBtns = THEMES.map(
       ([id, label, sw]) =>
-        `<button type="button" class="blsm-theme ${id === curTheme ? "is-sel" : ""}" data-theme-val="${id}" style="--sw:${sw}"><span class="sw"></span>${label}</button>`
+        `<button type="button" class="blsm-theme ${id === curTheme ? "is-sel" : ""}" data-theme-val="${id}" aria-pressed="${id === curTheme}" style="--sw:${sw}"><span class="sw" aria-hidden="true"></span><span class="blsm-theme-label">${label}</span></button>`
     ).join("");
     const overlay = document.createElement("div");
     overlay.id = OVERLAY_ID;
@@ -320,13 +161,16 @@
               <div class="blsm-row ${config.merchant_teleporter ? "on" : ""}" data-key="merchant_teleporter">
                 <span class="emoji">${ICO("cart", "🛒")}</span><div class="txt"><b>Auto Merchant</b><span>Teleport, talk & buy from Mari / Jester.</span></div><div class="blsm-switch"></div>
               </div>
+              <div class="blsm-row ${config.fishing_mode ? "on" : ""}" data-key="fishing_mode">
+                <span class="emoji">${ICO("fish", "🎣")}</span><div class="txt"><b>Fishing Mode</b><span>Auto cast, reel, sell, and dock trips.</span></div><div class="blsm-switch"></div>
+              </div>
               <div class="blsm-row ${config.auto_claim_daily_quests ? "on" : ""}" data-key="auto_claim_daily_quests">
                 <span class="emoji">${ICO("scroll", "📜")}</span><div class="txt"><b>Daily Quests</b><span>Auto-claim daily quest rewards.</span></div><div class="blsm-switch"></div>
               </div>
               <div class="blsm-row ${config.biome_randomizer ? "on" : ""}" data-key="biome_randomizer">
                 <span class="emoji">${ICO("dice", "🎲")}</span><div class="txt"><b>Biome Randomizer</b><span>Use Biome Randomizers on a timer.</span></div><div class="blsm-switch"></div>
               </div>
-              <div class="blsm-row ${config.biome_selector ? "on" : ""}" data-key="biome_selector">
+              <div class="blsm-row blsm-row-disabled" data-key="biome_selector" data-disabled="1">
                 <span class="emoji">${ICO("compass", "🧭")}</span><div class="txt"><b>Biome Selector <span style="color:#ff6b6b;">(Broken / W.I.P.)</span></b><span>Unfinished — leave off for now.</span></div><div class="blsm-switch"></div>
               </div>
               <div class="blsm-row ${config.strange_controller ? "on" : ""}" data-key="strange_controller">
@@ -399,7 +243,13 @@
       selected_theme: normalizeIntroTheme(overlay.dataset.theme || "system"),
     };
     overlay.querySelectorAll(".blsm-row").forEach((row) => {
-      patch[row.getAttribute("data-key")] = row.classList.contains("on");
+      const key = row.getAttribute("data-key");
+      if (key === "biome_selector") {
+        patch[key] = false;
+        return;
+      }
+      if (row.getAttribute("data-disabled")) return;
+      patch[key] = row.classList.contains("on");
     });
     return { webhook, patch };
   };
@@ -413,6 +263,7 @@
       ["Webhook", webhook ? "Connected" : "Skipped"],
       ["Roblox user", patch.roblox_username || "—"],
       ["Auto Merchant", yn(patch.merchant_teleporter)],
+      ["Fishing Mode", yn(patch.fishing_mode)],
       ["Daily Quests", yn(patch.auto_claim_daily_quests)],
       ["Biome Randomizer", yn(patch.biome_randomizer)],
       ["Biome Selector", yn(patch.biome_selector)],
@@ -423,7 +274,10 @@
     const host = overlay.querySelector('[data-role="summary"]');
     if (host) {
       host.innerHTML = rows
-        .map(([k, v]) => `<div class="item"><span>${k}</span><b>${esc(v)}</b></div>`)
+        .map(
+          ([k, v]) =>
+            `<div class="item"><span>${esc(k)}</span><b>${esc(v)}</b></div>`
+        )
         .join("");
     }
   };
@@ -437,7 +291,9 @@
 
     injectStyles();
     const overlay = render(config);
-    overlay.style.top = titlebarHeight() + "px";
+    const top = titlebarHeight();
+    overlay.style.top = top + "px";
+    overlay.style.setProperty("--blsm-intro-top", top + "px");
     document.body.appendChild(overlay);
     spawnPetals(overlay);
 
@@ -497,12 +353,20 @@
       if (themeBtn && overlay.contains(themeBtn)) {
         const val = themeBtn.getAttribute("data-theme-val");
         overlay.dataset.theme = val;
-        overlay.querySelectorAll(".blsm-theme").forEach((b) => b.classList.toggle("is-sel", b === themeBtn));
-        document.body.setAttribute("data-theme", val); // live preview
+        overlay.querySelectorAll(".blsm-theme").forEach((b) => {
+          const on = b === themeBtn;
+          b.classList.toggle("is-sel", on);
+          b.setAttribute("aria-pressed", on ? "true" : "false");
+        });
+        document.body.setAttribute("data-theme", val);
         return;
       }
       const row = e.target.closest?.(".blsm-row");
-      if (row && overlay.contains(row)) { row.classList.toggle("on"); return; }
+      if (row && overlay.contains(row)) {
+        if (row.getAttribute("data-disabled")) return;
+        row.classList.toggle("on");
+        return;
+      }
       const act = e.target?.getAttribute?.("data-act");
       if (!act) return;
       if (act === "next") { state.idx === state.count - 1 ? finish() : go(1); }
@@ -532,6 +396,19 @@
     if (config[DONE_KEY] !== INTRO_VERSION) await open();
   };
 
-  if (window.pywebview?.api) boot();
-  else window.addEventListener("pywebviewready", boot, { once: true });
+  const scheduleBoot = () => {
+    const run = () => {
+      if (window.BlossomLicense?.whenReady) {
+        window.BlossomLicense.whenReady(() => void boot());
+        return;
+      }
+      void boot();
+    };
+    if (window.pywebview?.api) run();
+    else window.addEventListener("pywebviewready", run, { once: true });
+  };
+
+  window.BlossomIntro = { open, INTRO_VERSION };
+
+  scheduleBoot();
 })();

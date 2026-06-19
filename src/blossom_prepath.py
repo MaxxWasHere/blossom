@@ -105,7 +105,6 @@ def path_playback_multiplier_from_config(*, default: float = 1.0) -> float:
     for key in (
         "path_playback_multiplier",
         "obby_playback_multiplier",
-        "egg_playback_multiplier",
         "fishing_playback_multiplier",
     ):
         raw = config.get(key)

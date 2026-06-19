@@ -1,0 +1,119 @@
+.blsm-macro-schedule {
+  margin-bottom: 14px;
+  border-radius: var(--m3-shape-corner-md, 16px);
+}
+
+.blsm-macro-schedule.card {
+  background: var(--md-sys-color-surface-container, var(--bg-card));
+  border-color: var(--md-sys-color-outline-variant, var(--border));
+}
+
+.blsm-macro-schedule .card-header p {
+  margin: 4px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.blsm-schedule-body {
+  padding: 0 14px 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.blsm-schedule-toggle {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  cursor: pointer;
+}
+
+.blsm-schedule-toggle input {
+  margin-top: 3px;
+}
+
+.blsm-schedule-toggle span {
+  display: grid;
+  gap: 2px;
+}
+
+.blsm-schedule-toggle span span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.blsm-schedule-steps {
+  display: grid;
+  gap: 8px;
+}
+
+.blsm-schedule-step {
+  display: grid;
+  grid-template-columns: 28px 1fr auto 32px;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--r-md, 12px);
+  background: var(--bg-card, rgba(255, 255, 255, 0.02));
+}
+
+.blsm-schedule-step-num {
+  font-weight: 700;
+  color: var(--accent, #ecbaba);
+  text-align: center;
+}
+
+.blsm-schedule-activity {
+  width: 100%;
+  min-width: 0;
+}
+
+.blsm-schedule-duration {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.blsm-schedule-duration input {
+  width: 52px;
+  text-align: center;
+}
+
+.blsm-schedule-remove {
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 8px;
+  padding: 2px 6px;
+}
+
+.blsm-schedule-remove:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.blsm-schedule-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.blsm-schedule-live {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.blsm-schedule-live.is-running {
+  color: var(--accent-text, var(--accent, #ecbaba));
+}
+
+html.blsm-reduce-motion .blsm-schedule-step {
+  transition: none;
+}

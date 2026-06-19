@@ -1,25 +1,70 @@
-# Blossom 2.2.4
+# Blossom 2.3.0
+
+## New
+- Schedule profiles — save multiple named automation plans (e.g. Weekday fish, Weekend grind) from the Macro Schedule tab. Pick a profile card to edit its timeline, or tap **Add profile** for a new plan. **Save** stores the profile and sets it as the active plan that runs when **Use schedule when macro runs** is on.
+- Macro Schedule tab — dedicated **Schedule** sidebar section with a horizontal timeline editor (time flows left→right). Drag blocks by the body to reorder, drag palette chips to add steps, resize left/right edges to remap duration, zoom the timeline with +/− or the slider, right-click for Properties / Duplicate / Delete, then enable **Use schedule when macro runs** and press Start.
+- Calibrations apply immediately — every Mark saves to your Blossom config and the macro reads updated points on the next tick without restarting.
 
 ## UI
-- Pink Blush and Midnight Rose — Sakura and Midnight built-in themes now follow the M3 Expressive Pink Blush design system: Plus Jakarta Sans typography, rose-tinted surfaces (#fff8f7 light / deep rose-black dark), blossom pink primary (#7b5455 / #ecbaba), soft ambient pink shadows, and larger M3 radii (4 / 12 / 16 / 24 px).
+- Macro Schedule marked W.I.P. — the Schedule sidebar section, nav item, and tab page show clear experimental labeling (badge, subtitle, and warning banner). The planner is unfinished and may not run correctly when the macro is started; profiles and timeline editing are preview-only until the feature stabilizes.
+- Sidebar category lanes — grouped nav uses soft inset tonal rails with a left selection glow instead of bordered cards. Section labels and items are left-aligned within the optically centered column; gradient dividers separate MACROS, SETUP, and Schedule lanes.
+- Sidebar selection motion — switching categories now animates both the incoming and outgoing active item (spring select + eased deselect) within and across groups. Respects Reduce motion.
+- Horizontal Macro Schedule timeline — blocks span left→right with width proportional to step duration; the track scrolls inside its own container so the page never grows wider on zoom or hover. Zoom level persists in your config and local cache.
+- Material 3 design tokens — unified `--md-sys-color-*` roles, expressive typography scale, shape corners, and elevation across all built-in themes; sidebar, cards, command palette, update toasts, loading overlay, calibrations hub, and macro schedule use the same token surface (`--blsm-schedule-*`, `--blsm-overlay-*`, `--blsm-toast-*`).
+- Shared-axis navigation — page enters slide horizontally based on sidebar direction; overlay dialogs use container-transform enter; focus rings and ripples on cards, nav items, chips, and license buttons.
+- Schedule setup — first visit to the Macro Schedule tab shows a four-slide guide (timeline, drag-and-drop, duration & loop, enable & start). Replay from Settings & extras → Onboarding setup.
+- Schedule edit mode — selecting a block or opening Properties slides the sidebar into a step properties panel (activity, hours, minutes). Drag left or right edges on the timeline to remap time. Done or Escape to exit; clicking empty timeline deselects the step but keeps the panel open.
+- Progressive macro flow banners — setup steps on each macro tab update live: muted until done, accent pulse on the current step, checkmark when calibrations, modes, or running state is satisfied. Dismiss per page.
+- Beta activation gate — M3 dialog with **Get beta access on Discord** CTA, autofocus key field, full HWID copy, and morphing loader while activating. Welcome tour runs only after activation (no double stack on first beta launch).
+- Welcome setup (v5) — refreshed slides with Fishing Mode on the automation step, Biome Selector disabled as W.I.P., shared-axis step transitions, M3 dot progress, expressive feature cards, theme swatch grid, M3 switches, and polished footer buttons that stay visible on short windows. Replay from Settings & extras → Onboarding setup.
+- Material 3 Expressive loading — startup and the bootstrap launcher show morphing playful-geometry shapes (soft burst, cookie, pentagon, pill, sunny, oval) with spring rotation in a contained circle; update, runtime sync, and installs use a thick M3 expressive capsule bar (rounded track, accent fill with soft glow, spring-smoothed width).
+- Expressive progress bar — determinate downloads grow a rounded accent fill left→right with a subtle shimmer; indeterminate work shows a sliding accent segment inside the muted track. Each new download starts from 0%.
+- Pink Blush and Midnight Rose — Sakura and Midnight built-in themes now follow the M3 Expressive Pink Blush design system: Google Sans Flex typography, rose-tinted surfaces (#fff8f7 light / deep rose-black dark), blossom pink primary (#7b5455 / #ecbaba), soft ambient pink shadows, and larger M3 radii (4 / 12 / 16 / 24 px).
+- Google Sans Flex + JetBrains Mono — the app UI uses Google Sans Flex; inline code, paths, keybinds, and calibration coordinates use JetBrains Mono (Nerd Font).
 - Material 3 Expressive motion — emphasized easing, spring-like transitions, tonal card surfaces, state-layer feedback on buttons and nav, ripple touches, sidebar selection slide, card fade-rise on page change, toggle thumb overshoot, dropdown container reveal, and Start/Stop macro button color pulse. Respects Appearance → Reduce motion (`html.blsm-reduce-motion`).
 - Merchant tab layout — a three-step flow banner (Teleporter → Shop → Portable Crack), two-column settings grid, and a toggle for returning to Limbo after the teleporter run.
+- Macro tab (Automated Actions, Fishing, Macro Status) — Material 3 Expressive revamp: progressive three-step flow banners, quick-link chips (Calibrations, hotkeys, Fishing, Status), two-column card grids, expressive mode toggle tiles, live running pill on Status, pulsing module indicators, pill-shaped Start/Stop emphasis in the header, and staggered fade-rise on enter. Respects Reduce motion.
+- Macro Schedule icons — sidebar entry, profile cards, timeline blocks, palette chips, zoom controls, and setup tour use BlossomIcons (calendar, fishing, flask, cart, pause, grip-horizontal, plus, minus, layers, trash) instead of emoji.
+- Sidebar groups — left-aligned section labels and nav items inside soft inset tonal lanes (left accent rail, gradient section dividers) instead of bordered category cards. Command palette selection rows use the same rounded style.
+- Soft scrollbars — rounded, low-contrast thumbs across the app with smooth scrolling (respects Reduce motion). Macro Schedule timeline supports Ctrl+scroll (or Shift+scroll) to pan horizontally, and auto-scrolls when you drag blocks near the left or right edge.
+- Sidebar motion — selection spring pulse with paired deselect easing, hover slide, icon wiggle, left-edge glow on active items, M3 ripples on nav taps, and staggered lane enter when the sidebar loads. Respects Reduce motion.
 
 ## Improved
+- Macro Schedule timeline — shorter step blocks, taller track area, floating drag ghost on the cursor, subtler reorder gap preview, and properties sidebar stays open until Done when you deselect or delete a step.
+- Macro Schedule profiles migrate automatically — existing single-timeline configs become a **Default** profile on first open; your steps and loop setting are preserved.
+- Removed the redundant macro setup intro — welcome setup and schedule tour remain; macro pages still show progressive flow banners.
+- Macro Schedule lives in its own **Schedule** sidebar category with a full-width horizontal timeline — block width reflects step duration, spring drag ghosts from the block body, left/right edge resize, zoom controls, and debounced save.
 - Header theme dropdown stays in sync with Appearance — picking a theme from the top-bar Macro Theme menu updates your saved Appearance settings instead of fighting the theme observer.
 - Potion switching scheduler — a brief settle gap between rotation crafts so merchant, quests, SC/BR, and other due UI tasks can run between potion slots instead of immediately re-queuing the next potion.
+- Diagnostic logging — session logs under `%LOCALAPPDATA%\Blossom\logs\` (`logs.txt` for INFO and above, `errors.log` for errors only). Files rotate when they grow large; uncaught exceptions and console output use the same format. Settings & extras → Logs & diagnostics shows the path, opens the folder in File Explorer, or copies the last ~300 lines for support.
 
 ## Fixed
+- Macro Schedule drag — timeline blocks and palette chips show one full-opacity ghost under the cursor instead of stacking faint copies in the top-left corner.
+- Macro Schedule tab opens again — the virtual schedule page was hidden by the same `.fade-in` rule that suppresses React pages; sidebar hand-off no longer leaves dual `.active` items when switching tabs.
+- Loading overlay, bootstrap launcher, and update toasts respect your saved Appearance theme (`ui_theme`, accent, reduce motion) from config and local cache on startup.
+- Macro Schedule sidebar entry appears in the **Schedule** section after sidebar regrouping — injection retries after React and pywebview finish rendering.
+- Welcome setup slides no longer render an empty card body — the slide viewport keeps a minimum height so step content stays visible above the footer.
+- Fishing vision install progress — the bar fills while bytes download (determinate), runs continuously only while preparing or when size is unknown, and fully stops (unmounts) once installed instead of leaving the indeterminate animation running.
+- Macro no longer sits idle when Fishing Mode and Auto Potion Craft are both enabled — potion craft and other interval tasks run instead of the main loop spinning forever while the fishing worker refuses to start.
+- Welcome tour no longer stacks under the beta activation gate on first launch — intro waits for a valid license before mounting.
+- Macro Status live pill no longer flashes “running” on launch — the running indicator waits for the pywebview bridge and reads real macro state from the backend instead of guessing from header button CSS.
 - Header theme dropdown no longer freezes the app on close — the Appearance theme observer no longer fights React’s Macro Theme picker in an infinite `data-theme` loop, and expressive dropdown motion uses the native `is-open` class instead of a body-wide class observer.
 - Merchant teleporter now returns you to Limbo after shopping — when the teleporter round-trip finishes, Blossom uses Portable Crack from your inventory (search "crack", amount 1, Use). Turn it off under Merchant → Return to Limbo after merchant teleporter.
 - Fishing no longer spams the Roblox chat window — close-chat clicks are debounced, the redundant prep-loop close was removed, and the dock failsafe closes chat after its UI-nav key sequence (with proper delays between keys).
 - Page enter animations no longer re-stagger on every DOM refresh — stagger indices update only when the tab or card count changes.
+- Fishing vision installer card no longer flashes a failed or not-installed state while a download is still in progress.
 
 ## Macro
+- Merchant teleporter uses the Coteab interact → dialogue → OCR → shop flow with click delays at 25% of the original Coteab timing (75% faster). Calibrations are unchanged.
+- Macro schedule overrides fishing, potion craft, and merchant teleporter toggles per step while the macro runs, then restores your manual toggles when you stop.
+- Removed the seasonal Easter / egg-path automation (collect Easter, egg OCR during fishing, egg playback multiplier). Those toggles no longer appear in the macro UI.
 - Fishing failsafe rejoin — when you are stuck at the dock with no bite for 60 seconds, Blossom retries the in-game UI path (backslash, S, A, Enter) once, then reconnects if it still cannot fish. Requires Auto Reconnect and Fishing failsafe rejoin in Misc settings.
 - Prep-phase stuck recovery — if collections, walking, or other pre-fishing steps hang for 90 seconds without progress, the same failsafe rejoin path runs so you are not left AFK in a menu overnight.
 - Auto Reconnect — when Roblox closes or disconnects mid-macro, Blossom terminates the client, joins your private server via your saved link, clicks your calibrated Reconnect Start button, and verifies you are in-game from Roblox logs. Calibrate Reconnect Start under Movements and set your Private Server link in Misc.
 - Forced sell after reconnect — a successful reconnect sets the next fishing cycle to run your sell trip first, so a disconnect with a full inventory does not leave you fishing without selling.
+
+## Licensing & updates
+- Stable **2.3.0** — the built-in updater on the stable channel offers this release; beta builds stay on their own track.
 
 # Blossom 2.2.3
 

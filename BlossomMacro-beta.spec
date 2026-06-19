@@ -36,6 +36,7 @@ hiddenimports = [
     'blossom_quests',
     'blossom_ui_scheduler',
     'blossom_macro_session',
+    'blossom_macro_schedule',
     'blossom_license',
     'blossom_biome_selector',
     'blossom_custom_ui',

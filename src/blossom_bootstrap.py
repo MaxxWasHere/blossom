@@ -490,6 +490,10 @@ def _run_with_ui(ui: BootstrapReporter) -> int:
 
 
 def main() -> int:
+    from blossom_logging import get_logger, setup_logging
+
+    setup_logging("bootstrap")
+    log = get_logger("bootstrap")
     try:
         if sys.platform == "win32" and "--no-ui" not in sys.argv:
             from blossom_bootstrap_ui import BootstrapUI
@@ -499,7 +503,11 @@ def main() -> int:
             return BootstrapUI(channel=ch, version=version).run(_run_with_ui)
         return run_bootstrap()
     except KeyboardInterrupt:
+        log.info("Bootstrap interrupted by user")
         return 130
+    except Exception as error:
+        log.error("Bootstrap failed: %s", error, exc_info=True)
+        raise
 
 
 if __name__ == "__main__":

@@ -1,0 +1,275 @@
+/* Bootstrap launcher shell — titlebar + splash layout (pairs with blossom-loading.css) */
+
+:root {
+  --blsm-titlebar-h: 32px;
+  --blsm-caption-w: 46px;
+  --bg-root: #0a0809;
+  --bg-sidebar: #0f0f14;
+  --border: #241a1e;
+  --text-primary: #ece8ea;
+  --text-secondary: #a8a0a4;
+  --text-muted: #6e6468;
+  --accent: #e891a8;
+  --accent-text: #f5c6d4;
+  --accent-glow: rgba(232, 145, 168, 0.15);
+  --shadow-glow: 0 0 20px rgba(232, 145, 168, 0.08);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--font-body, "Google Sans Flex", -apple-system, BlinkMacSystemFont, sans-serif);
+  background: var(--bg-root);
+  color: var(--text-primary);
+}
+
+.bootstrap-window.window-frame {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--border));
+  border-radius: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+  background: var(--bg-root);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 16px 48px rgba(0, 0, 0, 0.55),
+    var(--shadow-glow);
+  animation: bootstrap-window-in 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes bootstrap-window-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bootstrap-window.is-closing {
+  animation: bootstrap-window-out 0.34s cubic-bezier(0.4, 0, 1, 1) both;
+  pointer-events: none;
+}
+
+@keyframes bootstrap-window-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+}
+
+.blsm-titlebar.titlebar {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: stretch;
+  height: var(--blsm-titlebar-h);
+  min-height: var(--blsm-titlebar-h);
+  padding: 0;
+  margin: 0;
+  background: var(--bg-sidebar);
+  border-bottom: 1px solid var(--border);
+  user-select: none;
+  -webkit-app-region: no-drag;
+  z-index: 10;
+}
+
+.titlebar-drag-region {
+  position: absolute;
+  inset: 0;
+  right: calc(var(--blsm-caption-w) * 2);
+  z-index: 0;
+  -webkit-app-region: drag;
+}
+
+.titlebar-brand {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  min-width: 0;
+  pointer-events: none;
+}
+
+.titlebar-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: contain;
+}
+
+.blsm-titlebar .titlebar-title {
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.titlebar-spacer {
+  flex: 1;
+  min-width: 0;
+}
+
+.titlebar-controls {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-shrink: 0;
+  height: 100%;
+  margin-left: auto;
+}
+
+.titlebar-btn {
+  width: var(--blsm-caption-w);
+  height: 100%;
+  min-width: var(--blsm-caption-w);
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  -webkit-app-region: no-drag;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.titlebar-btn svg {
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.titlebar-btn.minimize:hover {
+  background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+}
+
+.titlebar-btn.close:hover {
+  background: #c42b1c;
+  color: #fff;
+}
+
+.bootstrap-splash-root {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 22px 24px 26px;
+  overflow: hidden;
+  background: radial-gradient(900px 420px at 50% -8%, rgba(232, 124, 192, 0.16), transparent 58%),
+    var(--bg-root);
+}
+
+.bootstrap-splash-content {
+  position: relative;
+  z-index: 2;
+  width: min(420px, 100%);
+}
+
+.bootstrap-card.blossom-loading-card {
+  animation: bootstrap-card-glow 4.5s ease-in-out infinite alternate;
+}
+
+@keyframes bootstrap-card-glow {
+  0% {
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 18px rgba(232, 145, 168, 0.06);
+  }
+  100% {
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 28px rgba(232, 145, 168, 0.14);
+  }
+}
+
+.bootstrap-phases {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin: 0 0 18px;
+  flex-wrap: wrap;
+}
+
+.bootstrap-phase {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.22);
+  transition:
+    color 0.22s ease,
+    border-color 0.22s ease,
+    background 0.22s ease,
+    box-shadow 0.22s ease,
+    transform 0.22s ease;
+}
+
+.bootstrap-phase.is-active {
+  color: var(--accent-text);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  box-shadow: 0 0 14px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+.bootstrap-phase.is-done {
+  color: var(--text-secondary);
+  border-color: color-mix(in srgb, var(--accent) 22%, transparent);
+}
+
+.bootstrap-error {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, #f0a0a8 45%, transparent);
+  background: color-mix(in srgb, #f0a0a8 10%, rgba(0, 0, 0, 0.35));
+  color: #f0c4c8;
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.bootstrap-error[hidden] {
+  display: none !important;
+}
+
+.blossom-loading-progress-fill {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bootstrap-window.window-frame,
+  .bootstrap-card.blossom-loading-card,
+  .blossom-loading-aurora,
+  .blossom-loading-indicator,
+  .blossom-loading-spinner {
+    animation: none !important;
+  }
+
+  .bootstrap-window.window-frame {
+    opacity: 1;
+    transform: none;
+  }
+}

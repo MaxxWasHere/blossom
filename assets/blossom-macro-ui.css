@@ -1,0 +1,437 @@
+/* Macro pages — Material 3 Expressive layout (Automated Actions, Fishing, Macro Status) */
+
+html.blsm-macro-hub-active .page-content > .page-header p,
+html.blsm-macro-hub-active .main-content > .page-header p {
+  max-width: 52rem;
+  line-height: 1.55;
+}
+
+/* ——— Flow hub banners ——— */
+.blsm-macro-flow-wrap {
+  position: relative;
+}
+
+.blsm-macro-flow-dismiss {
+  position: absolute;
+  top: -6px;
+  right: -4px;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--md-sys-color-outline-variant, var(--border-color, #3a2a32));
+  border-radius: var(--m3-shape-corner-full, 9999px);
+  background: var(--md-sys-color-surface-container-high, var(--card-bg, #1a1216));
+  color: var(--md-sys-color-on-surface-variant, var(--text-muted, #a89aa0));
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.blsm-macro-hub {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.blsm-macro-flow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 900px) {
+  .blsm-macro-flow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blsm-macro-flow-step {
+  position: relative;
+  border: 1px solid var(--md-sys-color-outline-variant, var(--border-color, #3a2a32));
+  border-radius: var(--m3-shape-corner-md, var(--m3e-r-md, var(--r-md, 12px)));
+  padding: 14px 14px 12px;
+  background: var(--md-sys-color-surface-container, color-mix(in srgb, var(--card-bg, #1a1216) 92%, var(--accent, #e891a8) 8%));
+  transition:
+    border-color var(--m3e-duration-short, 150ms) var(--m3e-ease-standard, ease),
+    box-shadow var(--m3e-duration-medium, 300ms) var(--m3e-ease-emphasized-decel, ease),
+    opacity var(--m3e-duration-short, 150ms) ease;
+}
+
+.blsm-macro-flow-step.is-pending {
+  opacity: 0.62;
+}
+
+.blsm-macro-flow-step.is-pending::before {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface-variant, #a89aa0) 35%, var(--md-sys-color-surface-container-high, #1a1216));
+  color: var(--md-sys-color-on-surface, #ece8ea);
+}
+
+.blsm-macro-flow-step.is-current {
+  border-color: color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 55%, var(--md-sys-color-outline-variant, #3a2a32));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 22%, transparent);
+  animation: blsm-macro-flow-pulse 2.4s ease-in-out infinite;
+}
+
+.blsm-macro-flow-step.is-done {
+  border-color: color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 28%, var(--md-sys-color-outline-variant, #3a2a32));
+  opacity: 0.88;
+}
+
+.blsm-macro-flow-step.is-done::before {
+  content: "✓";
+  background: var(--md-sys-color-primary, var(--accent, #e891a8));
+}
+
+@keyframes blsm-macro-flow-pulse {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 18%, transparent); }
+  50% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary, var(--accent, #e891a8)) 32%, transparent); }
+}
+
+html.blsm-reduce-motion .blsm-macro-flow-step.is-current {
+  animation: none;
+}
+
+.blsm-macro-flow-step::before {
+  content: attr(data-step);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: var(--m3-shape-corner-full, 9999px);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-primary, var(--bg, #120d10));
+  background: var(--md-sys-color-primary, var(--accent, #e891a8));
+  margin-bottom: 8px;
+}
+
+.blsm-macro-flow-step strong {
+  display: block;
+  font-family: var(--font-display, var(--font-body, "Google Sans Flex", system-ui, sans-serif));
+  font-size: 0.92rem;
+  margin-bottom: 4px;
+}
+
+.blsm-macro-flow-step span {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted, #a89aa0);
+  line-height: 1.45;
+}
+
+.blsm-macro-flow-step.is-active {
+  border-color: color-mix(in srgb, var(--accent, #e891a8) 55%, var(--border-color, #3a2a32));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent, #e891a8) 22%, transparent);
+}
+
+/* legacy is-active kept for dev preview mocks */
+
+/* Quick links row */
+.blsm-macro-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.blsm-macro-quick .blsm-macro-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent, #e891a8) 35%, var(--border-color, #3a2a32));
+  background: color-mix(in srgb, var(--card-bg, #1a1216) 90%, var(--accent, #e891a8) 10%);
+  color: var(--text-secondary, #a8a0a4);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    transform var(--m3e-duration-short, 150ms) var(--m3e-ease-spring, ease),
+    border-color var(--m3e-duration-short, 150ms) ease,
+    background var(--m3e-duration-short, 150ms) ease;
+}
+
+.blsm-macro-quick .blsm-macro-chip:hover {
+  border-color: color-mix(in srgb, var(--accent, #e891a8) 55%, var(--border-color, #3a2a32));
+  color: var(--accent-text, #f5c6d4);
+  transform: translateY(-1px);
+}
+
+.blsm-macro-quick .blsm-macro-chip:active {
+  transform: scale(0.97);
+}
+
+.blsm-macro-hotkey-hint {
+  margin-left: auto;
+  font-size: 0.76rem;
+  color: var(--text-muted, #6e6468);
+  font-family: var(--font-mono, "JetBrains Mono", monospace);
+}
+
+.blsm-macro-hotkey-hint kbd {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color, #3a2a32);
+  background: var(--bg-input, #120e10);
+  color: var(--accent-text, #f5c6d4);
+  font-size: 0.72rem;
+  font-family: inherit;
+}
+
+/* ——— Card grids ——— */
+.blsm-macro-grid {
+  display: grid;
+  gap: 14px;
+  align-items: start;
+}
+
+.blsm-macro-grid--auto {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.blsm-macro-grid--fishing {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
+.blsm-macro-grid--status {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 52rem;
+}
+
+@media (max-width: 1040px) {
+  .blsm-macro-grid--auto,
+  .blsm-macro-grid--fishing {
+    grid-template-columns: 1fr;
+  }
+}
+
+.blsm-macro-grid-col {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.blsm-macro-grid-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 900px) {
+  .blsm-macro-grid-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ——— Page chrome ——— */
+html.blsm-macro-hub-active .page-content > .card,
+html.blsm-macro-hub-active .main-content > .card,
+html.blsm-macro-hub-active .blsm-macro-grid .card {
+  border-radius: var(--m3e-r-lg, var(--r-lg, 16px)) !important;
+}
+
+html.blsm-macro-hub-active .corner-bracket {
+  display: none !important;
+}
+
+html.blsm-macro-hub-active .card > div[style*="padding"] {
+  padding: 16px 18px 18px !important;
+}
+
+/* Toggle rows → expressive mode tiles */
+html.blsm-macro-hub-active .toggle-row,
+html.blsm-macro-hub-active .card label:has(.toggle-switch) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  padding: 11px 13px !important;
+  margin: 0 0 8px !important;
+  border-radius: var(--m3e-r-md, var(--r-md, 12px)) !important;
+  border: 1px solid var(--border-color, #3a2a32) !important;
+  background: color-mix(in srgb, var(--card-bg, #1a1216) 94%, var(--accent, #e891a8) 6%) !important;
+  transition:
+    border-color var(--m3e-duration-short, 150ms) ease,
+    background var(--m3e-duration-short, 150ms) ease,
+    transform var(--m3e-duration-short, 150ms) var(--m3e-ease-spring, ease) !important;
+}
+
+html.blsm-macro-hub-active .toggle-row:has(input:checked),
+html.blsm-macro-hub-active .card label:has(.toggle-switch input:checked) {
+  border-color: color-mix(in srgb, var(--accent, #e891a8) 45%, var(--border-color, #3a2a32)) !important;
+  background: color-mix(in srgb, var(--accent, #e891a8) 10%, var(--card-bg, #1a1216)) !important;
+}
+
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) .toggle-row:hover,
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) .card label:has(.toggle-switch):hover {
+  transform: translateY(-1px);
+}
+
+/* Nested form groups under toggles */
+html.blsm-macro-hub-active .card .form-group {
+  margin-bottom: 10px;
+}
+
+html.blsm-macro-hub-active .card [style*="marginLeft"][style*="10px"] {
+  margin-left: 14px !important;
+  padding-left: 12px !important;
+  border-left: 2px solid color-mix(in srgb, var(--accent, #e891a8) 25%, transparent) !important;
+}
+
+/* BR/SC biome exclusion grid on Automated Actions */
+html.blsm-macro-hub-active .coteab-br-sc-biome-grid label {
+  border-radius: var(--m3e-r-sm, var(--r-sm, 8px)) !important;
+  transition: border-color var(--m3e-duration-short, 150ms) ease, background var(--m3e-duration-short, 150ms) ease;
+}
+
+html.blsm-macro-hub-active .coteab-br-sc-biome-grid label:has(input:checked) {
+  border-color: color-mix(in srgb, var(--accent, #e891a8) 45%, var(--border-color, #3a2a32)) !important;
+  background: color-mix(in srgb, var(--accent, #e891a8) 8%, var(--card-bg, #1a1216)) !important;
+}
+
+/* Biome selector injected panel */
+html.blsm-macro-hub-active #blossom-biome-selector-panel {
+  border-radius: var(--m3e-r-lg, var(--r-lg, 16px)) !important;
+}
+
+html.blsm-macro-hub-active .blsm-bs-drive-row {
+  border-radius: var(--m3e-r-sm, var(--r-sm, 8px)) !important;
+}
+
+/* ——— Macro Status module rows ——— */
+html.blsm-macro-hub-active .blsm-macro-module-row,
+html.blsm-macro-hub-active [data-blossom-page="Macro Status"] .card [style*="gridTemplateColumns"] {
+  border-radius: var(--m3e-r-sm, var(--r-sm, 8px)) !important;
+}
+
+html.blsm-macro-hub-active [data-blossom-page="Macro Status"] .card [style*="gridTemplateColumns"] {
+  padding: 10px 12px !important;
+  margin-bottom: 6px !important;
+  border: 1px solid var(--border-color, #3a2a32) !important;
+  background: color-mix(in srgb, var(--card-bg, #1a1216) 96%, var(--accent, #e891a8) 4%) !important;
+  transition: background var(--m3e-duration-short, 150ms) ease;
+}
+
+html.blsm-macro-hub-active [data-blossom-page="Macro Status"] .card [style*="gridTemplateColumns"]:hover {
+  background: color-mix(in srgb, var(--accent, #e891a8) 7%, var(--card-bg, #1a1216)) !important;
+}
+
+html.blsm-macro-hub-active [data-blossom-page="Macro Status"] .card [style*="borderRadius: 999px"] {
+  width: 9px !important;
+  height: 9px !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, currentColor 25%, transparent);
+}
+
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) [data-blossom-page="Macro Status"] .card [style*="borderRadius: 999px"] {
+  animation: blsm-macro-status-pulse 2.4s var(--m3e-ease-emphasized-decel, ease) infinite;
+}
+
+@keyframes blsm-macro-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.72;
+    transform: scale(0.92);
+  }
+}
+
+/* Running indicator on status hub */
+.blsm-macro-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px dashed color-mix(in srgb, var(--accent, #e891a8) 40%, var(--border-color, #3a2a32));
+  background: color-mix(in srgb, var(--card-bg, #1a1216) 92%, var(--accent, #e891a8) 8%);
+  color: var(--text-secondary, #a8a0a4);
+}
+
+.blsm-macro-live-pill.is-running {
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--success, #22c55e) 45%, var(--border-color, #3a2a32));
+  background: color-mix(in srgb, var(--success, #22c55e) 12%, var(--card-bg, #1a1216));
+  color: #86efac;
+}
+
+.blsm-macro-live-pill .blsm-macro-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--text-muted, #6e6468);
+}
+
+.blsm-macro-live-pill.is-running .blsm-macro-live-dot {
+  background: var(--success, #22c55e);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--success, #22c55e) 55%, transparent);
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-macro-live-pill.is-running .blsm-macro-live-dot {
+  animation: blsm-macro-status-pulse 1.6s var(--m3e-ease-emphasized-decel, ease) infinite;
+}
+
+/* ——— Header Start / Stop emphasis on macro pages ——— */
+html.blsm-macro-hub-active .header-bar .btn-start,
+html.blsm-macro-hub-active .header-bar .btn-stop {
+  border-radius: 999px !important;
+  min-height: 34px !important;
+  padding: 7px 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.01em;
+  gap: 8px;
+}
+
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) .header-bar .btn-start:not(:hover) {
+  box-shadow:
+    0 2px 8px color-mix(in srgb, var(--success, #22c55e) 28%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--success, #22c55e) 18%, transparent) !important;
+}
+
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) .header-bar .btn-stop:not(:hover) {
+  box-shadow:
+    0 4px 14px color-mix(in srgb, var(--danger, #ef4444) 32%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--danger, #ef4444) 20%, transparent) !important;
+}
+
+/* Accordion body reveal on macro pages */
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) .blsm-md-accordion.is-expanded > .blsm-morph-shell,
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) .blsm-md-accordion.is-expanded > div:not(.card-header) {
+  animation: m3e-fade-rise var(--m3e-duration-medium, 300ms) var(--m3e-ease-emphasized-decel, ease) both;
+}
+
+/* Hub enter stagger */
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-macro-hub,
+html.blsm-expressive-on.blsm-macro-hub-active:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-macro-grid {
+  animation: m3e-fade-rise var(--m3e-duration-long, 500ms) var(--m3e-ease-emphasized-decel, ease) both;
+  animation-delay: calc(var(--blsm-stagger, 0) * 70ms + 40ms);
+}
+
+/* Reduce motion */
+html.blsm-reduce-motion .blsm-macro-live-dot,
+html.blsm-reduce-motion [data-blossom-page="Macro Status"] .card [style*="borderRadius: 999px"] {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.blsm-macro-hub-active .blsm-macro-flow-step,
+  html.blsm-macro-hub-active .blsm-macro-chip,
+  html.blsm-macro-hub-active .toggle-row {
+    transition: none !important;
+    transform: none !important;
+  }
+}
