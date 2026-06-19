@@ -36,8 +36,8 @@
     { key: "dark", label: "Dark", hint: "Neutral dark palette", swatch: "#3f3f46" },
     { key: "light", label: "Light", hint: "Bright surfaces", swatch: "#fafafa" },
     { key: "oled", label: "OLED", hint: "True black for AMOLED panels", swatch: "linear-gradient(135deg,#000 60%,#f2a3b9 60%)" },
-    { key: "sakura", label: "Sakura", hint: "Warm petal pinks, light base", swatch: "linear-gradient(135deg,#f9eef3 50%,#d4537e 50%)" },
-    { key: "midnight", label: "Midnight", hint: "Deep navy, indigo accent", swatch: "linear-gradient(135deg,#070b14 55%,#818cf8 55%)" },
+    { key: "sakura", label: "Pink Blush", hint: "M3 soft rose surfaces, light base", swatch: "linear-gradient(135deg,#fff8f7 50%,#7b5455 50%)" },
+    { key: "midnight", label: "Midnight Rose", hint: "Deep rose-black with soft pink accents", swatch: "linear-gradient(135deg,#161012 55%,#ecbaba 55%)" },
     { key: "forest", label: "Forest", hint: "Mossy greens, emerald accent", swatch: "linear-gradient(135deg,#0a0f0b 55%,#5fd49a 55%)" },
   ];
 
@@ -177,13 +177,20 @@
 
   const visualThemeKey = (s) => (hasCustomUi(s) ? "custom" : normalizeThemeKey(s.theme));
 
+  let applyingVisualTheme = false;
+
   const applyVisualTheme = (s) => {
-    const body = document.body;
-    if (!body) return;
-    body.setAttribute("data-theme", visualThemeKey(s));
-    body.classList.remove("blsm-json-theme");
-    document.documentElement.classList.toggle("blsm-custom-ui-active", hasCustomUi(s));
-    syncLightUiClass(s);
+    applyingVisualTheme = true;
+    try {
+      const body = document.body;
+      if (!body) return;
+      body.setAttribute("data-theme", visualThemeKey(s));
+      body.classList.remove("blsm-json-theme");
+      document.documentElement.classList.toggle("blsm-custom-ui-active", hasCustomUi(s));
+      syncLightUiClass(s);
+    } finally {
+      applyingVisualTheme = false;
+    }
   };
 
   const injectStyleText = (id, css) => {
@@ -606,12 +613,45 @@
   const watchThemeChanges = () => {
     if (themeObserver || !document.body) return;
     themeObserver = new MutationObserver(() => {
+      if (applyingVisualTheme) return;
+      const cur = document.body.getAttribute("data-theme") || "";
       const want = visualThemeKey(state);
-      const cur = document.body.getAttribute("data-theme");
-      if (cur !== want) applyVisualTheme(state);
+      if (cur === want) {
+        if (!hasCustomUi(state)) applyAccent(state.accent);
+        return;
+      }
+      const parsed = normalizeThemeKey(cur);
+      if (!hasCustomUi(state) && VALID_THEMES.has(parsed)) {
+        if (parsed !== normalizeThemeKey(state.theme)) {
+          state.theme = parsed;
+          syncLightUiClass(state);
+          writeLocal(state);
+          refreshCardFields();
+          void persist({ immediate: false, feedback: false });
+        }
+        if (!hasCustomUi(state)) applyAccent(state.accent);
+        return;
+      }
+      applyVisualTheme(state);
       if (!hasCustomUi(state)) applyAccent(state.accent);
     });
     themeObserver.observe(document.body, { attributes: true, attributeFilter: ["data-theme"] });
+  };
+
+  const bindHeaderThemeSelect = () => {
+    document.querySelectorAll(".header-bar select.form-input").forEach((sel) => {
+      if (sel.dataset.blsmThemeSync === "1") return;
+      sel.dataset.blsmThemeSync = "1";
+      sel.addEventListener("change", () => {
+        const key = normalizeThemeKey(sel.value);
+        if (!VALID_THEMES.has(key) || key === normalizeThemeKey(state.theme)) return;
+        state.theme = key;
+        syncLightUiClass(state);
+        writeLocal(state);
+        refreshCardFields();
+        void persist({ immediate: false, feedback: false });
+      });
+    });
   };
 
   const watchSystemScheme = () => {
@@ -967,10 +1007,12 @@
     watchThemeChanges();
     watchSystemScheme();
     hideLegacyToolbarTheme();
+    bindHeaderThemeSelect();
   };
 
   const sync = () => {
     hideLegacyToolbarTheme();
+    bindHeaderThemeSelect();
     void reconcile();
     if (!onAppearancePage()) {
       document.getElementById(CARD_ID)?.remove();

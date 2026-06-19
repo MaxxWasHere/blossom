@@ -1,13 +1,16 @@
 # Blossom 2.2.4
 
 ## UI
+- Pink Blush and Midnight Rose — Sakura and Midnight built-in themes now follow the M3 Expressive Pink Blush design system: Plus Jakarta Sans typography, rose-tinted surfaces (#fff8f7 light / deep rose-black dark), blossom pink primary (#7b5455 / #ecbaba), soft ambient pink shadows, and larger M3 radii (4 / 12 / 16 / 24 px).
 - Material 3 Expressive motion — emphasized easing, spring-like transitions, tonal card surfaces, state-layer feedback on buttons and nav, ripple touches, sidebar selection slide, card fade-rise on page change, toggle thumb overshoot, dropdown container reveal, and Start/Stop macro button color pulse. Respects Appearance → Reduce motion (`html.blsm-reduce-motion`).
 - Merchant tab layout — a three-step flow banner (Teleporter → Shop → Portable Crack), two-column settings grid, and a toggle for returning to Limbo after the teleporter run.
 
 ## Improved
+- Header theme dropdown stays in sync with Appearance — picking a theme from the top-bar Macro Theme menu updates your saved Appearance settings instead of fighting the theme observer.
 - Potion switching scheduler — a brief settle gap between rotation crafts so merchant, quests, SC/BR, and other due UI tasks can run between potion slots instead of immediately re-queuing the next potion.
 
 ## Fixed
+- Header theme dropdown no longer freezes the app on close — the Appearance theme observer no longer fights React’s Macro Theme picker in an infinite `data-theme` loop, and expressive dropdown motion uses the native `is-open` class instead of a body-wide class observer.
 - Merchant teleporter now returns you to Limbo after shopping — when the teleporter round-trip finishes, Blossom uses Portable Crack from your inventory (search "crack", amount 1, Use). Turn it off under Merchant → Return to Limbo after merchant teleporter.
 - Fishing no longer spams the Roblox chat window — close-chat clicks are debounced, the redundant prep-loop close was removed, and the dock failsafe closes chat after its UI-nav key sequence (with proper delays between keys).
 - Page enter animations no longer re-stagger on every DOM refresh — stagger indices update only when the tab or card count changes.

@@ -59,14 +59,14 @@ html.blsm-light-ui .window-frame .changelog-item,
 html.blsm-light-ui .window-frame .credit-item,
 html.blsm-light-ui .window-frame .buff-item,
 html.blsm-light-ui .window-frame .info-banner {
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  box-shadow: 0 1px 2px rgba(46, 20, 20, 0.04), 0 8px 24px rgba(244, 194, 194, 0.08) !important;
 }
 
 html.blsm-light-ui .window-frame .card:hover,
 html.blsm-light-ui .window-frame .stat-card:hover,
 html.blsm-light-ui .window-frame .credit-item:hover,
 html.blsm-light-ui .window-frame .buff-item:hover {
-  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 4px 14px rgba(244, 194, 194, 0.14) !important;
 }
 
 html.blsm-light-ui .window-frame .btn-secondary:hover,

@@ -75,26 +75,6 @@
     );
   };
 
-  let dropdownObserver = null;
-  const watchDropdowns = () => {
-    if (dropdownObserver || !motionAllowed()) return;
-    dropdownObserver = new MutationObserver((records) => {
-      for (const rec of records) {
-        if (rec.type !== "attributes" || rec.attributeName !== "class") continue;
-        const menu = rec.target;
-        if (!menu.classList?.contains("blossom-dropdown-menu--portal")) continue;
-        const open = menu.classList.contains("is-open");
-        menu.classList.toggle("blsm-m3e-menu-open", open);
-        if (!open) menu.classList.remove("blsm-m3e-menu-open");
-      }
-    });
-    dropdownObserver.observe(document.body, {
-      attributes: true,
-      attributeFilter: ["class"],
-      subtree: true,
-    });
-  };
-
   const tick = () => {
     syncExpressiveClass();
     pulseNavSelection();
@@ -103,7 +83,6 @@
 
   syncExpressiveClass();
   bindRipples();
-  watchDropdowns();
   tick();
 
   if (observeMain) observeMain(tick, 0);

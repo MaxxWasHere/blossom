@@ -215,60 +215,82 @@ body[data-theme="oled"],
   background: var(--bg-root);
 }
 
-/* Sakura — warm light theme, petal pinks on cream surfaces. */
+/* Sakura (Pink Blush) — M3 Expressive light rose surfaces. */
 body[data-theme="sakura"],
 :root[data-theme="sakura"] {
   color-scheme: light;
-  --bg-root: #f9eef3;
-  --bg-sidebar: #f4e2ea;
-  --bg-main: #fcf4f8;
-  --bg-card: #fffbfd;
-  --bg-card-hover: #faeef4;
-  --bg-input: #fdf7fa;
-  --bg-input-focus: #f8e9f0;
-  --accent: #d4537e;
-  --accent-dim: #b73a64;
-  --accent-glow: rgba(212, 83, 126, 0.14);
-  --accent-text: #b73a64;
+  --bg-root: #fff8f7;
+  --bg-sidebar: #fff0ef;
+  --bg-main: #fff8f7;
+  --bg-card: #ffffff;
+  --bg-card-hover: #fff0ef;
+  --bg-input: #ffe9e8;
+  --bg-input-focus: #ffe1e0;
+  --accent: #7b5455;
+  --accent-dim: #613d3e;
+  --accent-glow: rgba(123, 84, 85, 0.12);
+  --accent-text: #734e4e;
   --text-on-accent: #ffffff;
-  --border-accent: rgba(212, 83, 126, 0.3);
-  --shadow-glow: 0 0 24px rgba(212, 83, 126, 0.09);
-  --shadow-card: 0 1px 3px rgba(151, 71, 102, 0.12);
-  --text-primary: #38202b;
-  --text-secondary: #6f4a59;
-  --text-muted: #a07f8d;
-  --border: #efd8e2;
-  --border-hover: #e2bfd0;
-  --radius-sm: 10px;
+  --border-accent: rgba(123, 84, 85, 0.28);
+  --shadow-glow: 0 8px 24px rgba(244, 194, 194, 0.12);
+  --shadow-card: 0 2px 8px rgba(123, 84, 85, 0.06), 0 8px 24px rgba(244, 194, 194, 0.1);
+  --text-primary: #2e1414;
+  --text-secondary: #504444;
+  --text-muted: #827473;
+  --border: #d4c2c2;
+  --border-hover: #c4b2b2;
+  --radius-sm: 4px;
   --radius-md: 12px;
-  --radius-lg: 14px;
-  --radius-xl: 16px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --md-sys-color-primary: #7b5455;
+  --md-sys-color-primary-container: #f4c2c2;
+  --md-sys-color-secondary: #8f4951;
+  --md-sys-color-tertiary-container: #d2cdc7;
+  --md-sys-color-surface: #fff8f7;
+  --md-sys-color-on-surface: #2e1414;
+  --md-sys-color-outline: #827473;
+  --md-sys-color-outline-variant: #d4c2c2;
+  font-family: "Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text-primary);
   background: var(--bg-root);
 }
 
-/* Midnight — deep navy with indigo accents. */
+/* Midnight (Midnight Rose) — deep rose-black with soft pink accents. */
 body[data-theme="midnight"],
 :root[data-theme="midnight"] {
-  --bg-root: #070b14;
-  --bg-sidebar: #0a0f1d;
-  --bg-main: #080d17;
-  --bg-card: #0f1626;
-  --bg-card-hover: #151e33;
-  --bg-input: #0c1220;
-  --bg-input-focus: #131b2e;
-  --accent: #818cf8;
-  --accent-dim: #5c66d6;
-  --accent-glow: rgba(129, 140, 248, 0.16);
-  --accent-text: #e0e3ff;
-  --border-accent: rgba(129, 140, 248, 0.32);
-  --shadow-glow: 0 0 24px rgba(99, 110, 235, 0.1);
-  --shadow-card: 0 2px 14px rgba(2, 5, 16, 0.45);
-  --text-primary: #e6eaf6;
-  --text-secondary: #97a1bd;
-  --text-muted: #5d667f;
-  --border: #18213a;
-  --border-hover: #26314f;
+  --bg-root: #161012;
+  --bg-sidebar: #1c1617;
+  --bg-main: #181113;
+  --bg-card: #241b1c;
+  --bg-card-hover: #2c2223;
+  --bg-input: #1f1819;
+  --bg-input-focus: #282022;
+  --accent: #ecbaba;
+  --accent-dim: #c99393;
+  --accent-glow: rgba(236, 186, 186, 0.14);
+  --accent-text: #ffedec;
+  --border-accent: rgba(236, 186, 186, 0.28);
+  --shadow-glow: 0 0 24px rgba(244, 194, 194, 0.08);
+  --shadow-card: 0 8px 24px rgba(46, 20, 20, 0.35);
+  --text-primary: #ffedec;
+  --text-secondary: #d4c2c2;
+  --text-muted: #827473;
+  --border: #3d2e2f;
+  --border-hover: #504444;
+  --radius-sm: 4px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --md-sys-color-primary: #ecbaba;
+  --md-sys-color-primary-container: #613d3e;
+  --md-sys-color-secondary: #ffb2b9;
+  --md-sys-color-tertiary-container: #494642;
+  --md-sys-color-surface: #161012;
+  --md-sys-color-on-surface: #ffedec;
+  --md-sys-color-outline: #827473;
+  --md-sys-color-outline-variant: #504444;
+  font-family: "Plus Jakarta Sans", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: var(--text-primary);
   background: var(--bg-root);
 }

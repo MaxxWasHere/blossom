@@ -259,12 +259,12 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .header-bar .btn-stop.blsm-m3e-
 }
 
 /* ——— Dropdown container transform ——— */
-html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-menu--portal.blsm-m3e-menu-open {
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-menu--portal.is-open {
   animation: m3e-dropdown-reveal var(--m3e-duration-medium) var(--m3e-ease-emphasized-decel) both;
   transform-origin: top center;
 }
 
-html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-menu--portal[data-placement="up"].blsm-m3e-menu-open {
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-dropdown-menu--portal[data-placement="up"].is-open {
   transform-origin: bottom center;
   animation-name: m3e-dropdown-reveal;
 }
@@ -284,7 +284,7 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-appearance-card {
 html.blsm-reduce-motion .blsm-m3e-ripple,
 html.blsm-reduce-motion .blsm-m3e-nav-enter,
 html.blsm-reduce-motion .blsm-m3e-macro-morph,
-html.blsm-reduce-motion .blsm-m3e-menu-open {
+html.blsm-reduce-motion .blossom-dropdown-menu--portal.is-open {
   animation: none !important;
 }
 
@@ -292,7 +292,7 @@ html.blsm-reduce-motion .blsm-m3e-menu-open {
   html.blsm-expressive-on .blsm-m3e-ripple,
   html.blsm-expressive-on .blsm-m3e-nav-enter,
   html.blsm-expressive-on .blsm-m3e-macro-morph,
-  html.blsm-expressive-on .blsm-m3e-menu-open,
+  html.blsm-expressive-on .blossom-dropdown-menu--portal.is-open,
   html.blsm-expressive-on .blsm-page-enter > * {
     animation: none !important;
     transition: none !important;
