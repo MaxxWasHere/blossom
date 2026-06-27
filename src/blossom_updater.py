@@ -12,8 +12,8 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 # Latest version numbers (bump when shipping each channel).
-STABLE_VERSION = "2.3.0"
-BETA_VERSION = "2.3.0-beta.1"
+STABLE_VERSION = "2.3.5"
+BETA_VERSION = "2.3.5-beta.1"
 
 try:
     import blossom_build_info as _build_info

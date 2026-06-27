@@ -1,0 +1,286 @@
+/* Blossom — global expressive motion (extends blossom-expressive.css to the
+   rest of the app: inputs, selects, checkboxes, chips, badges, dialogs, toasts,
+   command palette, license gate, injected panels, list rows, links, code, and
+   the music player + animated-background surfaces). All gated on
+   html.blsm-expressive-on AND not blsm-reduce-motion. */
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) {
+  --m3eg-ease: cubic-bezier(0.2, 0, 0, 1);
+  --m3eg-ease-decel: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --m3eg-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --m3eg-d-short: 150ms;
+  --m3eg-d-med: 280ms;
+  --m3eg-d-long: 460ms;
+}
+
+/* ============================ Inputs / selects / textarea ============================ */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .form-input,
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="text"],
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="number"],
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="password"],
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="url"],
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="color"],
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="email"],
+html.blsm-expressive-on:not(.blsm-reduce-motion) textarea,
+html.blsm-expressive-on:not(.blsm-reduce-motion) select {
+  transition:
+    border-color var(--m3eg-d-short) var(--m3eg-ease),
+    box-shadow var(--m3eg-d-med) var(--m3eg-ease-decel),
+    background var(--m3eg-d-short) var(--m3eg-ease),
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring) !important;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .form-input:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="text"]:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="number"]:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) textarea:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) select:hover {
+  border-color: color-mix(in srgb, var(--accent, #e891a8) 45%, var(--border, #241a1e)) !important;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .form-input:focus,
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="text"]:focus,
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="number"]:focus,
+html.blsm-expressive-on:not(.blsm-reduce-motion) textarea:focus,
+html.blsm-expressive-on:not(.blsm-reduce-motion) select:focus {
+  box-shadow: 0 0 0 3px var(--accent-glow, rgba(232, 145, 168, 0.18)) !important;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="color"] {
+  transform: scale(1);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="color"]:hover {
+  transform: scale(1.06);
+}
+
+/* Checkboxes / radios — a little spring pop when checked */
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="checkbox"],
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="radio"] {
+  transition: transform var(--m3eg-d-short) var(--m3eg-ease-spring) !important;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="checkbox"]:checked,
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="radio"]:checked {
+  transform: scale(1.14);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="checkbox"]:active,
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="radio"]:active {
+  transform: scale(0.9);
+}
+
+/* Range thumbs already styled per-component; add a gentle track transition */
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="range"] {
+  transition: filter var(--m3eg-d-short) var(--m3eg-ease);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) input[type="range"]:hover {
+  filter: brightness(1.08);
+}
+
+/* ============================ Chips / pills / badges ============================ */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-pill,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .status-badge,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-macro-chip,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-license-btn,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-license-discord,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-sidebar-wip-badge {
+  transition:
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring),
+    background var(--m3eg-d-short) var(--m3eg-ease),
+    border-color var(--m3eg-d-short) var(--m3eg-ease),
+    box-shadow var(--m3eg-d-med) var(--m3eg-ease-decel) !important;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-pill:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .status-badge:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-macro-chip:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-license-btn:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-license-discord:hover {
+  transform: translateY(-2px) scale(1.03) !important;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-pill:active,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-macro-chip:active,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-license-btn:active,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-license-discord:active {
+  transform: scale(0.96) !important;
+}
+
+/* ============================ Secondary / accent buttons (extend .btn) ============================ */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn-secondary,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn-accent,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn-tertiary {
+  transition:
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring),
+    background var(--m3eg-d-short) var(--m3eg-ease),
+    border-color var(--m3eg-d-short) var(--m3eg-ease),
+    box-shadow var(--m3eg-d-med) var(--m3eg-ease-decel) !important;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn-secondary:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn-accent:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .btn-tertiary:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+}
+
+/* ============================ Titlebar / window controls ============================ */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .titlebar-btn,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-window-resize {
+  transition: background var(--m3eg-d-short) var(--m3eg-ease),
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring),
+    color var(--m3eg-d-short) var(--m3eg-ease);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .titlebar-btn:hover {
+  transform: scale(1.08);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .titlebar-btn:active {
+  transform: scale(0.92);
+}
+
+/* ============================ Dialogs / toasts / overlays ============================ */
+@keyframes m3eg-dialog-in {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes m3eg-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes m3eg-toast-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: none; }
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-update-dialog {
+  animation: m3eg-toast-in var(--m3eg-d-med) var(--m3eg-ease-spring) both;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-license-overlay {
+  animation: m3eg-backdrop-in var(--m3eg-d-med) var(--m3eg-ease-decel) both;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blossom-license-overlay > * {
+  animation: m3eg-dialog-in var(--m3eg-d-long) var(--m3eg-ease-spring) both;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-cmdk .blsm-cmdk-backdrop {
+  animation: m3eg-backdrop-in var(--m3eg-d-med) var(--m3eg-ease-decel) both;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-cmdk .blsm-cmdk-panel {
+  animation: m3eg-dialog-in var(--m3eg-d-med) var(--m3eg-ease-spring) both;
+  transform-origin: top center;
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-cmdk .blsm-cmdk-option {
+  transition: background var(--m3eg-d-short) var(--m3eg-ease),
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-cmdk .blsm-cmdk-option:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-cmdk .blsm-cmdk-option.is-active {
+  transform: translateX(2px);
+}
+
+/* ============================ Injected Blossom panels — fade-rise on mount ============================ */
+@keyframes m3eg-panel-rise {
+  from { opacity: 0; transform: translateY(14px) scale(0.99); }
+  to { opacity: 1; transform: none; }
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-bg-card,
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-fishing-collection-hub,
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-biome-webhooks-hub,
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-merchant-hub,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-appearance-card {
+  animation: m3eg-panel-rise var(--m3eg-d-long) var(--m3eg-ease-decel) both;
+}
+
+/* Background settings controls — expressive hover/press */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-bg-select,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-bg-seg button,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-bg-range {
+  transition: background var(--m3eg-d-short) var(--m3eg-ease),
+    border-color var(--m3eg-d-short) var(--m3eg-ease),
+    color var(--m3eg-d-short) var(--m3eg-ease),
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-bg-seg button:active,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-bg-select:active {
+  transform: scale(0.97);
+}
+
+/* ============================ Music player launcher + window — expressive idle ============================ */
+/* The component CSS already handles open/close/collapse transitions and
+   reduce-motion; here we just make sure they ride the expressive easing tokens
+   when motion is on (no-op override only when expressive is active). */
+html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-music-launcher {
+  transition: transform 0.3s var(--m3eg-ease-spring),
+    opacity 0.2s var(--m3eg-ease),
+    box-shadow 0.2s var(--m3eg-ease);
+}
+
+/* ============================ List rows / table rows / links / code ============================ */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card tr,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card tbody tr,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card ul > li,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card ol > li {
+  transition: background var(--m3eg-d-short) var(--m3eg-ease),
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card tbody tr:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card ul > li:hover {
+  background: color-mix(in srgb, var(--accent, #e891a8) 6%, transparent);
+  transform: translateX(2px);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) a {
+  transition: color var(--m3eg-d-short) var(--m3eg-ease),
+    text-decoration-color var(--m3eg-d-short) var(--m3eg-ease),
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) a:hover {
+  color: var(--accent, #e891a8);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) kbd,
+html.blsm-expressive-on:not(.blsm-reduce-motion) code {
+  transition: background var(--m3eg-d-short) var(--m3eg-ease),
+    transform var(--m3eg-d-short) var(--m3eg-ease-spring);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) kbd:hover,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card code:hover {
+  transform: translateY(-1px);
+}
+
+/* ============================ Card headers / icons — lively press ============================ */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card > .card-header .card-icon {
+  transition: transform var(--m3eg-d-short) var(--m3eg-ease-spring);
+}
+html.blsm-expressive-on:not(.blsm-reduce-motion) .card > .card-header:active .card-icon {
+  transform: scale(0.9) rotate(-6deg);
+}
+
+/* ============================ Global entrance for page content not already animated ============================ */
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-runtime-card,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-credits-card,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > section,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .form-row,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-toggle,
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-page-enter > .blsm-app-section {
+  animation: m3eg-panel-rise var(--m3eg-d-long) var(--m3eg-ease-decel) both;
+  animation-delay: calc(var(--blsm-stagger, 0) * 60ms + 90ms);
+}
+
+/* ============================ Reduce-motion safety net ============================ */
+html.blsm-reduce-motion .blossom-update-dialog,
+html.blsm-reduce-motion .blossom-license-overlay,
+html.blsm-reduce-motion .blossom-license-overlay > *,
+html.blsm-reduce-motion #blsm-cmdk .blsm-cmdk-backdrop,
+html.blsm-reduce-motion #blsm-cmdk .blsm-cmdk-panel,
+html.blsm-reduce-motion #blsm-bg-card,
+html.blsm-reduce-motion #blsm-fishing-collection-hub,
+html.blsm-reduce-motion #blsm-biome-webhooks-hub,
+html.blsm-reduce-motion #blsm-merchant-hub,
+html.blsm-reduce-motion .blsm-appearance-card,
+html.blsm-reduce-motion .blsm-page-enter > * {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  html.blsm-expressive-on .blossom-update-dialog,
+  html.blsm-expressive-on .blossom-license-overlay,
+  html.blsm-expressive-on .blossom-license-overlay > *,
+  html.blsm-expressive-on #blsm-cmdk .blsm-cmdk-backdrop,
+  html.blsm-expressive-on #blsm-cmdk .blsm-cmdk-panel,
+  html.blsm-expressive-on #blsm-bg-card,
+  html.blsm-expressive-on #blsm-fishing-collection-hub,
+  html.blsm-expressive-on .blsm-appearance-card,
+  html.blsm-expressive-on .blsm-page-enter > * {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}

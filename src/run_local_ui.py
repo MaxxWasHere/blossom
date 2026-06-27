@@ -5,11 +5,14 @@ from __future__ import annotations
 import json
 import os
 import re
+import secrets
 import shutil
 import subprocess
 import sys
 import time
 import webbrowser
+import base64
+import mimetypes
 from contextlib import contextmanager
 from copy import deepcopy
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
@@ -226,6 +229,51 @@ UPDATE_RECHECK_SECONDS = 6 * 60 * 60  # re-check every 6 hours while app stays o
 
 _SERVER_BASE: str | None = None
 CALIBRATION_KEY_RE = re.compile(r"^[A-Za-z0-9_:-]{1,80}$")
+
+# Animated-background custom media streaming. Local files can't be loaded via
+# file:// (the UI is served over HTTP), and base64 is impractical for large
+# videos, so the bridge registers a path under a session-scoped token and the
+# asset server streams it back from /blsm-bg-media/<token>.
+_BG_MEDIA_PREFIX = "/blsm-bg-media/"
+_bg_media_lock = Lock()
+_bg_media_tokens: dict[str, str] = {}
+_BG_VIDEO_EXTS = {
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".ogg": "video/ogg",
+    ".ogv": "video/ogg",
+    ".mov": "video/quicktime",
+    ".mkv": "video/x-matroska",
+}
+_BG_IMAGE_EXTS = {
+    ".gif": "image/gif",
+    ".png": "image/png",
+    ".jpg": "image/jpeg",
+    ".jpeg": "image/jpeg",
+    ".webp": "image/webp",
+    ".apng": "image/apng",
+    ".bmp": "image/bmp",
+    ".svg": "image/svg+xml",
+}
+
+
+def _bg_media_kind(path: Path) -> str:
+    ext = path.suffix.lower()
+    if ext in _BG_VIDEO_EXTS:
+        return "video"
+    if ext in _BG_IMAGE_EXTS:
+        return "image"
+    guessed = mimetypes.guess_type(path.name)[0] or ""
+    return "video" if guessed.startswith("video") else "image"
+
+
+def _bg_media_mime(path: Path) -> str:
+    ext = path.suffix.lower()
+    if ext in _BG_VIDEO_EXTS:
+        return _BG_VIDEO_EXTS[ext]
+    if ext in _BG_IMAGE_EXTS:
+        return _BG_IMAGE_EXTS[ext]
+    return mimetypes.guess_type(path.name)[0] or "application/octet-stream"
 
 
 
@@ -530,6 +578,70 @@ def start_asset_server(root: Path) -> str:
 
         def log_message(self, format, *args):
             return
+
+        def do_GET(self):
+            path = self.path.split("?", 1)[0]
+            if path.startswith(_BG_MEDIA_PREFIX):
+                self._serve_bg_media(path[len(_BG_MEDIA_PREFIX):])
+                return
+            return SimpleHTTPRequestHandler.do_GET(self)
+
+        def _serve_bg_media(self, token: str):
+            with _bg_media_lock:
+                file_path = _bg_media_tokens.get(token)
+            if not file_path:
+                self.send_error(404, "Media token not found")
+                return
+            target = Path(file_path)
+            try:
+                if not target.is_file():
+                    self.send_error(404, "Media file not found")
+                    return
+                size = target.stat().st_size
+                mime = _bg_media_mime(target)
+                start, end = 0, size - 1
+                partial = False
+                range_header = self.headers.get("Range")
+                if range_header and range_header.startswith("bytes="):
+                    try:
+                        spec = range_header[6:].split("-", 1)
+                        start = int(spec[0]) if spec[0] else 0
+                        if len(spec) > 1 and spec[1]:
+                            end = int(spec[1])
+                    except ValueError:
+                        self.send_error(400, "Bad range request")
+                        return
+                    if size <= 0 or start < 0 or start >= size or end >= size or start > end:
+                        self.send_error(416, "Requested range not satisfiable")
+                        return
+                    partial = True
+                length = end - start + 1
+                self.send_response(206 if partial else 200)
+                self.send_header("Content-Type", mime)
+                self.send_header("Accept-Ranges", "bytes")
+                self.send_header("Content-Length", str(length))
+                if partial:
+                    self.send_header(
+                        "Content-Range", f"bytes {start}-{end}/{size}"
+                    )
+                self.send_header("Cache-Control", "private, max-age=3600")
+                self.end_headers()
+                with target.open("rb") as handle:
+                    handle.seek(start)
+                    remaining = length
+                    while remaining > 0:
+                        chunk = handle.read(min(1024 * 1024, remaining))
+                        if not chunk:
+                            break
+                        self.wfile.write(chunk)
+                        remaining -= len(chunk)
+            except (BrokenPipeError, ConnectionResetError):
+                return
+            except Exception:
+                try:
+                    self.send_error(500, "Media stream failed")
+                except Exception:
+                    return
 
     server = ThreadingHTTPServer(("127.0.0.1", 0), AssetHandler)
     host, port = server.server_address
@@ -4129,6 +4241,98 @@ class LocalUiApi:
             return {"ok": True, "path": str(folder)}
         except Exception as error:
             log_bridge_error("open_themes_folder", error)
+            return {"ok": False, "error": str(error)}
+
+    _AUDIO_EXTS = {
+        ".mp3": "audio/mpeg",
+        ".wav": "audio/wav",
+        ".wave": "audio/wav",
+        ".ogg": "audio/ogg",
+        ".oga": "audio/ogg",
+        ".opus": "audio/ogg",
+        ".m4a": "audio/mp4",
+        ".mp4": "audio/mp4",
+        ".aac": "audio/aac",
+        ".flac": "audio/flac",
+        ".webm": "audio/webm",
+    }
+
+    def pick_audio_file(self):
+        """Open a native file picker for a local audio track; returns its path or None."""
+        try:
+            result = webview.windows[0].create_file_dialog(
+                webview.OPEN_DIALOG,
+                file_types=("Audio files (*.mp3;*.wav;*.ogg;*.m4a;*.flac;*.aac;*.webm)", "All files (*.*)"),
+            )
+        except Exception as error:
+            log_bridge_error("pick_audio_file", error)
+            return {"ok": False, "error": str(error)}
+        if not result:
+            return {"ok": True, "path": ""}
+        path = result[0] if isinstance(result, (list, tuple)) else result
+        return {"ok": True, "path": str(path)}
+
+    def audio_file_data_url(self, path: str):
+        """Read a local audio file and return a data: URL the webview can play.
+
+        The app is served over HTTP, so raw file:// sources are blocked by the
+        browser. The music player calls this on demand for a local track path.
+        """
+        try:
+            target = Path(path or "").expanduser()
+            if not target.is_file():
+                return {"ok": False, "error": "File not found"}
+            data = target.read_bytes()
+            if len(data) > 60 * 1024 * 1024:
+                return {"ok": False, "error": "File is larger than 60 MB"}
+            ext = target.suffix.lower()
+            mime = self._AUDIO_EXTS.get(ext) or mimetypes.guess_type(target.name)[0] or "audio/mpeg"
+            encoded = base64.b64encode(data).decode("ascii")
+            return {"ok": True, "dataUrl": f"data:{mime};base64,{encoded}", "mime": mime}
+        except Exception as error:
+            log_bridge_error("audio_file_data_url", error)
+            return {"ok": False, "error": str(error)}
+
+    def pick_bg_media(self):
+        """Open a native file picker for a local background video/gif/image."""
+        try:
+            result = webview.windows[0].create_file_dialog(
+                webview.OPEN_DIALOG,
+                file_types=(
+                    "Media files (*.mp4;*.webm;*.ogg;*.ogv;*.mov;*.mkv;*.gif;*.png;*.jpg;*.jpeg;*.webp;*.apng;*.bmp;*.svg)",
+                    "Video files (*.mp4;*.webm;*.ogg;*.ogv;*.mov;*.mkv)",
+                    "Image files (*.gif;*.png;*.jpg;*.jpeg;*.webp;*.apng;*.bmp;*.svg)",
+                    "All files (*.*)",
+                ),
+            )
+        except Exception as error:
+            log_bridge_error("pick_bg_media", error)
+            return {"ok": False, "error": str(error)}
+        if not result:
+            return {"ok": True, "path": ""}
+        path = result[0] if isinstance(result, (list, tuple)) else result
+        return {"ok": True, "path": str(path)}
+
+    def bg_media_url(self, path: str):
+        """Register a local background media file and return a streamable URL.
+
+        The UI is served over HTTP so file:// is blocked; instead the asset
+        server streams the file from /blsm-bg-media/<token>. Tokens are
+        session-scoped. ``kind`` is "video" or "image" so the UI picks a
+        <video> or <img> element.
+        """
+        try:
+            target = Path(path or "").expanduser()
+            if not target.is_file():
+                return {"ok": False, "error": "File not found"}
+            kind = _bg_media_kind(target)
+            token = secrets.token_urlsafe(16)
+            with _bg_media_lock:
+                _bg_media_tokens[token] = str(target.resolve())
+            base = _SERVER_BASE or ""
+            return {"ok": True, "url": f"{base}{_BG_MEDIA_PREFIX}{token}", "kind": kind, "token": token}
+        except Exception as error:
+            log_bridge_error("bg_media_url", error)
             return {"ok": False, "error": str(error)}
 
     def get_log_info(self) -> dict:

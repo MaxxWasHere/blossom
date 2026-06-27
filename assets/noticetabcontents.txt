@@ -1,9 +1,22 @@
+# Blossom 2.3.5
+
+## New
+- Music player — open it from the new **Music** sidebar category, which shows the player as a full in-app page (everything fits inside: now-playing, transport, seek/volume/speed, a scrolling playlist and the add-track section). Add tracks by pasting a web URL or browsing a local audio file (mp3, wav, ogg, m4a, flac…), then play/pause, seek, skip, shuffle and repeat. Adjust volume, mute, and playback speed (0.5×–2×), reorder or remove tracks. The page opens/closes with spring scale/fade motion, the sidebar selection animates like the other categories, and the player closes when you pick another category (audio keeps playing in the background). Closed by default on launch; your playlist, volume, speed, loop, shuffle and last track save to your config and restore when you reopen the player (no auto-play on launch; local files keep their path in config, not a data URL).
+- Animated background — Appearance has a new **Animated background** card with live wallpaper presets (Aurora, Mesh, Stars, Bubbles), plus a **Custom media** preset that uses your own video, gif or image — paste a web URL or **Browse** a local file (local media is streamed back through the app's server, so large videos work without base64). Opacity, blur, dim and speed sliders tune the look; speed controls video playback rate. The background sits behind cards, the toolbar, inputs and sidebar items, so most surfaces stay solid and text stays readable; it freezes to a static frame (and videos pause) when Reduce motion is on. Off by default.
+
+## UI
+- Expressive motion everywhere — inputs, selects, checkboxes, chips, badges, secondary buttons, titlebar controls, list/table rows, links and code now share the same Material 3 Expressive easing: hover lifts, press springs, focus glows, and a checked pop. Dialogs, toasts, the command palette and the license gate get container-transform entrances; injected Blossom panels (Appearance, Animated background, Fishing, Merchant, Biome webhooks) fade-rise on mount. All gated on Appearance → Reduce motion.
+
+## Licensing & updates
+- Stable **2.3.5** — the built-in updater on the stable channel offers this release; beta builds stay on their own track.
+
 # Blossom 2.3.0
 
 ## New
 - Schedule profiles — save multiple named automation plans (e.g. Weekday fish, Weekend grind) from the Macro Schedule tab. Pick a profile card to edit its timeline, or tap **Add profile** for a new plan. **Save** stores the profile and sets it as the active plan that runs when **Use schedule when macro runs** is on.
 - Macro Schedule tab — dedicated **Schedule** sidebar section with a horizontal timeline editor (time flows left→right). Drag blocks by the body to reorder, drag palette chips to add steps, resize left/right edges to remap duration, zoom the timeline with +/− or the slider, right-click for Properties / Duplicate / Delete, then enable **Use schedule when macro runs** and press Start.
 - Calibrations apply immediately — every Mark saves to your Blossom config and the macro reads updated points on the next tick without restarting.
+- Slower Collections clicks — Fishing page has a **Slower Collections clicks** toggle with an adjustable extra delay (ms). When on, Blossom opens and closes the Collections menu with a longer settle and click hold, and waits longer for the menu to appear — useful on slower PCs where the menu does not open in time during a fishing cycle. Off by default.
 
 ## UI
 - Macro Schedule marked W.I.P. — the Schedule sidebar section, nav item, and tab page show clear experimental labeling (badge, subtitle, and warning banner). The planner is unfinished and may not run correctly when the macro is started; profiles and timeline editing are preview-only until the feature stabilizes.

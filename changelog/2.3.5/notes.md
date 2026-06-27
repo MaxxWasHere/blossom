@@ -1,0 +1,11 @@
+# Blossom 2.3.5
+
+## New
+- Music player — open it from the new **Music** sidebar category, which shows the player as a full in-app page (everything fits inside: now-playing, transport, seek/volume/speed, a scrolling playlist and the add-track section). Add tracks by pasting a web URL or browsing a local audio file (mp3, wav, ogg, m4a, flac…), then play/pause, seek, skip, shuffle and repeat. Adjust volume, mute, and playback speed (0.5×–2×), reorder or remove tracks. The page opens/closes with spring scale/fade motion, the sidebar selection animates like the other categories, and the player closes when you pick another category (audio keeps playing in the background). Closed by default on launch; your playlist, volume, speed, loop, shuffle and last track save to your config and restore when you reopen the player (no auto-play on launch; local files keep their path in config, not a data URL).
+- Animated background — Appearance has a new **Animated background** card with live wallpaper presets (Aurora, Mesh, Stars, Bubbles), plus a **Custom media** preset that uses your own video, gif or image — paste a web URL or **Browse** a local file (local media is streamed back through the app's server, so large videos work without base64). Opacity, blur, dim and speed sliders tune the look; speed controls video playback rate. The background sits behind cards, the toolbar, inputs and sidebar items, so most surfaces stay solid and text stays readable; it freezes to a static frame (and videos pause) when Reduce motion is on. Off by default.
+
+## UI
+- Expressive motion everywhere — inputs, selects, checkboxes, chips, badges, secondary buttons, titlebar controls, list/table rows, links and code now share the same Material 3 Expressive easing: hover lifts, press springs, focus glows, and a checked pop. Dialogs, toasts, the command palette and the license gate get container-transform entrances; injected Blossom panels (Appearance, Animated background, Fishing, Merchant, Biome webhooks) fade-rise on mount. All gated on Appearance → Reduce motion.
+
+## Licensing & updates
+- Stable **2.3.5** — the built-in updater on the stable channel offers this release; beta builds stay on their own track.
