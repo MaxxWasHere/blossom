@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 from typing import Any, Callable
 import autoit
-from macro_engine import click_at_settled
+from macro_engine import click_at_settled, CLICK_HOLD_SEC
 import numpy as np
 import win32clipboard
 from PIL import ImageGrab
@@ -74,6 +74,8 @@ DEFAULT_FISHING_CONFIG = {
     "fishing_confirm_sell_all_button": [800, 619],      # confirm sell-all button
     "collections_button": [33, 443],                    # collections menu button
     "exit_collections_button": [385, 164],              # close collections menu button
+    "fishing_slow_collections_clicks": False,           # slower, more deliberate collections open/close
+    "fishing_collections_click_delay_ms": 400,          # extra settle/hold added when slow mode is on
     "aura_menu": [1200, 500],                           # aura menu button
     "aura_search_bar": [834, 364],                      # aura search bar
     "first_aura_slot_pos": [0, 0],                      # first aura slot
@@ -226,6 +228,8 @@ def load_fishing_config(raw_config: dict[str, Any] | None = None) -> dict[str, A
         "fishing_confirm_sell_all_button": _coerce_point(raw.get("fishing_confirm_sell_all_button"), DEFAULT_FISHING_CONFIG["fishing_confirm_sell_all_button"]),
         "collections_button": _coerce_point(raw.get("collections_button"), DEFAULT_FISHING_CONFIG["collections_button"]),
         "exit_collections_button": _coerce_point(raw.get("exit_collections_button"), DEFAULT_FISHING_CONFIG["exit_collections_button"]),
+        "fishing_slow_collections_clicks": bool(raw.get("fishing_slow_collections_clicks", False)),
+        "fishing_collections_click_delay_ms": _coerce_int(raw.get("fishing_collections_click_delay_ms"), 400, 0, 5000),
         "aura_menu": _coerce_point(raw.get("aura_menu"), DEFAULT_FISHING_CONFIG["aura_menu"]),
         "aura_search_bar": _coerce_point(raw.get("aura_search_bar"), DEFAULT_FISHING_CONFIG["aura_search_bar"]),
         "first_aura_slot_pos": _coerce_point(raw.get("first_aura_slot_pos"), DEFAULT_FISHING_CONFIG["first_aura_slot_pos"]),
@@ -260,6 +264,26 @@ def load_fishing_config(raw_config: dict[str, Any] | None = None) -> dict[str, A
 
 def _get_fishing_actions_delay_seconds(cfg: dict[str, Any]) -> float:
     return _coerce_int(cfg.get("fishing_actions_delay_ms"), 100, 0, 5000) / 1000.0
+
+
+def _get_collections_slow_seconds(cfg: dict[str, Any]) -> float:
+    """Extra seconds added to collections open/close clicks when slow mode is on."""
+    if not bool(cfg.get("fishing_slow_collections_clicks", False)):
+        return 0.0
+    return _coerce_int(cfg.get("fishing_collections_click_delay_ms"), 400, 0, 5000) / 1000.0
+
+
+def _collections_click(cfg: dict[str, Any], x: int, y: int) -> None:
+    """Click the collections open/close button. Slower (longer settle + hold) when enabled."""
+    if x <= 0:
+        return
+    extra = _get_collections_slow_seconds(cfg)
+    click_at_settled(
+        x,
+        y,
+        pre_sleep_sec=0.1 + extra,
+        hold_sec=CLICK_HOLD_SEC + min(extra, 0.35),
+    )
 
 
 def _get_pixel_rgb(x: int, y: int, sct: Any | None = None) -> tuple[int, int, int]:
@@ -481,13 +505,13 @@ def _run_pre_fishing_sequence(
 
     collections_x, collections_y = cfg["collections_button"]
     if collections_x > 0:
-        click_at_settled(collections_x, collections_y)
-    if not sleep_interruptible(1.0 + fishing_actions_delay):
+        _collections_click(cfg, collections_x, collections_y)
+    if not sleep_interruptible(1.0 + fishing_actions_delay + _get_collections_slow_seconds(cfg)):
         return False
 
     exit_x, exit_y = cfg["exit_collections_button"]
     if exit_x > 0:
-        click_at_settled(exit_x, exit_y)
+        _collections_click(cfg, exit_x, exit_y)
     if not sleep_interruptible(0.2 + fishing_actions_delay):
         return False
 
@@ -690,13 +714,13 @@ def _run_sell_fish_sequence(
 
     collections_x, collections_y = cfg["collections_button"]
     if collections_x > 0:
-        click_at_settled(collections_x, collections_y)
-    if not sleep_interruptible(1.0 + fishing_actions_delay):
+        _collections_click(cfg, collections_x, collections_y)
+    if not sleep_interruptible(1.0 + fishing_actions_delay + _get_collections_slow_seconds(cfg)):
         return False
 
     exit_x, exit_y = cfg["exit_collections_button"]
     if exit_x > 0:
-        click_at_settled(exit_x, exit_y)
+        _collections_click(cfg, exit_x, exit_y)
     if not sleep_interruptible(0.2 + fishing_actions_delay):
         return False
 
@@ -1258,6 +1282,7 @@ def run_fishing_loop(
             midbar_x, midbar_y = cfg["fishing_midbar_sample_pos"]
             bar_color = _get_pixel_rgb(midbar_x, midbar_y, sct=sct)
             start_time = time.time()
+            minigame_engaged = False
 
             while (time.time() - start_time) < 9:
                 if not _should_continue() or not _can_run():
@@ -1269,6 +1294,8 @@ def run_fishing_loop(
                     scan_height=int(cfg.get("fishing_bar_scan_height", 3)),
                     sct=sct,
                 )
+                if found:
+                    minigame_engaged = True
                 if not found:
                     click_burst = int(cfg.get("fishing_click_burst", 2))
                     for i in range(max(1, click_burst)):
@@ -1289,11 +1316,15 @@ def run_fishing_loop(
                 if not _sleep_interruptible(0.55):
                     break
 
-            fish_caught_count += 1
-            fish_caught_since_merchant += 1
-            fish_caught_since_merchant_ocr += 1
-            fish_caught_since_br_sc += 1
-            _persist_runtime_counters()
+            # Only count a catch when the minigame bar was actually present during
+            # the reel window — false bites (indicator fired with no bar) reel blind
+            # for the full window and must not inflate the catch/sell counters.
+            if minigame_engaged:
+                fish_caught_count += 1
+                fish_caught_since_merchant += 1
+                fish_caught_since_merchant_ocr += 1
+                fish_caught_since_br_sc += 1
+                _persist_runtime_counters()
             _touch_progress()
 
             _set_busy(False)

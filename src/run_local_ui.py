@@ -2304,6 +2304,11 @@ class LocalUiApi:
             print(f"[FishingMode] merchant teleporter result: {result}")
         except Exception as error:
             print(f"[FishingMode] merchant sequence failed: {error}")
+        # The teleporter moves the player off the dock (to the merchant, then back
+        # to Limbo via Portable Crack). Flag a re-walk so the next fishing cycle
+        # walks back to the dock instead of clicking the fish button in Limbo.
+        if ran:
+            self._fishing_runtime_state["merchant_requires_reset"] = True
         return ran
 
     def _start_fishing_worker(self) -> None:

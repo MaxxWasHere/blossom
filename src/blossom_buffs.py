@@ -2,7 +2,9 @@
 
 Triggered when the biome watcher detects GLITCHED. For each enabled buff in
 config["auto_buff_glitched"], open the inventory, search the buff name, set the
-amount, and use it (repeated 3x like the original to beat client lag).
+amount, and use it. Priority potions are popped first, then any remaining
+enabled buffs; Heavenly/Oblivion add a per-potion settle wait (shortened when a
+Warp Potion is also queued).
 """
 
 from __future__ import annotations
@@ -15,7 +17,17 @@ CalibrationPoint = tuple[int, int] | None
 GetPoint = Callable[[str], CalibrationPoint]
 ConfigEnabled = Callable[[dict, str], bool]
 
-BUFF_REPEAT = 3
+# Noteab priority order — these potions are popped before any other enabled buff.
+BUFF_PRIORITY_ORDER: tuple[str, ...] = (
+    "Xyz Potion",
+    "Warp Potion",
+    "Heavenly Potion II",
+    "Oblivion Potion",
+)
+# Per-potion settle wait (seconds) for potions that apply a stack: 0.85s each.
+BUFF_HEAVENLY_OBLIVION_WAIT_PER_POTION_SEC = 0.85
+# Warp Potion speeds up game actions, so the settle wait is shortened.
+BUFF_WARP_WAIT_MULTIPLIER = 0.12
 
 _BUFF_CALIBRATION_SPECS: tuple[tuple[str, str | None], ...] = (
     ("inventory_menu", None),
@@ -37,31 +49,37 @@ def _resolve_point(get_point: GetPoint, key: str, fallback: str | None = None) -
 
 
 def _enabled_buffs(config: dict) -> list[tuple[str, int]]:
-    """Return [(buff_name, amount)] for enabled entries in auto_buff_glitched."""
+    """Return [(buff_name, amount)] for enabled entries, priority potions first."""
     raw = config.get("auto_buff_glitched", {})
-    result: list[tuple[str, int]] = []
+    enabled: dict[str, int] = {}
     if not isinstance(raw, dict):
-        return result
+        return []
     for buff, spec in raw.items():
-        enabled = False
+        is_enabled = False
         amount = 1
         if isinstance(spec, (list, tuple)):
             if len(spec) >= 1:
-                enabled = bool(spec[0])
+                is_enabled = bool(spec[0])
             if len(spec) >= 2:
                 try:
                     amount = int(spec[1])
                 except (TypeError, ValueError):
                     amount = 1
         elif isinstance(spec, dict):
-            enabled = bool(spec.get("enabled", False))
+            is_enabled = bool(spec.get("enabled", False))
             try:
                 amount = int(spec.get("amount", 1))
             except (TypeError, ValueError):
                 amount = 1
-        if enabled:
-            result.append((str(buff), max(1, amount)))
-    return result
+        if is_enabled:
+            enabled[str(buff)] = max(1, amount)
+    ordered: list[tuple[str, int]] = []
+    for buff in BUFF_PRIORITY_ORDER:
+        if buff in enabled:
+            ordered.append((buff, enabled.pop(buff)))
+    for buff, amount in enabled.items():
+        ordered.append((buff, amount))
+    return ordered
 
 
 def auto_buff_glitched_enabled(config: dict, *, config_enabled: ConfigEnabled) -> bool:
@@ -116,52 +134,60 @@ def run_auto_pop_buffs(
     use_button = _resolve_point(get_point, "use_button")
 
     used = 0
+    warp_enabled = any(buff == "Warp Potion" for buff, _ in buffs)
     for buff, amount in buffs:
         if cancel_event.is_set():
             return "Cancelled"
         print(f"[main macro] using buff {buff} x{amount}")
-        for _ in range(BUFF_REPEAT):
-            if cancel_event.is_set():
-                return "Cancelled"
-            if not focus_roblox():
-                return "Error: Roblox not focused"
-            _sleep_sec(0.35, cancel_event)
+        if not focus_roblox():
+            return "Error: Roblox not focused"
+        _sleep_sec(0.35, cancel_event)
 
-            if not github_original_click_at(*inventory_menu, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
+        if not github_original_click_at(*inventory_menu, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
+            return "Cancelled"
+        _sleep_sec(0.22 + click_delay, cancel_event)
+
+        if not github_original_click_at(*search_bar, click=2, pre_sleep_sec=click_delay, cancel=cancel_event):
+            return "Cancelled"
+        _sleep_sec(0.23 + click_delay, cancel_event)
+
+        _autoit_send("^{a}")
+        _autoit_send("{BACKSPACE}")
+        _autoit_send(buff.lower())
+        _sleep_sec(0.22 + click_delay, cancel_event)
+
+        if not github_original_click_at(*first_slot, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
+            return "Cancelled"
+        _sleep_sec(0.22 + click_delay, cancel_event)
+
+        if amount_box is not None:
+            if not github_original_click_at(*amount_box, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
                 return "Cancelled"
             _sleep_sec(0.22 + click_delay, cancel_event)
-
-            if not github_original_click_at(*search_bar, click=2, pre_sleep_sec=click_delay, cancel=cancel_event):
-                return "Cancelled"
-            _sleep_sec(0.23 + click_delay, cancel_event)
-
             _autoit_send("^{a}")
+            _sleep_sec(0.285 + click_delay, cancel_event)
             _autoit_send("{BACKSPACE}")
-            _autoit_send(buff.lower())
-            _sleep_sec(0.22 + click_delay, cancel_event)
+            _sleep_sec(0.285 + click_delay, cancel_event)
+            _autoit_send(str(amount))
+            _sleep_sec(0.285 + click_delay, cancel_event)
 
-            if not github_original_click_at(*first_slot, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
+        if not github_original_click_at(*use_button, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
+            return "Cancelled"
+        _sleep_sec(0.3 + click_delay, cancel_event)
+
+        if not github_original_click_at(*inventory_menu, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
+            return "Cancelled"
+        _sleep_sec(0.32 + click_delay, cancel_event)
+
+        # Per-potion settle wait (Noteab additional_wait_time): Heavenly/Oblivion
+        # apply a stack, so wait ~0.85s per potion — shortened when a Warp Potion
+        # is also queued (warp speeds up game actions).
+        if buff in ("Heavenly Potion II", "Oblivion Potion"):
+            wait_sec = BUFF_HEAVENLY_OBLIVION_WAIT_PER_POTION_SEC * amount
+            if warp_enabled:
+                wait_sec *= BUFF_WARP_WAIT_MULTIPLIER
+            if not _sleep_sec(wait_sec, cancel_event):
                 return "Cancelled"
-            _sleep_sec(0.22 + click_delay, cancel_event)
-
-            if amount_box is not None:
-                if not github_original_click_at(*amount_box, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
-                    return "Cancelled"
-                _sleep_sec(0.22 + click_delay, cancel_event)
-                _autoit_send("^{a}")
-                _sleep_sec(0.285 + click_delay, cancel_event)
-                _autoit_send("{BACKSPACE}")
-                _sleep_sec(0.285 + click_delay, cancel_event)
-                _autoit_send(str(amount))
-                _sleep_sec(0.285 + click_delay, cancel_event)
-
-            if not github_original_click_at(*use_button, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
-                return "Cancelled"
-            _sleep_sec(0.3 + click_delay, cancel_event)
-
-            if not github_original_click_at(*inventory_menu, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
-                return "Cancelled"
-            _sleep_sec(0.32 + click_delay, cancel_event)
         used += 1
 
     return f"OK: popped {used} buff type(s)"

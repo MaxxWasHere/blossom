@@ -1,0 +1,84 @@
+/* Fishing tab — slower Collections clicks toggle */
+
+#blsm-fishing-collection-hub {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.blsm-fishing-collection-toggle {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px dashed color-mix(in srgb, var(--accent, #e891a8) 40%, var(--border-color, #3a2a32));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card-bg, #1a1216) 92%, var(--accent, #e891a8) 8%);
+}
+
+.blsm-fishing-collection-toggle input {
+  margin-top: 3px;
+  accent-color: var(--accent, #e891a8);
+}
+
+.blsm-fishing-collection-toggle label {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.blsm-fishing-collection-toggle label b {
+  font-size: 0.9rem;
+}
+
+.blsm-fishing-collection-toggle label span {
+  font-size: 0.78rem;
+  color: var(--text-muted, #a89aa0);
+  line-height: 1.4;
+}
+
+.blsm-fishing-collection-delay {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 12px;
+  border: 1px solid var(--border-color, #3a2a32);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card-bg, #1a1216) 96%, transparent);
+}
+
+.blsm-fishing-collection-delay label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-secondary, #cbbec4);
+}
+
+.blsm-fishing-collection-delay input[type="number"] {
+  width: 96px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, #3a2a32);
+  background: var(--bg-input, #120e10);
+  color: var(--text-primary, #ece8ea);
+  font-size: 0.85rem;
+  accent-color: var(--accent, #e891a8);
+}
+
+.blsm-fishing-collection-delay input[type="number"]:focus-visible {
+  outline: 2px solid var(--accent, #e891a8);
+  outline-offset: 1px;
+}
+
+.blsm-fishing-collection-delay-hint {
+  flex-basis: 100%;
+  font-size: 0.76rem;
+  color: var(--text-muted, #a89aa0);
+  line-height: 1.4;
+}
+
+.blsm-fishing-collection-delay[hidden] {
+  display: none;
+}

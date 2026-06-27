@@ -20,6 +20,7 @@ from typing import Callable
 import blossom_ocr
 from macro_engine import (
     _sleep_sec,
+    click_hold_at,
     github_original_click_at,
     inventory_click_delay_sec,
     replay_key_action,
@@ -54,7 +55,6 @@ MERCHANT_INTERACT_PRESSES = 6
 MERCHANT_INTERACT_PRESS_GAP = 0.55 * _COTEAB_MERCHANT_TIMING
 MERCHANT_POST_INTERACT_SETTLE_SEC = 0.65 * _COTEAB_MERCHANT_TIMING
 MERCHANT_DIALOGUE_CLICKS = 8
-MERCHANT_DIALOGUE_CLICK_GAP = 0.55 * _COTEAB_MERCHANT_TIMING
 MERCHANT_NAME_OCR_TRIES = 4
 MERCHANT_NAME_OCR_GAP = 0.12 * _COTEAB_MERCHANT_TIMING
 MERCHANT_OPEN_WAIT_SEC = 7.0 * _COTEAB_MERCHANT_TIMING
@@ -65,6 +65,11 @@ MERCHANT_SLOT_SETTLE_SEC = 0.15 * _COTEAB_MERCHANT_TIMING
 MERCHANT_PURCHASE_TYPE_GAP_SEC = 0.18 * _COTEAB_MERCHANT_TIMING
 MERCHANT_PURCHASE_SETTLE_SEC = 2.0 * _COTEAB_MERCHANT_TIMING
 MERCHANT_POST_TELEPORT_SETTLE_SEC = 1.1 * _COTEAB_MERCHANT_TIMING
+# Dialogue press-and-hold durations (Noteab autoit_hold_left_click). These are
+# game-side dialogue waits, not click pacing, so they are not scaled by
+# _COTEAB_MERCHANT_TIMING.
+MERCHANT_PRE_OCR_HOLD_SEC = 4.25
+MERCHANT_POST_PURCHASE_HOLD_SEC = 3.35
 PORTABLE_CRACK_SEARCH = "crack"
 
 # Per-slot calibration keys (preferred over the +178 offset when all set).
@@ -136,6 +141,7 @@ _MERCHANT_INTERACT_KEY_KEYS = (
 # Module-level cooldown timestamp (mirrors self.last_merchant_interaction).
 _last_merchant_interaction = 0.0
 _last_found_webhook_at: dict[str, float] = {}
+_last_shop_webhook_at: dict[str, float] = {}
 
 
 # --------------------------------------------------------------------------- #
@@ -405,24 +411,31 @@ def _resolve_merchant_max_button(get_point: GetPoint, merchant_name: str = "") -
     return None
 
 
-def _click_through_dialogue(get_point: GetPoint, cancel_event, click_delay: float) -> bool:
+def _hold_dialogue_box(
+    dialogue: CalibrationPoint,
+    hold_sec: float,
+    cancel_event,
+    click_delay: float,
+) -> bool:
+    """Mirror Noteab autoit_hold_left_click: advancing clicks, then a press-and-hold."""
+    if dialogue is None:
+        return False
+    if not github_original_click_at(
+        *dialogue,
+        click=MERCHANT_DIALOGUE_CLICKS,
+        pre_sleep_sec=click_delay,
+        cancel=cancel_event,
+    ):
+        return False
+    return click_hold_at(*dialogue, hold_sec, cancel=cancel_event)
+
+
+def _hold_through_dialogue(get_point: GetPoint, cancel_event, click_delay: float) -> bool:
     dialogue = get_point("merchant_dialogue_box")
     if dialogue is None:
         print("[main macro] merchant: missing merchant_dialogue_box calibration")
         return False
-    for _ in range(MERCHANT_DIALOGUE_CLICKS):
-        if cancel_event.is_set():
-            return False
-        if not github_original_click_at(
-            *dialogue,
-            click=2,
-            pre_sleep_sec=click_delay,
-            cancel=cancel_event,
-        ):
-            return False
-        if not _sleep_sec(MERCHANT_DIALOGUE_CLICK_GAP, cancel_event):
-            return False
-    return True
+    return _hold_dialogue_box(dialogue, MERCHANT_PRE_OCR_HOLD_SEC, cancel_event, click_delay)
 
 
 def _buy_item(
@@ -463,7 +476,14 @@ def _buy_item(
         cancel=cancel_event,
     ):
         return False
-    return _sleep_sec(MERCHANT_PURCHASE_SETTLE_SEC, cancel_event)
+    if not _sleep_sec(MERCHANT_PURCHASE_SETTLE_SEC, cancel_event):
+        return False
+    # Hold the purchase confirmation dialogue open (original holdTime=3350ms) so
+    # multi-item buys complete before the next slot is clicked.
+    dialogue = get_point("merchant_dialogue_box")
+    if dialogue is not None:
+        return _hold_dialogue_box(dialogue, MERCHANT_POST_PURCHASE_HOLD_SEC, cancel_event, click_delay)
+    return True
 
 
 def _capture_merchant_screenshot() -> str | None:
@@ -524,6 +544,20 @@ def _should_send_found_webhook(merchant_name: str) -> bool:
     return True
 
 
+def _should_send_shop_webhook(merchant_name: str) -> bool:
+    now = time.time()
+    last = _last_shop_webhook_at.get(merchant_name, 0.0)
+    if now - last < MERCHANT_FOUND_WEBHOOK_THROTTLE_SEC:
+        remaining = MERCHANT_FOUND_WEBHOOK_THROTTLE_SEC - (now - last)
+        print(
+            f"[main macro] merchant: skipping duplicate shop webhook for {merchant_name} "
+            f"({remaining:.0f}s throttle)"
+        )
+        return False
+    _last_shop_webhook_at[merchant_name] = now
+    return True
+
+
 def _run_webhook_async(name: str, target) -> None:
     Thread(target=target, name=name, daemon=True).start()
 
@@ -566,6 +600,8 @@ def _send_merchant_shop_webhook(
         return
     urls = _webhook_urls(config)
     if not urls:
+        return
+    if not _should_send_shop_webhook(merchant_name):
         return
     ps_link = str(config.get("private_server_link", "") or "").strip() or None
     ping_id = _merchant_ping_id(config, merchant_name)
@@ -729,14 +765,13 @@ def _run_merchant_handler(
     if not _phase_press_interact(config, cancel_event):
         return "Cancelled"
 
-    # Phase 2 — dialogue clicks
-    if not _click_through_dialogue(get_point, cancel_event, click_delay):
+    # Phase 2 — dialogue hold (press-and-hold advances to the name screen)
+    if not _hold_through_dialogue(get_point, cancel_event, click_delay):
         return "Error: calibrate merchant_dialogue_box for merchant detection"
 
     # Phase 3 — name OCR (early exit on match)
     merchant_name, name_region = _phase_detect_merchant(get_region, cancel_event)
     if not merchant_name:
-        _last_merchant_interaction = time.time()
         _abort_merchant_no_shop(get_point, cancel_event, click_delay)
         if name_region is None:
             print("[main macro] merchant: cannot confirm shop — calibrate 'Merchant Name' region")

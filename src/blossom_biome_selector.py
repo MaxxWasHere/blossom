@@ -264,11 +264,6 @@ def _fuzzy_drive_match(ocr_text: str, drive_name: str) -> bool:
     return overlap >= 0.6
 
 
-def _ocr_row_label(region: tuple[int, int, int, int]) -> str:
-    text = blossom_ocr.ocr_region(region, psm=ROW_OCR_PSM)
-    return blossom_ocr.correct_item_text(text) if text else ""
-
-
 def _enabled_drives(config: dict) -> list[str]:
     toggles = normalize_drive_toggles(config.get("biome_selector_drives"))
     return [name for name, on in toggles.items() if on]
@@ -333,7 +328,6 @@ def _click_confirm(
     *,
     config: dict,
     get_point: GetPoint,
-    get_region: GetRegion,
     cancel_event,
 ) -> bool:
     click_delay = _click_delay_sec(config)
@@ -341,14 +335,6 @@ def _click_confirm(
     if confirm is None:
         print("[main macro] biome selector: missing confirm calibration")
         return False
-
-    region = _resolve_region(get_region, "biome_selector_confirm_pos")
-    if region is not None and blossom_ocr.ocr_available():
-        text = _ocr_row_label(region)
-        print(f"[main macro] biome selector: confirm OCR -> {text!r}")
-        if text and "confirm" not in text and "cancel" in text:
-            print("[main macro] biome selector: confirm OCR looks like Cancel — skipping click")
-            return False
 
     if not github_original_click_at(*confirm, click=1, pre_sleep_sec=click_delay, cancel=cancel_event):
         return False
@@ -363,7 +349,7 @@ def _run_drive_panel(
     cancel_event,
 ) -> str:
     if not blossom_ocr.ocr_available():
-        return "Error: Tesseract OCR required for Biome Selector drives"
+        return "Error: Windows OCR required for Biome Selector drives"
 
     enabled = _enabled_drives(config)
     if not enabled:
@@ -413,7 +399,6 @@ def _run_drive_panel(
         if not _click_confirm(
             config=config,
             get_point=get_point,
-            get_region=get_region,
             cancel_event=cancel_event,
         ):
             return "Cancelled"

@@ -273,7 +273,6 @@ def _sleep_until(deadline: float, cancel: threading.Event | None = None) -> bool
         if remaining <= 0:
             return True
         time.sleep(min(remaining, CANCEL_SLEEP_CHUNK_SEC))
-    return not _cancelled(cancel)
 
 
 def release_stuck_inputs(*, reason: str = "", cancel: threading.Event | None = None) -> bool:
@@ -447,20 +446,25 @@ def click_at_settled(
     *,
     click: int = 1,
     pre_sleep_sec: float = 0.1,
+    hold_sec: float = CLICK_HOLD_SEC,
     cancel: threading.Event | None = None,
 ) -> bool:
-    """Jump to (x, y), settle, then click in place — no click while moving there."""
+    """Jump to (x, y), settle, then click in place — no click while moving there.
+
+    ``hold_sec`` overrides the per-click button hold duration (slower clicks).
+    """
     if _cancelled(cancel):
         return False
     instant_move(int(x), int(y))
     delay = max(PRE_CLICK_SETTLE_SEC, float(pre_sleep_sec))
     if not _sleep_sec(delay, cancel):
         return False
+    hold = max(0.0, float(hold_sec))
     for i in range(max(1, int(click))):
         if _cancelled(cancel):
             return False
         mouse_button("left", down=True)
-        if not _sleep_sec(CLICK_HOLD_SEC, cancel):
+        if not _sleep_sec(hold, cancel):
             return False
         mouse_button("left", down=False)
         if i + 1 < click and not _sleep_sec(0.04, cancel):

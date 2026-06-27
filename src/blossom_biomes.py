@@ -28,9 +28,11 @@ AURA_COOLDOWN_SEC = 20.0
 _HOVER_RE = re.compile(
     r'"largeImage"\s*:\s*\{\s*"hoverText"\s*:\s*"([^"]+)"', re.IGNORECASE
 )
-# Equipped aura, e.g.  "state":"Equipped \"Celestial\"","smallImage"
+# Equipped aura, e.g. "state":"Equipped \"Celestial\"" / "state":"Equipped _None_".
+# Capture until the state string's unescaped closing quote (handles escaped quotes,
+# and does not depend on smallImage following the state field).
 _AURA_RE = re.compile(
-    r'"state"\s*:\s*"Equipped\s+(.+?)"\s*,\s*"smallImage"', re.IGNORECASE
+    r'"state"\s*:\s*"Equipped\s+((?:[^"\\]|\\.)*)"', re.IGNORECASE
 )
 
 

@@ -29,9 +29,9 @@ ROBLOX_PROCESS_NAMES = frozenset(
 )
 
 _DISCONNECT_LINE = "[FLog::Network] Client:Disconnect"
-_EQUIPPED_RE = re.compile(
-    r'"state"\s*:\s*"Equipped\s+(.+?)"\s*,\s*"smallImage"', re.IGNORECASE
-)
+# In-game signal: any "state":"Equipped ..." entry means the player is loaded.
+# Mirrors Noteab reconnect_logs_state — a prefix match with no smallImage dependency.
+_EQUIPPED_RE = re.compile(r'"state"\s*:\s*"Equipped', re.IGNORECASE)
 
 DEFAULT_PLACE_ID = "15532962292"
 DEFAULT_MAX_ATTEMPTS = 3
