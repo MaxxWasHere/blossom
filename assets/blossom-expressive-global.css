@@ -195,16 +195,6 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-bg-select:active {
   transform: scale(0.97);
 }
 
-/* ============================ Music player launcher + window — expressive idle ============================ */
-/* The component CSS already handles open/close/collapse transitions and
-   reduce-motion; here we just make sure they ride the expressive easing tokens
-   when motion is on (no-op override only when expressive is active). */
-html.blsm-expressive-on:not(.blsm-reduce-motion) #blsm-music-launcher {
-  transition: transform 0.3s var(--m3eg-ease-spring),
-    opacity 0.2s var(--m3eg-ease),
-    box-shadow 0.2s var(--m3eg-ease);
-}
-
 /* ============================ List rows / table rows / links / code ============================ */
 html.blsm-expressive-on:not(.blsm-reduce-motion) .card tr,
 html.blsm-expressive-on:not(.blsm-reduce-motion) .card tbody tr,

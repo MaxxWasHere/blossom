@@ -29,8 +29,8 @@ PYI_DIST = ROOT / "dist"
 MANIFEST_PATH = ROOT / "assets" / "runtime_manifest.json"
 WINOCR_VERSION = "0.0.15"
 
-DEFAULT_STABLE_VERSION = "2.3.5"
-DEFAULT_BETA_VERSION = "2.3.5-beta.1"
+DEFAULT_STABLE_VERSION = "2.3.6"
+DEFAULT_BETA_VERSION = "2.3.6-beta.1"
 DEFAULT_BETA_EXPIRY_DAYS = 45
 
 OBFUSCATE_MODULES = ["src/blossom_license.py"]
