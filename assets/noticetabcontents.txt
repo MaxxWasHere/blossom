@@ -4,6 +4,10 @@
 - Settings & extras → Logs & diagnostics: **Open logs folder** now reliably opens the logs folder in File Explorer — it previously opened behind the app window (or did nothing) because the folder was launched from a background API thread that Windows blocks from claiming the foreground.
 - Appearance → custom UI: the **Open themes folder** button gets the same fix and opens the themes folder reliably.
 
+## UI
+- Macro Schedule (W.I.P.) editor polish — taller, comfier timeline with a softer ruler; per-block node dots are muted by default and light up accent on hover/selection/live for clearer hierarchy; selected blocks lift with a stronger accent ring.
+- Macro Schedule interaction — profile cards, palette chips, zoom and properties controls now show keyboard focus rings and M3 pressed-state springs; timeline blocks are keyboard-focusable (Tab) with Enter to edit and Delete to remove; the empty-state dropzone and "Drag to add" palette label get affordance icons. Still clearly labeled Work in Progress.
+
 # Blossom 2.3.6
 
 ## Fixed

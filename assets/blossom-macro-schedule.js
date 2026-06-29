@@ -308,7 +308,7 @@
     const selCls = selectedIndex === index ? " is-selected" : "";
     const w = blockWidthPx(step);
     return `
-      <div class="blsm-schedule-block${liveCls}${selCls}" data-index="${index}" data-activity="${step.activity}" style="--block-w:${w}px">
+      <div class="blsm-schedule-block${liveCls}${selCls}" data-index="${index}" data-activity="${step.activity}" tabindex="0" role="button" aria-label="${meta.short} step, ${formatDuration(step)}. Press Enter to edit." style="--block-w:${w}px">
         <div class="blsm-schedule-edge blsm-schedule-edge-left" data-edge="left" title="Drag to adjust duration"></div>
         <div class="blsm-schedule-block-body">
           <span class="blsm-schedule-grip" aria-hidden="true">${iconMarkup("grip-horizontal")}</span>
@@ -400,7 +400,7 @@
         </div>
       </div>
       <div class="blsm-schedule-palette">
-        <div class="blsm-schedule-palette-label">Drag to add</div>
+        <div class="blsm-schedule-palette-label"><span class="blsm-schedule-palette-label-icon" aria-hidden="true">${iconMarkup("plus")}</span>Drag to add</div>
         ${paletteHtml()}
       </div>
       <div class="blsm-schedule-live-pill" data-schedule-live><span class="dot"></span><span data-schedule-live-text>Schedule off — macro uses your manual toggles.</span></div>
@@ -637,7 +637,7 @@
     });
     parts.push(insertHtml(mountedState.steps.length));
     parts.push(
-      `<div class="blsm-schedule-dropzone" data-drop-end>Add blocks here or drag from the palette below</div>`
+      `<div class="blsm-schedule-dropzone" data-drop-end><span class="blsm-schedule-dropzone-icon" aria-hidden="true">${iconMarkup("plus")}</span><span>Add blocks here or drag from the palette below</span></div>`
     );
     track.innerHTML = parts.join("");
     syncTimelineMeta(root);
@@ -898,6 +898,17 @@
         if (!Number.isFinite(index)) return;
         enterEditMode(index);
         showContextMenu(e.clientX, e.clientY, index);
+      });
+      block.addEventListener("keydown", (e) => {
+        const index = Number(block.getAttribute("data-index"));
+        if (!Number.isFinite(index) || !mountedState) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          enterEditMode(index);
+        } else if (e.key === "Delete" || e.key === "Backspace") {
+          e.preventDefault();
+          deleteStepAt(index);
+        }
       });
     });
   };

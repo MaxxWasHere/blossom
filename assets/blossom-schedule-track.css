@@ -162,7 +162,7 @@ html.blsm-schedule-page-active #blsm-schedule-page {
 
 /* ——— Horizontal timeline track ——— */
 .blsm-schedule-track-wrap {
-  --block-h: 76px;
+  --block-h: 82px;
   position: relative;
   max-width: 100%;
   overflow: hidden;
@@ -173,14 +173,14 @@ html.blsm-schedule-page-active #blsm-schedule-page {
 
 .blsm-schedule-track-scroll {
   max-width: 100%;
-  min-height: 200px;
-  padding: 18px 14px 22px;
+  min-height: 210px;
+  padding: 20px 16px 26px;
 }
 
 .blsm-schedule-ruler {
   position: relative;
-  height: 28px;
-  margin-bottom: 8px;
+  height: 30px;
+  margin-bottom: 10px;
   border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant, #3a2a32) 70%, transparent);
 }
 
@@ -215,7 +215,7 @@ html.blsm-schedule-page-active #blsm-schedule-page {
   display: flex;
   flex-direction: row;
   align-items: center;
-  min-height: 156px;
+  min-height: 168px;
   gap: 0;
   transition: min-width 0.28s var(--m3e-ease-emphasized, cubic-bezier(0.34, 1.56, 0.64, 1));
 }
@@ -273,14 +273,24 @@ html.blsm-schedule-page-active #blsm-schedule-page {
   content: "";
   position: absolute;
   left: 50%;
-  top: -8px;
-  width: 8px;
-  height: 8px;
-  margin-left: -4px;
+  top: -7px;
+  width: 7px;
+  height: 7px;
+  margin-left: -3.5px;
   border-radius: 50%;
+  background: color-mix(in srgb, var(--md-sys-color-outline-variant, #3a2a32) 72%, transparent);
+  box-shadow: 0 0 0 2px var(--blsm-schedule-track, transparent);
+  transition:
+    transform 0.2s var(--m3e-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1)),
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.blsm-schedule-block:hover::before,
+.blsm-schedule-block.is-live::before,
+.blsm-schedule-block.is-selected::before {
   background: var(--md-sys-color-primary, var(--accent, #e891a8));
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 20%, transparent);
-  transition: transform 0.2s ease;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 18%, transparent);
 }
 
 .blsm-schedule-block-body {
@@ -330,9 +340,10 @@ html.blsm-schedule-page-active #blsm-schedule-page {
 
 .blsm-schedule-block.is-selected {
   border-color: var(--md-sys-color-primary, var(--accent, #e891a8));
+  transform: translateY(-2px);
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 30%, transparent),
-    0 0 20px color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 18%, transparent),
+    0 0 0 2px color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 38%, transparent),
+    0 0 24px color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 22%, transparent),
     var(--m3-elevation-2, 0 6px 20px rgba(0, 0, 0, 0.2));
 }
 
@@ -730,7 +741,7 @@ html.blsm-schedule-edit-mode .sidebar {
   font-weight: 600;
   cursor: pointer;
   text-align: left;
-  transition: border-color 0.15s ease, background 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.12s var(--m3e-ease-spring, cubic-bezier(0.34, 1.56, 0.64, 1));
 }
 
 .blsm-schedule-props-act.is-active {
@@ -876,6 +887,82 @@ html.blsm-schedule-edit-mode .sidebar {
   color: var(--md-sys-color-on-error-container, #ffdad6);
   background: color-mix(in srgb, var(--md-sys-color-error-container, #93000a) 78%, transparent);
   border: 1px solid color-mix(in srgb, var(--md-sys-color-error, #ffb4ab) 30%, transparent);
+}
+
+/* ——— Focus rings (keyboard navigation) ——— */
+.blsm-schedule-profile-card:focus-visible,
+.blsm-schedule-profile-back:focus-visible,
+.blsm-schedule-chip:focus-visible,
+.blsm-schedule-zoom-btn:focus-visible,
+.blsm-schedule-props-act:focus-visible,
+.blsm-schedule-props-done:focus-visible,
+.blsm-schedule-props-delete:focus-visible,
+.blsm-schedule-context-menu button:focus-visible,
+.blsm-schedule-block:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 62%, transparent);
+  outline-offset: 2px;
+}
+
+/* ——— Pressed / active spring feedback ——— */
+.blsm-schedule-chip:hover:active {
+  transform: translateY(0) scale(0.96);
+}
+
+.blsm-schedule-profile-card:hover:active {
+  transform: translateY(-1px) scale(0.985);
+  box-shadow: var(--m3-elevation-1, 0 2px 8px rgba(0, 0, 0, 0.12));
+}
+
+.blsm-schedule-props-act:hover:active {
+  transform: scale(0.98);
+}
+
+.blsm-schedule-zoom-btn:hover:active {
+  transform: scale(0.88);
+}
+
+.blsm-schedule-profile-back:hover:active,
+.blsm-schedule-props-done:hover:active {
+  transform: scale(0.97);
+}
+
+/* ——— Dropzone + palette affordances ——— */
+.blsm-schedule-dropzone {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.blsm-schedule-dropzone-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--md-sys-color-primary, #e891a8) 14%, transparent);
+  color: var(--md-sys-color-primary, var(--accent, #e891a8));
+}
+
+.blsm-schedule-dropzone-icon .blsm-vec {
+  width: 16px;
+  height: 16px;
+}
+
+.blsm-schedule-palette-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.blsm-schedule-palette-label-icon {
+  display: inline-flex;
+  color: var(--md-sys-color-primary, var(--accent, #e891a8));
+  opacity: 0.85;
+}
+
+.blsm-schedule-palette-label-icon .blsm-vec {
+  width: 14px;
+  height: 14px;
 }
 
 /* ——— Reduce motion ——— */
