@@ -1,6 +1,9 @@
 # Blossom 2.3.7
 
 ## Fixed
+- Sidebar selection — visiting the Macro Schedule tab no longer strips the active color off your previous sidebar category; the active highlight reappears correctly when you navigate back. Schedule now takes over the sidebar via CSS (like the Music page) instead of removing React's active class, which React wouldn't restore on a same-category click.
+- Macro Schedule (W.I.P.) — selecting a timeline block now deselects it when you click anywhere outside the editor (page header, WIP banner, page background) instead of leaving it accent-colored; the deselect listener was previously scoped only to the editor.
+- Macro Schedule (W.I.P.) — fixed a document keydown/click listener leak that accumulated each time the Schedule tab was reopened.
 - Settings & extras → Logs & diagnostics: **Open logs folder** now reliably opens the logs folder in File Explorer — it previously opened behind the app window (or did nothing) because the folder was launched from a background API thread that Windows blocks from claiming the foreground.
 - Appearance → custom UI: the **Open themes folder** button gets the same fix and opens the themes folder reliably.
 

@@ -230,12 +230,6 @@
 
   const setScheduleActive = () => {
 
-    document.querySelectorAll(".sidebar-item.active, .sidebar-item.is-active").forEach((el) => {
-
-      el.classList.remove("active", "is-active");
-
-    });
-
     document.getElementById(SIDEBAR_ID)?.classList.add("active", "is-active");
 
   };

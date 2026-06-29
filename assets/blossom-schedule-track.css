@@ -810,6 +810,31 @@ html.blsm-schedule-edit-mode .sidebar {
   box-shadow: inset 3px 0 0 color-mix(in srgb, var(--md-sys-color-error, #ffb4ab) 55%, transparent) !important;
 }
 
+/* While the Schedule page is open, visually deactivate the real sidebar items
+   without stripping React's `active` class — so a category still shows its
+   active color when you navigate back to it after visiting Schedule. The
+   injected Schedule item is excluded. Mirrors the Music page takeover. */
+html.blsm-schedule-page-active .sidebar-nav .sidebar-item.active:not(#blsm-sidebar-macro-schedule),
+html.blsm-schedule-page-active .sidebar-nav .sidebar-item.is-active:not(#blsm-sidebar-macro-schedule) {
+  transform: none !important;
+  background: transparent !important;
+  color: var(--md-sys-color-on-surface-variant, var(--text-secondary)) !important;
+  box-shadow: none !important;
+}
+html.blsm-schedule-page-active .sidebar-nav .sidebar-item.active:not(#blsm-sidebar-macro-schedule)::before,
+html.blsm-schedule-page-active .sidebar-nav .sidebar-item.is-active:not(#blsm-sidebar-macro-schedule)::before,
+html.blsm-schedule-page-active .sidebar-nav .sidebar-item.active:not(#blsm-sidebar-macro-schedule)::after,
+html.blsm-schedule-page-active .sidebar-nav .sidebar-item.is-active:not(#blsm-sidebar-macro-schedule)::after {
+  opacity: 0 !important;
+  height: 0 !important;
+}
+html.blsm-schedule-page-active .sidebar-nav .sidebar-item.active:not(#blsm-sidebar-macro-schedule) .icon,
+html.blsm-schedule-page-active .sidebar-nav .sidebar-item.is-active:not(#blsm-sidebar-macro-schedule) .icon {
+  color: var(--md-sys-color-on-surface-variant, var(--text-muted)) !important;
+  opacity: 0.9 !important;
+  transform: none !important;
+}
+
 /* ——— Schedule W.I.P. page banner ——— */
 .blsm-schedule-wip-banner-wrap {
   margin-bottom: 14px;

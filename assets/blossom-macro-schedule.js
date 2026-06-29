@@ -157,6 +157,10 @@
   let propsPanel = null;
   /** @type {null | (() => void)} */
   let timelineScrollUnmount = null;
+  /** @type {null | ((e: KeyboardEvent) => void)} */
+  let globalKeyHandler = null;
+  /** @type {null | ((e: MouseEvent) => void)} */
+  let globalClickHandler = null;
 
   const editorRoot = () => mountedHost?.querySelector(".blsm-schedule-editor .blsm-schedule-root") || null;
 
@@ -1186,13 +1190,17 @@
     if (root.dataset.blsmGlobalBound === "1") return;
     root.dataset.blsmGlobalBound = "1";
 
-    document.addEventListener("keydown", (e) => {
+    globalKeyHandler = (e) => {
       if (e.key === "Escape" && document.documentElement.classList.contains("blsm-schedule-edit-mode")) {
         exitEditMode();
       }
-    });
+    };
+    document.addEventListener("keydown", globalKeyHandler);
 
-    root.addEventListener("click", (e) => {
+    // Document-scoped (not root-scoped) so clicking anywhere outside the
+    // editor — page header, WIP banner, page background — also deselects the
+    // active block instead of leaving it accent-colored.
+    globalClickHandler = (e) => {
       if (!(e.target instanceof Element)) return;
       if (
         e.target.closest(
@@ -1204,7 +1212,8 @@
       if (document.documentElement.classList.contains("blsm-schedule-edit-mode")) {
         deselectBlock();
       }
-    });
+    };
+    document.addEventListener("click", globalClickHandler);
   };
 
   const mountTrack = async (host) => {
@@ -1225,6 +1234,14 @@
       refresh: () => void syncLive(),
       destroy: () => {
         exitEditMode();
+        if (globalKeyHandler) {
+          document.removeEventListener("keydown", globalKeyHandler);
+          globalKeyHandler = null;
+        }
+        if (globalClickHandler) {
+          document.removeEventListener("click", globalClickHandler);
+          globalClickHandler = null;
+        }
         if (timelineScrollUnmount) {
           timelineScrollUnmount();
           timelineScrollUnmount = null;
