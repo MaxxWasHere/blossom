@@ -91,6 +91,7 @@ from blossom_dirs import (
     is_managed_install,
     managed_channel,
     migrate_all_user_data,
+    reveal_folder_in_explorer,
 )
 from blossom_logging import (
     get_logger,
@@ -4241,9 +4242,7 @@ class LocalUiApi:
 
     def open_themes_folder(self):
         try:
-            folder = ensure_themes_dir()
-            os.startfile(str(folder))  # noqa: S606 — local folder open by user action
-            return {"ok": True, "path": str(folder)}
+            return reveal_folder_in_explorer(ensure_themes_dir())
         except Exception as error:
             log_bridge_error("open_themes_folder", error)
             return {"ok": False, "error": str(error)}

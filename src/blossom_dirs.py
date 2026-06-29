@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import os
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 LEGACY_COTEAB_DIR = Path(os.environ.get("LOCALAPPDATA", "")) / "CoteabMacro"
@@ -44,6 +46,53 @@ def ensure_app_data_dirs() -> None:
     POTION_DIR.mkdir(parents=True, exist_ok=True)
     OBBY_PATHS_DIR.mkdir(parents=True, exist_ok=True)
     THEMES_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def reveal_folder_in_explorer(folder: Path | str) -> dict[str, object]:
+    """Open *folder* in Windows Explorer, creating it first if missing.
+
+    pywebview dispatches JS-API calls on a worker thread where ``os.startfile``
+    can land Explorer behind the app window — Windows blocks a background
+    thread from claiming the foreground, so the user sees "nothing happen".
+    Spawning ``explorer`` as its own process hands the open request to the
+    already-running Explorer instance (reliable across threads);
+    ``os.startfile`` / ``webbrowser`` stay as fallbacks.
+    """
+    path = Path(folder)
+    try:
+        path.mkdir(parents=True, exist_ok=True)
+    except OSError as error:
+        return {"ok": False, "path": str(path), "error": f"could not create folder: {error}"}
+
+    target = str(path.resolve())
+    errors: list[str] = []
+
+    if sys.platform == "win32":
+        try:
+            import ctypes
+
+            ctypes.windll.user32.AllowSetForegroundWindow(-1)  # ASFW_ANY
+        except Exception:
+            pass
+        for opener in (
+            lambda: subprocess.Popen(["explorer", target]),
+            lambda: os.startfile(target),  # noqa: S606
+        ):
+            try:
+                opener()
+                return {"ok": True, "path": target}
+            except Exception as error:  # noqa: BLE001
+                errors.append(str(error))
+    else:
+        try:
+            import webbrowser
+
+            webbrowser.open(target)
+            return {"ok": True, "path": target}
+        except Exception as error:  # noqa: BLE001
+            errors.append(str(error))
+
+    return {"ok": False, "path": target, "error": "; ".join(errors) or "could not open folder"}
 
 
 def ensure_runtime_deps_dir() -> Path:

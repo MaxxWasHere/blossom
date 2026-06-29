@@ -17,7 +17,7 @@ from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from typing import IO, TextIO
 
-from blossom_dirs import LOGS_DIR, ensure_app_data_dirs
+from blossom_dirs import LOGS_DIR, ensure_app_data_dirs, reveal_folder_in_explorer
 
 _CONFIGURED = False
 _LOCK = threading.Lock()
@@ -306,18 +306,7 @@ def _tail_file(path: Path, max_lines: int) -> str:
 def open_logs_folder() -> dict[str, object]:
     """Open the logs directory in Explorer (Windows)."""
     ensure_app_data_dirs()
-    LOGS_DIR.mkdir(parents=True, exist_ok=True)
-    folder = str(LOGS_DIR)
-    try:
-        if sys.platform == "win32":
-            os.startfile(folder)  # noqa: S606 — user-initiated folder open
-        else:
-            import webbrowser
-
-            webbrowser.open(folder)
-        return {"ok": True, "path": folder}
-    except Exception as error:
-        return {"ok": False, "path": folder, "error": str(error)}
+    return reveal_folder_in_explorer(LOGS_DIR)
 
 
 def log_bridge_error(method: str, error: BaseException) -> None:

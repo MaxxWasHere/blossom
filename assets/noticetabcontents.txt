@@ -1,3 +1,9 @@
+# Blossom 2.3.7
+
+## Fixed
+- Settings & extras → Logs & diagnostics: **Open logs folder** now reliably opens the logs folder in File Explorer — it previously opened behind the app window (or did nothing) because the folder was launched from a background API thread that Windows blocks from claiming the foreground.
+- Appearance → custom UI: the **Open themes folder** button gets the same fix and opens the themes folder reliably.
+
 # Blossom 2.3.6
 
 ## Fixed
