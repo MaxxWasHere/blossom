@@ -12,7 +12,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 # Latest version numbers (bump when shipping each channel).
-STABLE_VERSION = "2.3.6"
+STABLE_VERSION = "2.3.7"
 BETA_VERSION = "2.3.6-beta.1"
 
 try:
