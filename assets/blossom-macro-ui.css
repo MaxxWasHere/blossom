@@ -385,6 +385,28 @@ html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-macro-live-pill.is-runnin
   animation: blsm-macro-status-pulse 1.6s var(--m3e-ease-emphasized-decel, ease) infinite;
 }
 
+/* ——— Macro Status reason banner (explains idle/stopped runs) ——— */
+.blsm-macro-reason {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #a8a0a4);
+  background: color-mix(in srgb, var(--card-bg, #1a1216) 94%, var(--border-color, #3a2a32) 6%);
+  border: 1px solid var(--border-color, #3a2a32);
+}
+
+.blsm-macro-reason.is-error {
+  color: #fca5a5;
+  border-color: color-mix(in srgb, #ef4444 45%, var(--border-color, #3a2a32));
+  background: color-mix(in srgb, #ef4444 12%, var(--card-bg, #1a1216));
+}
+
+html.blsm-expressive-on:not(.blsm-reduce-motion) .blsm-macro-reason {
+  animation: m3e-fade-rise var(--m3e-duration-medium, 300ms) var(--m3e-ease-emphasized-decel, ease) both;
+}
+
 /* ——— Header Start / Stop emphasis on macro pages ——— */
 html.blsm-macro-hub-active .header-bar .btn-start,
 html.blsm-macro-hub-active .header-bar .btn-stop {

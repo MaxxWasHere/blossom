@@ -100,7 +100,7 @@
       "fishing_mode",
       "enable_auto_obby",
       "auto_claim_daily_quests",
-      "auto_potion_craft",
+      "enable_potion_crafting",
     ].some((k) => configFlagOn(config?.[k]));
 
   const pageModeEnabled = (page, config) => {
@@ -315,7 +315,7 @@
 
     const livePill =
       page === PAGES.STATUS
-        ? `<div class="blsm-macro-live-pill" data-macro-live><span class="blsm-macro-live-dot"></span><span data-macro-live-text>Macro idle</span></div>`
+        ? `<div class="blsm-macro-live-pill" data-macro-live><span class="blsm-macro-live-dot"></span><span data-macro-live-text>Macro idle</span></div><div class="blsm-macro-reason" data-macro-reason hidden></div>`
         : "";
 
     hub.innerHTML =
@@ -348,6 +348,30 @@
     if (text) text.textContent = running ? "Macro running" : "Macro idle";
   };
 
+  const applyReason = (detail) => {
+    const box = document.querySelector("[data-macro-reason]");
+    if (!box) return;
+    if (!detail) {
+      box.hidden = true;
+      box.textContent = "";
+      box.classList.remove("is-error");
+      return;
+    }
+    const parts = [];
+    if (detail.reason) parts.push(detail.reason);
+    const enabled = detail.enabled_modules ?? 0;
+    const active = detail.active_modules ?? 0;
+    if (detail.running) {
+      parts.push(`${active} active · ${enabled} enabled module${enabled === 1 ? "" : "s"}`);
+    }
+    if (detail.uptime_seconds > 0) {
+      parts.push(`uptime ${Math.floor(detail.uptime_seconds)}s`);
+    }
+    box.textContent = parts.join(" · ");
+    box.hidden = false;
+    box.classList.toggle("is-error", Boolean(detail.last_error && !detail.running));
+  };
+
   // Authoritative running state from the backend — default idle until confirmed.
   const syncLivePill = () => {
     const pill = document.querySelector("[data-macro-live]");
@@ -367,6 +391,16 @@
         const stats = await api().get_session_stats();
         runningKnown = true;
         applyLivePill(!!stats?.running);
+        // On the Status page, pull the richer detail so idle/stopped runs
+        // explain themselves instead of silently showing "Macro idle".
+        if (api()?.get_macro_status_detail && currentPage() === PAGES.STATUS) {
+          try {
+            const detail = await api().get_macro_status_detail();
+            applyReason(detail);
+          } catch {
+            applyReason(null);
+          }
+        }
         void syncFlowSteps();
       } catch {
         if (!runningKnown) applyLivePill(false);

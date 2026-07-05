@@ -19,6 +19,8 @@ discord-bot/
 # --- Build / packaging ---
 build/
 dist/
+app/
+launchers/
 *.manifest
 build_serial.json
 # PyInstaller one-off local specs (keep BlossomMacro.spec in repo)

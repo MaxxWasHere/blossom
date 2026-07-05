@@ -1,3 +1,14 @@
+# Blossom 2.3.8
+
+## Fixed
+- Modules staying idle when you pressed Start (even with modes enabled): the macro worker thread was wrapped in a try/finally with no exception handler, so any error inside the startup sequence or a task silently killed the thread and flipped every module back to "idle" with no clue. The loop now catches and logs those errors (to errors.log and the in-app log) and keeps driving the remaining modules — a single task failure no longer takes down the whole run.
+- Macro Status now explains itself instead of just saying "idle": a reason banner shows the real state — "Macro running · N active · N enabled · uptime", or why nothing is running (not started, no modes enabled, fishing monopolizing the loop, a UI task in progress, or the last error message). Stopped-by-error runs surface the actual exception so you can see why it stopped.
+- Custom scrollbars, smooth scrolling, Ctrl+scroll horizontal, and the timeline auto-horizontal scroll were silently broken — `blossom-scroll.js` and `blossom-scroll.css` had been saved as UTF-16, so the browser could not parse them and the whole scroll feature failed to load. Re-saved as UTF-8 so the soft scrollbars work again.
+- Macro setup flow: the "enable a mode" step never recognized Auto Potion Craft as on because it checked the wrong config key (`auto_potion_craft` instead of `enable_potion_crafting`), so the step stayed incomplete even with potion craft enabled. Fixed.
+
+## UI
+- Macro Status reason banner uses the shared Material 3 Expressive fade-rise entrance and an error-toned style when the macro stopped on an error, matching the rest of the Status page.
+
 # Blossom 2.3.7
 
 ## Fixed

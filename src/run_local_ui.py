@@ -751,6 +751,10 @@ class LocalUiApi:
         self._macro_running = False
         self._macro_started_at: float | None = None
         self._macro_thread: Thread | None = None
+        # Last error raised inside the macro loop, surfaced to the Status page so
+        # a silent thread crash no longer leaves every module "idle" with no clue.
+        self._macro_last_error: str = ""
+        self._macro_last_error_at: float = 0.0
         # Serializes macro start/stop so a quick stop->start can't run the
         # teardown/join and the fresh-start setup at the same time.
         self._macro_lifecycle_lock = Lock()
@@ -3496,19 +3500,24 @@ class LocalUiApi:
         self._log_webhook_features()
 
         try:
-            if (
-                not self._macro_stop.is_set()
-                and (potion_enabled or obby_enabled or merchant_enabled or quest_enabled)
-            ):
-                next_merchant_at, next_quest_at, next_potion_at, next_obby_at = (
-                    self._run_startup_ui_sequence(
-                        merchant_enabled=merchant_enabled,
-                        quest_enabled=quest_enabled,
-                        potion_enabled=potion_enabled,
-                        obby_enabled=obby_enabled,
-                        switching_enabled=switching_enabled,
+            try:
+                if (
+                    not self._macro_stop.is_set()
+                    and (potion_enabled or obby_enabled or merchant_enabled or quest_enabled)
+                ):
+                    next_merchant_at, next_quest_at, next_potion_at, next_obby_at = (
+                        self._run_startup_ui_sequence(
+                            merchant_enabled=merchant_enabled,
+                            quest_enabled=quest_enabled,
+                            potion_enabled=potion_enabled,
+                            obby_enabled=obby_enabled,
+                            switching_enabled=switching_enabled,
+                        )
                     )
-                )
+            except Exception as error:  # noqa: BLE001 - log + keep the loop alive
+                self._record_macro_loop_error(error, where="startup")
+                # A startup failure must not silently kill the whole run; the
+                # interval loop below still drives fishing/BR/SC/biome selector.
             if not any(
                 (
                     fishing_enabled,
@@ -3607,17 +3616,22 @@ class LocalUiApi:
 
                 reason = f"interval {picked.task.name.lower()}"
                 timer_updates: dict[str, float] = {}
-                with self._macro_session(f"interval:{picked.task.name}") as acquired:
-                    if not acquired:
-                        continue
-                    self._run_scheduled_ui_task(
-                        picked.task,
-                        switching_enabled=switching_enabled,
-                        reason=reason,
-                    )
-                    timer_updates = self._advance_timers_after_ui_task(
-                        picked.task, switching_enabled=switching_enabled
-                    )
+                try:
+                    with self._macro_session(f"interval:{picked.task.name}") as acquired:
+                        if not acquired:
+                            continue
+                        self._run_scheduled_ui_task(
+                            picked.task,
+                            switching_enabled=switching_enabled,
+                            reason=reason,
+                        )
+                        timer_updates = self._advance_timers_after_ui_task(
+                            picked.task, switching_enabled=switching_enabled
+                        )
+                except Exception as error:  # noqa: BLE001 - one task error must not kill the macro
+                    self._record_macro_loop_error(error, where=f"task:{picked.task.name}")
+                    self._macro_session_gate.force_release()
+                    self._macro_stop.wait(0.5)
                 if "next_merchant_at" in timer_updates:
                     next_merchant_at = timer_updates["next_merchant_at"]
                 if "next_quest_at" in timer_updates:
@@ -3632,6 +3646,8 @@ class LocalUiApi:
                     next_br_at = timer_updates["next_br_at"]
                 if "next_biome_selector_at" in timer_updates:
                     next_biome_selector_at = timer_updates["next_biome_selector_at"]
+        except Exception as error:  # noqa: BLE001 - never let the worker die silently
+            self._record_macro_loop_error(error, where="loop")
         finally:
             self._stop_disconnect_watcher()
             self._stop_fishing_worker()
@@ -3640,6 +3656,76 @@ class LocalUiApi:
             self._restore_schedule_base_toggles()
             self._macro_running = False
             print("[main macro] worker stopped")
+
+    def _record_macro_loop_error(self, error: BaseException, *, where: str) -> None:
+        """Log a macro-loop exception and stash a short message for the Status page.
+
+        Without this the worker thread used to die silently inside ``try/finally``
+        (no ``except``), flipping ``_macro_running`` to False and leaving every
+        module "idle" with no visible reason.
+        """
+        import traceback
+
+        tb = traceback.format_exc()
+        msg = f"{type(error).__name__}: {error}" if str(error) else type(error).__name__
+        self._macro_last_error = f"[{where}] {msg}"
+        self._macro_last_error_at = time.time()
+        print(f"[main macro] error in {where}: {msg}")
+        print(tb)
+        try:
+            get_logger().error("macro loop error in %s: %s\n%s", where, msg, tb)
+        except Exception:  # noqa: BLE001 - logging must never crash the loop
+            pass
+
+    def get_macro_status_detail(self):
+        """Richer Status page state so idle/stopped runs explain themselves."""
+        try:
+            self._reload_config_from_disk()
+            modules = (self.get_active_modules() or {}).get("modules", {})
+        except Exception:  # noqa: BLE001
+            modules = {}
+        enabled_names = [
+            name for name, m in modules.items()
+            if isinstance(m, dict) and m.get("enabled")
+        ]
+        active_names = [
+            name for name, m in modules.items()
+            if isinstance(m, dict) and m.get("active")
+        ]
+        running = bool(self._macro_running)
+        started = self._macro_started_at if running else None
+        uptime = (time.time() - started) if started else 0.0
+        owner = self._macro_session_gate.owner()
+        # Classify why nothing appears to be running, in priority order.
+        if not running:
+            if self._macro_last_error:
+                reason = f"Macro stopped unexpectedly: {self._macro_last_error}"
+            else:
+                reason = "Macro is not running — press Start (or your hotkey) to begin."
+        elif not enabled_names:
+            reason = "Macro is running but no automation modes are enabled. Turn on Fishing Mode, Merchant, Quests, Potion Craft, Obby, BR/SC, or Buffs."
+        elif self._fishing_monopolizes_main_loop():
+            reason = "Fishing Mode is running on its own thread; merchant, quests, potion craft, obby, BR/SC, and biome selector wait while fishing is active."
+        elif owner is not None and not str(owner).startswith("fishing:"):
+            reason = f"Macro is running; a UI task is in progress ({owner}). Interval modules wait for it to settle."
+        else:
+            reason = "Macro is running; enabled modules fire on their intervals."
+        return {
+            "running": running,
+            "version": display_version(),
+            "uptime_seconds": round(uptime, 1),
+            "enabled_modules": len(enabled_names),
+            "active_modules": len(active_names),
+            "enabled_names": enabled_names,
+            "active_names": active_names,
+            "session_owner": owner,
+            "fishing_busy": bool(self._fishing_busy),
+            "reconnecting": bool(getattr(self._reconnect_manager, "reconnecting", False)),
+            "last_error": self._macro_last_error,
+            "last_error_age_seconds": round(time.time() - self._macro_last_error_at, 1)
+            if self._macro_last_error_at else None,
+            "reason": reason,
+        }
 
     def _teardown_macro_threads(self) -> None:
         """Signal stop and join the macro + fishing worker threads.
@@ -3692,6 +3778,8 @@ class LocalUiApi:
             self._macro_session_gate.force_release()
             self._fishing_busy = False
             self._pending_fishing_failsafe_rejoin = False
+            self._macro_last_error = ""
+            self._macro_last_error_at = 0.0
             self._begin_macro_schedule()
             self._macro_running = True
             self._macro_started_at = time.time()
